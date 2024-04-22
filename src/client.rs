@@ -7,6 +7,7 @@ mod bubble_history;
 
 use std::sync::Arc;
 use reqwest::header::{HeaderMap, HeaderValue};
+use crate::secret::PRONTO_API_TOKEN;
 
 pub struct ProntoClient {
     pub api_base_url: String,
@@ -29,7 +30,7 @@ impl ProntoClient {
         let mut headers = HeaderMap::new();
         headers.insert("Accept", HeaderValue::from_str("application/json, text/plain, */*").unwrap());
         headers.insert("Accept-Language", HeaderValue::from_str("en-US,en;q=0.5").unwrap());
-        headers.insert("Authorization", HeaderValue::from_str("Bearer 4puwrQyyFa4p10lZRrXgVwkFsY1eogUX3Qmk8EEa.1201495637").unwrap());
+        headers.insert("Authorization", HeaderValue::from_str(&format!("Bearer {PRONTO_API_TOKEN}")).unwrap());
         let client = reqwest::blocking::Client::builder()
             .cookie_store(true)
             .cookie_provider(Arc::new(jar))
