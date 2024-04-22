@@ -3,7 +3,8 @@ import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slin
 export struct Channel {
     id: int,
     title: string,
-    supergroup: bool,
+    unread: bool,
+    notifications: int
 }
 
 export struct Message {
@@ -165,7 +166,7 @@ export component AppWindow inherits Window {
 
     HorizontalLayout {
         side-bar := SideBar {
-            title: @tr("Prontus");
+            title: "Prontus";
             model: channels;
         }
         VerticalBox {
@@ -173,9 +174,6 @@ export component AppWindow inherits Window {
                 VerticalLayout {
                     for message in messages:Text  {
                         text: "\{message.user}: \{message.content}";
-                    }
-                    Text {
-                        text: "\{top_msg_id}";
                     }
                 }
 //                HorizontalLayout {

@@ -4,6 +4,7 @@ mod device_ping;
 mod bubble_info;
 mod bubble;
 mod bubble_history;
+mod message_create;
 
 use std::sync::Arc;
 use reqwest::header::{HeaderMap, HeaderValue};
