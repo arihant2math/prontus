@@ -1,16 +1,11 @@
 import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slint";
+import { Message } from "message.slint";
 
 export struct Channel {
     id: int,
     title: string,
     unread: bool,
     notifications: int
-}
-
-export struct Message {
-    id: int,
-    user: string,
-    content: string
 }
 
 component SideBarItem inherits Rectangle {
@@ -69,7 +64,7 @@ export component SideBar inherits Rectangle {
     out property <int> current-item: 0;
     out property <int> current-focused: fs.has-focus ? fs.focused-tab : -1; // The currently focused tab
 
-    callback on-change();
+    callback on-change(int);
 
     width: 250px;
     forward-focus: fs;
@@ -83,7 +78,7 @@ export component SideBar inherits Rectangle {
             key-pressed(event) => {
                 if (event.text == "\n") {
                      root.current-item = root.current-focused;
-                    on-change();
+                    on-change(root.model[root.current-item].id);
                      return accept;
                 }
                 if (event.text == Key.UpArrow) {
@@ -100,7 +95,7 @@ export component SideBar inherits Rectangle {
             key-released(event) => {
                 if (event.text == " ") {
                      root.current-item = root.current-focused;
-                     on-change();
+                     on-change(root.model[root.current-item].id);
                      return accept;
                 }
                 return reject;
@@ -130,7 +125,7 @@ export component SideBar inherits Rectangle {
             for item[index] in root.model : SideBarItem {
                 clicked => {
                     root.current-item = index;
-                    on-change();
+                    on-change(root.model[root.current-item].id);
                 }
 
                 has-focus: index == root.current-focused;
@@ -156,7 +151,7 @@ export component AppWindow inherits Window {
     out property <int> current_sidebar_item_id <=> side-bar.current-item;
     in-out property <[Message]> messages;
     out property <length> visible_height <=> scroll-view.visible-height;
-    out property <length> viewport_y <=> scroll-view.viewport-y;
+    in-out property <length> viewport_y <=> scroll-view.viewport-y;
     out property <length> viewport_height <=> scroll-view.viewport-height;
     in-out property <int> top_msg_id;
     in-out property <int> channel_id;

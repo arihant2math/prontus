@@ -40,6 +40,7 @@ fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
                         ui.set_top_msg_id(0);
                     }
                     ui.set_channel_id(channel_id as i32);
+                    ui.set_viewport_y(ui.get_visible_height() - ui.get_viewport_height());
                 }).unwrap();
             },
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
@@ -99,21 +100,14 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.set_channels(ModelRc::new(VecModel::from(ui_channels)));
 
     ui.on_setChannel({
-        let ui_handle = ui.as_weak();
-        let client = Arc::clone(&client);
         let tx = tx.clone();
-        move || {
-            let ui = ui_handle.unwrap();
-            let channel_index = ui.get_current_sidebar_item_id();
-            let channels = client.get_bubble_list();
-            let channel = channels.bubbles.iter().nth(channel_index as usize).unwrap();
-            tx.send(WorkerTasks::ChangeChannel(channel.id)).unwrap();
+        move |channel_id| {
+            tx.send(WorkerTasks::ChangeChannel(channel_id as u64)).unwrap();
         }
     });
 
     ui.on_scrollChannel({
         let ui_handle = ui.as_weak();
-        let client = Arc::clone(&client);
         let tx = tx.clone();
         move || {
             let ui = ui_handle.unwrap();
