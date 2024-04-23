@@ -16,6 +16,8 @@ export struct ChannelGroup {
 export component SidebarItem inherits Rectangle {
     in property <bool> selected;
     in property <bool> has-focus;
+    in property <bool> unread;
+
     in-out property <string> text <=> label.text;
 
     callback clicked <=> touch.clicked;
@@ -122,8 +124,9 @@ export component Sidebar inherits Rectangle {
             for category in root.model : VerticalLayout {
                 Text {
                     text: category.title;
-                    color: white;
-                    padding-left: 5px;
+                    color: lightgrey;
+                    overflow: TextOverflow.elide;
+                    font-size: 15px;
                 }
                 for item in category.channels : SidebarItem {
                     clicked => {

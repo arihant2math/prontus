@@ -1,14 +1,17 @@
 export struct Message {
     id: int,
     user: string,
-    content: string
+    content: string,
+    images: [image],
+    // TODO: Embeds
 }
 
 export component MessageComponent {
     in property <Message> message: { // TODO: proper loading signs
         id: 100,
         user: "test test",
-        content: "test message"
+        content: "test message",
+        images: []
     };
     HorizontalLayout {
         padding-top: 10px;
@@ -23,6 +26,10 @@ export component MessageComponent {
             Text {
                 text: message.content;
                 font-size: 14px;
+            }
+            HorizontalLayout {
+                for image in message.images: Image {
+                }
             }
         }
     }

@@ -4,8 +4,9 @@ use slint::{Model, ModelRc, VecModel, Weak};
 
 use crate::client::ProntoClient;
 
-mod client;
+pub(crate) mod client;
 mod secret;
+pub(crate) mod storage;
 
 use crate::secret::{*};
 
@@ -25,15 +26,18 @@ fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
         match rx.recv() {
             Ok(WorkerTasks::ChangeChannel(channel_id)) => {
                 let history = client.get_bubble_history(channel_id, None);
-                let mut ui_messages = Vec::new();
-                for message in history.messages.iter().rev() {
-                    ui_messages.push(Message {
-                        id: message.id as i32,
-                        content: message.message.clone().into(),
-                        user: message.user.fullname.clone().into()
-                    })
+                for message in history.messages.iter() {
+                    for image in message.message_media.iter() {
+                        println!("{:?}", image);
+                        storage::load_image(image.url.clone());
+                    }
                 }
+
                 app.upgrade_in_event_loop(move |ui| {
+                    let mut ui_messages = Vec::new();
+                    for message in history.messages.clone().into_iter().rev() {
+                        ui_messages.push(message.into())
+                    }
                     ui.set_messages(ModelRc::new(VecModel::from(ui_messages)));
                     if history.messages.len() > 0 {
                         ui.set_top_msg_id(history.messages.last().unwrap().id as i32); // TODO: this is confusing
@@ -45,15 +49,16 @@ fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
                 }).unwrap();
             },
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
-                let history = client.get_bubble_history(channel_id as u64, Some(top_msg_id as u64));
-                let mut reversed: Vec<Message> = history.messages.clone().into_iter().rev().map(|msg| {
-                    Message {
-                        id: msg.id as i32,
-                        content: msg.message.clone().into(),
-                        user: msg.user.fullname.clone().into()
+                let history = client.get_bubble_history(channel_id, Some(top_msg_id));
+                for message in history.messages.iter() {
+                    for image in message.message_media.iter() {
+                        storage::load_image(image.url.clone());
                     }
-                }).collect();
+                }
+
                 app.upgrade_in_event_loop(move |ui| {
+                    let mut reversed: Vec<Message> = history.messages.clone().into_iter().rev()
+                        .map(|msg| msg.into()).collect();
                     let mut ui_messages: Vec<Message> = ui.get_messages().iter().collect();
                     reversed.append(&mut ui_messages);
                     ui.set_messages(ModelRc::new(VecModel::from(reversed.clone())));
@@ -84,7 +89,13 @@ fn main() -> Result<(), slint::PlatformError> {
 
     let mut ui_channels_groups = HashMap::new();
     for (count, channel) in channels.bubbles.iter().enumerate() {
-        let category_name = &channel.category.clone().map(|c| c.title).unwrap_or("Direct Messages".to_string());
+        let category_name = &channel.category.clone().map(|c| c.title).unwrap_or_else(|| {
+            if channel.isdm {
+                "Direct Messages".to_string()
+            } else {
+                "Uncategorized".to_string()
+            }
+        });
         let category_id = &channel.category.clone().map(|c| c.id).unwrap_or(0);
         let key = (*category_id, category_name.to_string());
 
