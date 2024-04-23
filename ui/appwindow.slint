@@ -5,6 +5,7 @@ import { Message, MessageComponent } from "message.slint";
 import { Channel, ChannelGroup, Sidebar } from "sidebar.slint";
 
 export component AppWindow inherits Window {
+    title: "Prontus";
     in-out property <[ChannelGroup]> channels <=> side-bar.model;
     out property <int> current_sidebar_item_id <=> side-bar.current-item;
     in-out property <[Message]> messages;
@@ -42,6 +43,7 @@ export component AppWindow inherits Window {
                         y: 0px;
                         max-width: root.width - 255px; // TODO: Another hack
                         for message in messages:MessageComponent  {
+                            m-width: root.width - 255px;
                             message: message;
                         }
                     }

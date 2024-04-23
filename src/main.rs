@@ -158,7 +158,7 @@ fn main() -> Result<(), slint::PlatformError> {
         move || {
             let ui = ui_handle.unwrap();
             println!("{} {} {}", ui.get_visible_height(), ui.get_viewport_y(), ui.get_viewport_height());
-            if ui.get_viewport_y() > -20.0 { // TODO: Do not hardcode
+            if ui.get_viewport_y() > -100.0 { // TODO: Do not hardcode
                 let top_msg_id = ui.get_top_msg_id();
                 let channel_id = ui.get_channel_id();
                 tx.send(WorkerTasks::ScrollChannel(channel_id as u64, top_msg_id as u64)).unwrap();

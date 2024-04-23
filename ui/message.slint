@@ -26,6 +26,9 @@ export component MessageComponent {
         images: [],
         embeds: []
     };
+
+    in property <length> m-width;
+
     HorizontalLayout {
         padding-top: 10px;
         padding-bottom: 10px;
@@ -34,10 +37,13 @@ export component MessageComponent {
             Text {
                 text: message.user;
                 font-size: 15px;
+                max-height: 25px;
             }
             Text {
                 text: message.content;
                 font-size: 14px;
+                wrap: word-wrap;
+                width: root.m-width - 30px;
             }
             HorizontalLayout {
                 for image in message.images: Image {
