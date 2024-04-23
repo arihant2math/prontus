@@ -8,6 +8,7 @@ mod message_edit;
 mod message_delete;
 mod user_info;
 
+use std::collections::HashMap;
 use std::sync::Arc;
 use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -67,11 +68,12 @@ impl ProntoClient {
         message_create::post(&self.api_base_url, &self.http_client, bubble_id, message, user_id, Utc::now(), parent_message_id).await
     }
 
-    pub async fn edit_message(&self, message_id: u64, message: String) -> message_edit::MessageModifyResponse {
+    pub async fn edit_message(&self, message_id: u64, message: String) -> message_create::MessageModifyResponse {
         message_edit::post(&self.api_base_url, &self.http_client, message_id, message).await
     }
 
-    pub async fn delete_message(&self, message_id: u64) -> message_edit::MessageModifyResponse {
-        message_delete::delete(&self.api_base_url, &self.http_client, message_id).await
+    pub async fn delete_message(&self, message_id: u64) -> HashMap<String, bool> {
+        message_delete::post(&self.api_base_url, &self.http_client, message_id).await
+        // TODO: Handle error
     }
 }

@@ -9,6 +9,8 @@ export struct Message {
     id: int,
     user: string,
     content: string,
+    has_parent: bool,
+    parent_message: string,
     images: [image],
     embeds: [Embed]
     // TODO: Embeds

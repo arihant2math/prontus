@@ -131,7 +131,6 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
 }
 
 fn main() -> Result<(), slint::PlatformError> {
-    let client = Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), PRONTO_SESSION, PRONTO_API_TOKEN, PAACT_2245_5302428));
     let ui = AppWindow::new()?;
     let (tx, rx) = mpsc::channel::<WorkerTasks>();
 

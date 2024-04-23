@@ -37,6 +37,8 @@ pub struct Message {
     pub bubble_id: u64,
     pub message: String,
     pub user: UserInfo,
+    #[serde(default, rename = "parentmessage_id")]
+    pub parent_message_id: Option<u64>,
     #[serde(default, rename = "reactionsummary")]
     pub reactions: Vec<Reactions>,
     #[serde(default, rename = "messagemedia")]
@@ -53,6 +55,8 @@ impl From<Message> for crate::Message {
             user: message.user.fullname.into(),
             images: ModelRc::new(VecModel::from(Vec::new())),
             embeds: ModelRc::new(VecModel::from(Vec::new())),
+            has_parent: message.parent_message_id.is_some(),
+            parent_message: String::new().into()
         }
     }
 }
