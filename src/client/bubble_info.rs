@@ -1,4 +1,4 @@
-use reqwest::blocking::Client;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::client::bubble::Bubble;
@@ -21,11 +21,12 @@ pub struct GetBubbleInfoResponse {
     pub stats: BubbleStats,
 }
 
-pub fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> GetBubbleInfoResponse {
+pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> GetBubbleInfoResponse {
     let r = client.get(format!("{pronto_base_url}v2/bubble.info"))
         .query(&json!({ "bubble_id": bubble_id }))
         .send()
+        .await
         .unwrap();
-    let json = r.json::<GetBubbleInfoResponse>().unwrap();
+    let json = r.json::<GetBubbleInfoResponse>().await.unwrap();
     json
 }

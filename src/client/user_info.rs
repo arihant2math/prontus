@@ -1,4 +1,4 @@
-use reqwest::blocking::Client;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -25,10 +25,11 @@ pub struct GetUserInfoResponse {
     pub user: UserInfo,
 }
 
-pub fn get(pronto_base_url: &str, client: &Client) -> GetUserInfoResponse {
+pub async fn get(pronto_base_url: &str, client: &Client) -> GetUserInfoResponse {
     let r = client.get(format!("{pronto_base_url}v1/user.info"))
         .send()
+        .await
         .unwrap();
-    let json = r.json::<GetUserInfoResponse>().unwrap();
+    let json = r.json::<GetUserInfoResponse>().await.unwrap();
     json
 }

@@ -1,9 +1,10 @@
+// TODO: Boxes instead of layouts
+
 import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slint";
 import { Message, MessageComponent } from "message.slint";
 import { Channel, ChannelGroup, Sidebar } from "sidebar.slint";
 
 export component AppWindow inherits Window {
-    in-out property <string> fullname: "";
     in-out property <[ChannelGroup]> channels <=> side-bar.model;
     out property <int> current_sidebar_item_id <=> side-bar.current-item;
     in-out property <[Message]> messages;
@@ -16,7 +17,7 @@ export component AppWindow inherits Window {
 
     callback setChannel <=> side-bar.on-change;
     callback scrollChannel();
-    callback sendMessage() <=> send-box.accepted;
+    callback sendMessage <=> send-box.accepted;
 
 
     HorizontalLayout {
@@ -26,17 +27,22 @@ export component AppWindow inherits Window {
         VerticalLayout {
             VerticalBox {
                 scroll-view := ScrollView { // TODO: limit width
-                    VerticalLayout {
-                        for message in messages:MessageComponent  {
-                            message: message;
-                        }
-                    }
                     area := TouchArea {
                         width: parent.width;
                         height: parent.height;
+                        x: 0px;
+                        y: 0px;
                         scroll-event(e) => {
                             scrollChannel();
                             EventResult.accept
+                        }
+                    }
+                    VerticalLayout {
+                        x: 0px;
+                        y: 0px;
+                        max-width: root.width - 255px; // TODO: Another hack
+                        for message in messages:MessageComponent  {
+                            message: message;
                         }
                     }
                 }
