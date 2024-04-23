@@ -1,11 +1,12 @@
-mod user_info;
-mod bubble_list;
-mod device_ping;
-mod bubble_info;
 mod bubble;
 mod bubble_history;
+mod bubble_info;
+mod bubble_list;
+mod device_ping;
 mod message_create;
 mod message_edit;
+mod message_delete;
+mod user_info;
 
 use std::sync::Arc;
 use chrono::Utc;
@@ -64,5 +65,13 @@ impl ProntoClient {
 
     pub async fn post_message(&self, user_id: u64, bubble_id: u64, message: String, parent_message_id: Option<u64>) -> message_create::MessageModifyResponse {
         message_create::post(&self.api_base_url, &self.http_client, bubble_id, message, user_id, Utc::now(), parent_message_id).await
+    }
+
+    pub async fn edit_message(&self, message_id: u64, message: String) -> message_edit::MessageModifyResponse {
+        message_edit::post(&self.api_base_url, &self.http_client, message_id, message).await
+    }
+
+    pub async fn delete_message(&self, message_id: u64) -> message_edit::MessageModifyResponse {
+        message_delete::delete(&self.api_base_url, &self.http_client, message_id).await
     }
 }
