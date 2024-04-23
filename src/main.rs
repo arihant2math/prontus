@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::{Arc, mpsc};
 use slint::{Model, ModelRc, VecModel, Weak};
 
@@ -81,28 +82,46 @@ fn main() -> Result<(), slint::PlatformError> {
     let user_info = client.get_user_info();
     let channels = client.get_bubble_list();
 
-    let mut ui_channels = Vec::new();
-    for channel in channels.bubbles {
-        ui_channels.push(Channel {
+    let mut ui_channels_groups = HashMap::new();
+    for (count, channel) in channels.bubbles.iter().enumerate() {
+        let category_name = &channel.category.clone().map(|c| c.title).unwrap_or("Direct Messages".to_string());
+        let category_id = &channel.category.clone().map(|c| c.id).unwrap_or(0);
+        let key = (*category_id, category_name.to_string());
+
+        if !ui_channels_groups.contains_key(&key) {
+            ui_channels_groups.insert(key.clone(), Vec::new());
+        }
+        let ui_channel = Channel {
             id: channel.id as i32,
-            title: channel.title.into(),
+            title: channel.title.clone().into(),
             unread: false,
-            notifications: 0
-        });
+            notifications: channels.stats[count].unread as i32
+        };
+        ui_channels_groups.get_mut(&key).unwrap().push(ui_channel);
     }
     ui.set_fullname(user_info.user.fullname.into());
 
+    let mut ui_channels = Vec::new();
+    for ((category_id, category_name), ui_channels_group) in ui_channels_groups.clone().into_iter() {
+        ui_channels.push(ChannelGroup {
+            id: category_id as i32,
+            title: category_name.into(),
+            channels: ModelRc::new(VecModel::from(ui_channels_group))
+        });
+    }
 
-    let first_channel = ui_channels.iter().nth(0).unwrap();
 
+    let first_channel = ui_channels_groups.iter().next().unwrap().1.first().unwrap();
     tx.send(WorkerTasks::ChangeChannel(first_channel.id as u64)).unwrap();
 
     ui.set_channels(ModelRc::new(VecModel::from(ui_channels)));
 
     ui.on_setChannel({
         let tx = tx.clone();
-        move |channel_id| {
-            tx.send(WorkerTasks::ChangeChannel(channel_id as u64)).unwrap();
+        let ui_handle = ui.as_weak();
+        move |channel_id| { // TODO: channel id is broken
+            let ui = ui_handle.unwrap();
+            tx.send(WorkerTasks::ChangeChannel(ui.get_current_sidebar_item_id() as u64)).unwrap();
         }
     });
 

@@ -3,3 +3,27 @@ export struct Message {
     user: string,
     content: string
 }
+
+export component MessageComponent {
+    in property <Message> message: { // TODO: proper loading signs
+        id: 100,
+        user: "test test",
+        content: "test message"
+    };
+    HorizontalLayout {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        VerticalLayout {
+            padding-left: 10px;
+            Text {
+                text: message.user;
+                font-weight: 30;
+                font-size: 16px;
+            }
+            Text {
+                text: message.content;
+                font-size: 14px;
+            }
+        }
+    }
+}

@@ -19,7 +19,8 @@ pub struct GetBubbleHistoryResponse {
 }
 
 pub fn get(pronto_base_url: &str, client: &reqwest::blocking::Client, bubble_id: u64, latest_message_id: Option<u64>) -> GetBubbleHistoryResponse {
-    let r = if let Some(latest_message_id) = latest_message_id {
+    // TODO: catch {"ok":false,"error":"BUBBLE_NOTFOUND"}
+    let mut r = if let Some(latest_message_id) = latest_message_id {
         client.get(format!("{pronto_base_url}v1/bubble.history"))
             .query(&json!({ "bubble_id": bubble_id, "latest": latest_message_id }))
             .send()
@@ -28,7 +29,6 @@ pub fn get(pronto_base_url: &str, client: &reqwest::blocking::Client, bubble_id:
             .query(&json!({ "bubble_id": bubble_id }))
             .send()
     }.unwrap();
-
     let json = r.json::<GetBubbleHistoryResponse>().unwrap();
     json
 }
