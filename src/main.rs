@@ -21,6 +21,9 @@ enum WorkerTasks {
     AddMessage(u64, Option<u64>, String)
 }
 
+async fn websocket_worker(ui: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
+}
+
 #[tokio::main]
 async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let client = Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), PRONTO_SESSION, PRONTO_API_TOKEN, PAACT_2245_5302428));
