@@ -12,35 +12,40 @@ export component AppWindow inherits Window {
     out property <length> viewport_height <=> scroll-view.viewport-height;
     in-out property <int> top_msg_id;
     in-out property <int> channel_id;
+    in-out property <string> message <=> send-box.text;
 
     callback setChannel <=> side-bar.on-change;
     callback scrollChannel();
+    callback sendMessage() <=> send-box.accepted;
+
 
     HorizontalLayout {
         side-bar := Sidebar {
             title: "Prontus";
         }
-        VerticalBox {
-            scroll-view := ScrollView { // TODO: limit width
-                VerticalLayout {
-                    for message in messages:MessageComponent  {
-                        message: message;
+        VerticalLayout {
+            VerticalBox {
+                scroll-view := ScrollView { // TODO: limit width
+                    VerticalLayout {
+                        for message in messages:MessageComponent  {
+                            message: message;
+                        }
+                    }
+                    area := TouchArea {
+                        width: parent.width;
+                        height: parent.height;
+                        scroll-event(e) => {
+                            scrollChannel();
+                            EventResult.accept
+                        }
                     }
                 }
-//                HorizontalLayout {
-//                    TextInput {
-//                    }
-//                    Button {
-//                        text: "Send";
-//                    }
-//                }
-                area := TouchArea {
-                    width: parent.width;
-                    height: parent.height;
-                    scroll-event(e) => {
-                        scrollChannel();
-                        EventResult.accept
-                    }
+            }
+            HorizontalLayout {
+                padding-left: 25px;
+                send-box := TextInput { // TODO: Focus on channel switch
+                    height: 50px;
+                    font-size: 16px;
                 }
             }
         }

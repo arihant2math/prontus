@@ -44,6 +44,7 @@ fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
                     } else {
                         ui.set_top_msg_id(0);
                     }
+                    ui.set_message("".to_string().into());
                     ui.set_channel_id(channel_id as i32);
                     ui.set_viewport_y(ui.get_visible_height() - ui.get_viewport_height());
                 }).unwrap();
@@ -86,7 +87,7 @@ fn main() -> Result<(), slint::PlatformError> {
 
     let user_info = client.get_user_info();
     let channels = client.get_bubble_list();
-
+    // TODO: Sort by priority
     let mut ui_channels_groups = HashMap::new();
     for (count, channel) in channels.bubbles.iter().enumerate() {
         let category_name = &channel.category.clone().map(|c| c.title).unwrap_or_else(|| {

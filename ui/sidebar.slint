@@ -127,6 +127,7 @@ export component Sidebar inherits Rectangle {
                     color: lightgrey;
                     overflow: TextOverflow.elide;
                     font-size: 15px;
+                    padding-left: 25px; // TODO: Fix padding
                 }
                 for item in category.channels : SidebarItem {
                     clicked => {
