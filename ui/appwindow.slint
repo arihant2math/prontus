@@ -21,6 +21,7 @@ export component AppWindow inherits Window {
     callback setChannel <=> side-bar.on-change;
     callback scrollChannel();
     callback sendMessage <=> send-box.accepted;
+    callback deleteMessage(int);
 
 
     HorizontalLayout {
@@ -29,7 +30,7 @@ export component AppWindow inherits Window {
         }
         VerticalLayout {
             VerticalBox {
-                scroll-view := ScrollView { // TODO: limit width
+                scroll-view := ScrollView {
                     area := TouchArea {
                         width: parent.width;
                         height: parent.height;
@@ -37,6 +38,11 @@ export component AppWindow inherits Window {
                         y: 0px;
                         scroll-event(e) => {
                             scrollChannel();
+                            if (parent.viewport-y < -20px) { // TODO: Obviously hacky and needs to be replaced with proper values at the very least
+                                parent.viewport-y += 20px;
+                            } else if (parent.viewport-y < 0px) {
+                                parent.viewport-y = 0;
+                            }
                             EventResult.accept
                         }
                     }
@@ -47,6 +53,7 @@ export component AppWindow inherits Window {
                         for message in messages:MessageComponent  {
                             m-width: root.width - 255px;
                             message: message;
+                            delete(id) => {deleteMessage(id)}
                         }
                     }
                 }

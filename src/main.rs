@@ -1,12 +1,15 @@
 use std::collections::HashMap;
 use std::sync::{Arc, mpsc};
 use slint::{Model, ModelRc, VecModel, Weak};
+use tokio_tungstenite::connect_async;
+use futures_util::StreamExt;
 
 use crate::client::ProntoClient;
 
 pub(crate) mod client;
 mod secret;
 pub(crate) mod storage;
+mod websocket;
 
 use crate::secret::{*};
 
@@ -21,7 +24,17 @@ enum WorkerTasks {
     AddMessage(u64, Option<u64>, String)
 }
 
-async fn websocket_worker(ui: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
+#[derive(Clone, Debug)]
+enum WebsocketTasks {
+    ChangeChannel(u64)
+}
+
+async fn websocket_worker(ui: Weak<AppWindow>, rx: mpsc::Receiver<WebsocketTasks>) {
+    let url = url::Url::parse("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false").unwrap();
+    let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
+
+    let (write, read) = ws_stream.split();
+    // TODO
 }
 
 #[tokio::main]

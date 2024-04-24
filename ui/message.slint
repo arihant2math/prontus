@@ -3,6 +3,39 @@ import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slin
 export struct Embed {
     title: string,
     link: string,
+    description: string
+}
+
+export component EmbedComponent inherits Rectangle {
+    in property <Embed> embed: {
+        title: "Test Embed",
+        link: "https://example.com",
+        description: "This is some example text that goes on and on and on and on"
+    };
+
+    in property <length> m-width: 200px;
+
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: grey;
+
+    VerticalBox {
+        Text {
+            text: embed.link;
+            font-size: 11px;
+            width: root.m-width - 30px;
+            overflow: TextOverflow.elide;
+        }
+        Text {
+            text: embed.title;
+            font-size: 15px;
+        }
+        Text {
+            text: embed.description;
+            wrap: word-wrap;
+            width: root.m-width - 30px;
+        }
+    }
 }
 
 export struct Message {
@@ -16,26 +49,29 @@ export struct Message {
     // TODO: Embeds
 }
 
-export component ReactionComponent inherits Rectangle  {
-
-}
-
 export component MessageComponent {
+    width: 500px;
     in property <Message> message: { // TODO: proper loading signs
         id: 100,
         user: "test test",
-        content: "test message",
+        content: "No one shall be subjected to arbitrary arrest, detention or exile. Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him. No one shall be subjected to arbitrary interference with his privacy, family, home or correspondence, nor to attacks upon his honour and reputation. Everyone has the right to the protection of the law against such interference or attacks.",
         images: [],
         embeds: []
     };
 
-    in property <length> m-width;
+    in property <length> m-width: 500px;
+
+    callback delete(int);
 
     HorizontalLayout {
         padding-top: 10px;
         padding-bottom: 10px;
         VerticalLayout {
             padding-left: 10px;
+            Text {
+                visible: message.has_parent;
+                text: "Parent: \{message.parent_message}";
+            }
             Text {
                 text: message.user;
                 font-size: 15px;
@@ -51,32 +87,39 @@ export component MessageComponent {
                 for image in message.images: Image {
                 }
             }
+            HorizontalLayout {
+                padding-top: 10px;
+                for embed in message.embeds: EmbedComponent {
+                    embed: embed;
+                }
+            }
         }
     }
 
-//    HorizontalLayout { // TODO: Button group
-//        width: 250px;
-//        height: 45px;
-//
-//        Button {
-//            text: "Reply";
-//        }
-//        Button {
-//            text: "React";
-//        }
-//        Button {
-//            text: "Edit";
-//        }
-//        Button {
-//            text: "Delete";
-//        }
-//    }
+    pop-up := HorizontalLayout { // TODO: Button group
+        height: 30px;
+        y: 5px;
+        alignment: LayoutAlignment.end;
+        visible: false;
+
+        Button {
+            text: "Reply";
+        }
+        Button {
+            text: "React";
+        }
+        Button {
+            text: "Edit";
+        }
+        Button {
+            text: "Delete";
+            clicked => { root.delete(root.message.id) }
+        }
+    }
 
     area := TouchArea {
-        width: 100%;
-        height: 100%;
-        x: 0px;
-        y: 0px;
-
+        moved() => {
+            pop-up.visible = true;
+        }
     }
 }

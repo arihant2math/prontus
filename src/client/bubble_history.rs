@@ -44,19 +44,27 @@ pub struct Message {
     #[serde(default, rename = "messagemedia")]
     pub message_media: Vec<MessageMedia>,
     #[serde(default)]
-    pub resources: Vec<MessageResource>
+    pub resource: Option<MessageResource>
 }
 
 impl From<Message> for crate::Message {
     fn from(message: Message) -> Self {
+        let mut embeds = Vec::new();
+        if let Some(resource) = message.resource {
+            embeds.push(crate::Embed {
+                link: resource.url.clone().into(),
+                title: resource.title.clone().into(),
+                description: resource.snippet.clone().into(),
+            })
+        }
         crate::Message {
             id: message.id as i32,
             content: message.message.into(),
             user: message.user.fullname.into(),
             images: ModelRc::new(VecModel::from(Vec::new())),
-            embeds: ModelRc::new(VecModel::from(Vec::new())),
+            embeds: ModelRc::new(VecModel::from(embeds)),
             has_parent: message.parent_message_id.is_some(),
-            parent_message: String::new().into()
+            parent_message: String::new().into() // TODO: Actually get the parent message
         }
     }
 }
@@ -66,6 +74,7 @@ pub struct GetBubbleHistoryResponse {
     pub ok: bool,
     pub pagesize: u64,
     pub messages: Vec<Message>,
+    pub parentmessages: Vec<Message>
 }
 
 pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64, latest_message_id: Option<u64>) -> GetBubbleHistoryResponse {
