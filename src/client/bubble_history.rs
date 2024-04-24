@@ -1,8 +1,11 @@
+use std::sync::Arc;
 use reqwest::Client;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use slint::{ModelRc, VecModel};
+use slint::{Image, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel};
+use crate::client::ProntoClient;
 use crate::client::user_info::UserInfo;
+use crate::storage;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageMedia {
@@ -47,23 +50,24 @@ pub struct Message {
     pub resource: Option<MessageResource>
 }
 
-impl From<Message> for crate::Message {
-    fn from(message: Message) -> Self {
+impl Message {
+    pub fn to_slint(self) -> crate::Message {
         let mut embeds = Vec::new();
-        if let Some(resource) = message.resource {
+        if let Some(resource) = self.resource {
             embeds.push(crate::Embed {
                 link: resource.url.clone().into(),
                 title: resource.title.clone().into(),
                 description: resource.snippet.clone().into(),
             })
         }
+        let images = Vec::new();
         crate::Message {
-            id: message.id as i32,
-            content: message.message.into(),
-            user: message.user.fullname.into(),
-            images: ModelRc::new(VecModel::from(Vec::new())),
+            id: self.id as i32,
+            content: self.message.clone().into(),
+            user: self.user.fullname.into(),
+            images: ModelRc::new(VecModel::from(images)),
             embeds: ModelRc::new(VecModel::from(embeds)),
-            has_parent: message.parent_message_id.is_some(),
+            has_parent: self.parent_message_id.is_some(),
             parent_message: String::new().into() // TODO: Actually get the parent message
         }
     }

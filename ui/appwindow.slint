@@ -38,8 +38,9 @@ export component AppWindow inherits Window {
                         y: 0px;
                         scroll-event(e) => {
                             scrollChannel();
+                            // TODO: scrolling down doesn't work
                             if (parent.viewport-y < -20px) { // TODO: Obviously hacky and needs to be replaced with proper values at the very least
-                                parent.viewport-y += 20px;
+                                parent.viewport-y += 25px;
                             } else if (parent.viewport-y < 0px) {
                                 parent.viewport-y = 0;
                             }

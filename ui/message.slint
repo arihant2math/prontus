@@ -84,7 +84,10 @@ export component MessageComponent {
                 width: root.m-width - 30px;
             }
             HorizontalLayout {
-                for image in message.images: Image {
+                for img in message.images: Image {
+                    source: img;
+                    height: img.height * 1px;
+                    width: img.width * 1px;
                 }
             }
             HorizontalLayout {
@@ -93,33 +96,6 @@ export component MessageComponent {
                     embed: embed;
                 }
             }
-        }
-    }
-
-    pop-up := HorizontalLayout { // TODO: Button group
-        height: 30px;
-        y: 5px;
-        alignment: LayoutAlignment.end;
-        visible: false;
-
-        Button {
-            text: "Reply";
-        }
-        Button {
-            text: "React";
-        }
-        Button {
-            text: "Edit";
-        }
-        Button {
-            text: "Delete";
-            clicked => { root.delete(root.message.id) }
-        }
-    }
-
-    area := TouchArea {
-        moved() => {
-            pop-up.visible = true;
         }
     }
 }

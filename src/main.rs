@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::sync::{Arc, mpsc};
-use slint::{Model, ModelRc, VecModel, Weak};
+use slint::{Image, Model, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel, Weak};
 use tokio_tungstenite::connect_async;
 use futures_util::StreamExt;
 
@@ -82,20 +82,14 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let user_info = client.get_user_info().await;
     let user_id = user_info.user.id;
     loop {
+        let loop_client = Arc::clone(&client);
         match rx.recv() {
             Ok(WorkerTasks::ChangeChannel(channel_id)) => {
-                let history = client.get_bubble_history(channel_id, None).await;
-                for message in history.messages.iter() {
-                    for image in message.message_media.iter() {
-                        println!("{:?}", image);
-                        storage::load_image(image.url.clone());
-                    }
-                }
-
+                let history = loop_client.get_bubble_history(channel_id, None).await;
                 app.upgrade_in_event_loop(move |ui| {
                     let mut ui_messages = Vec::new();
                     for message in history.messages.clone().into_iter().rev() {
-                        ui_messages.push(message.into())
+                        ui_messages.push(message.to_slint());
                     }
                     ui.set_messages(ModelRc::new(VecModel::from(ui_messages)));
                     if history.messages.len() > 0 {
@@ -109,16 +103,10 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
                 }).unwrap();
             },
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
-                let history = client.get_bubble_history(channel_id, Some(top_msg_id)).await;
-                for message in history.messages.iter() {
-                    for image in message.message_media.iter() {
-                        storage::load_image(image.url.clone());
-                    }
-                }
-
+                let history = loop_client.get_bubble_history(channel_id, Some(top_msg_id)).await;
                 app.upgrade_in_event_loop(move |ui| {
                     let mut reversed: Vec<Message> = history.messages.clone().into_iter().rev()
-                        .map(|msg| msg.into()).collect();
+                        .map(|msg| msg.to_slint()).collect();
                     let mut ui_messages: Vec<Message> = ui.get_messages().iter().collect();
                     reversed.append(&mut ui_messages);
                     ui.set_messages(ModelRc::new(VecModel::from(reversed.clone())));
@@ -131,7 +119,7 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
                     ui.set_messages(ModelRc::new(VecModel::from({
                         let mut messages = ui.get_messages().iter()
                             .collect::<Vec<Message>>();
-                        messages.push(message.message.clone().into());
+                        messages.push(message.message.clone().to_slint());
                         messages
                     })));
                 }).unwrap();
@@ -187,6 +175,15 @@ fn main() -> Result<(), slint::PlatformError> {
             ui.set_message("".to_string().into());
         }
     });
+
+
+    // let image = storage::load_image(Arc::clone(&client), image.url.clone()).await;
+    // let buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
+    //     image.as_raw(),
+    //     image.width(),
+    //     image.height(),
+    // );
+    // let slint_image = Image::from_rgba8(buffer);
 
     ui.run()
 }

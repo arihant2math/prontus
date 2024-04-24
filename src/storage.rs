@@ -2,10 +2,12 @@ use std::{fs, thread};
 use std::fs::OpenOptions;
 use std::io::{Read, Write};
 use std::path::PathBuf;
+use std::sync::Arc;
 use base64::prelude::*;
 use home::home_dir;
+use slint::ModelTracker;
 
-use reqwest::Client;
+use crate::client::ProntoClient;
 
 pub fn get_image_path(url: &str) -> PathBuf {
     let ext = url.split(".").last();
@@ -14,18 +16,18 @@ pub fn get_image_path(url: &str) -> PathBuf {
     home_dir().unwrap().join(".prontus").join(filename)
 }
 
-async fn save_url(client: &Client, url: &str, file: &PathBuf) {
+async fn save_url(client: Arc<ProntoClient>, url: &str, file: &PathBuf) {
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .truncate(true)
         .open(file).unwrap();
-    let mut response = client.get(url).await.unwrap();
+    let response = client.http_client.get(url).send().await.unwrap();
     let bytes = response.bytes().await.unwrap();
     file.write_all(&bytes).unwrap();
 }
 
-pub fn load_url_path(client: &Client, url: String) -> PathBuf {
+pub async fn load_url_path(client: Arc<ProntoClient>, url: String) -> PathBuf {
     let path = get_image_path(&url);
     let p = path.clone();
     if path.exists() {
@@ -33,21 +35,13 @@ pub fn load_url_path(client: &Client, url: String) -> PathBuf {
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer).unwrap();
     } else {
-        // TODO: Bad idea if extensions do not match ...
-        fs::copy(home_dir().unwrap().join(".prontus").join("default.jpg"), &path).unwrap();
-        thread::spawn(move || {
-            save_url(client, &url, &path);
-            let mut file = OpenOptions::new().read(true).open(&path).unwrap();
-            let mut buffer = Vec::new();
-            file.read_to_end(&mut buffer).unwrap();
-            buffer
-        });
+        save_url(client, &url, &path).await;
     }
     p
 }
 
-pub fn load_image(client: &Client, url: String) -> image::RgbaImage {
-    let path = load_url_path(client, url);
+pub async fn load_image(client: Arc<ProntoClient>, url: String) -> image::RgbaImage {
+    let path = load_url_path(client, url).await;
     let reader = image::io::Reader::open(&path)
         .unwrap()
         .with_guessed_format()
