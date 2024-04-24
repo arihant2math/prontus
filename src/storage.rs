@@ -1,16 +1,14 @@
-use std::{fs, thread};
 use std::fs::OpenOptions;
-use std::io::{Read, Write};
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
+
 use base64::prelude::*;
 use home::home_dir;
-use slint::ModelTracker;
 
 use crate::client::ProntoClient;
 
 pub fn get_image_path(url: &str) -> PathBuf {
-    let ext = url.split(".").last();
     // URL safe is also file safe (to me)
     let filename = BASE64_URL_SAFE.encode(url);
     home_dir().unwrap().join(".prontus").join(filename)
@@ -30,23 +28,20 @@ async fn save_url(client: Arc<ProntoClient>, url: &str, file: &PathBuf) {
 pub async fn load_url_path(client: Arc<ProntoClient>, url: String) -> PathBuf {
     let path = get_image_path(&url);
     let p = path.clone();
-    if path.exists() {
-        let mut file = OpenOptions::new().read(true).open(&path).unwrap();
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer).unwrap();
-    } else {
+    if !path.exists() {
         save_url(client, &url, &path).await;
     }
     p
 }
 
+pub fn load_image_path(path_buf: PathBuf) -> image::RgbaImage {
+    let reader = image::io::Reader::open(&path_buf).unwrap().with_guessed_format().unwrap();
+    reader.decode().unwrap().to_rgba8()
+}
+
 pub async fn load_image(client: Arc<ProntoClient>, url: String) -> image::RgbaImage {
     let path = load_url_path(client, url).await;
-    let reader = image::io::Reader::open(&path)
-        .unwrap()
-        .with_guessed_format()
-        .unwrap();
-    reader.decode().unwrap().to_rgba8()
+    load_image_path(path)
 }
 
 #[cfg(test)]

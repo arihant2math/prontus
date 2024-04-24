@@ -13,7 +13,7 @@ export component EmbedComponent inherits Rectangle {
         description: "This is some example text that goes on and on and on and on"
     };
 
-    in property <length> m-width: 200px;
+    in property <length> m-width: 250px;
 
     border-radius: 5px;
     border-width: 1px;
@@ -40,7 +40,8 @@ export component EmbedComponent inherits Rectangle {
 
 export struct Message {
     id: int,
-    user: string,
+    user: string, // TODO: user struct
+    profile_picture: image,
     content: string,
     has_parent: bool,
     parent_message: string,
@@ -51,13 +52,7 @@ export struct Message {
 
 export component MessageComponent {
     width: 500px;
-    in property <Message> message: { // TODO: proper loading signs
-        id: 100,
-        user: "test test",
-        content: "No one shall be subjected to arbitrary arrest, detention or exile. Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him. No one shall be subjected to arbitrary interference with his privacy, family, home or correspondence, nor to attacks upon his honour and reputation. Everyone has the right to the protection of the law against such interference or attacks.",
-        images: [],
-        embeds: []
-    };
+    in property <Message> message;
 
     in property <length> m-width: 500px;
 

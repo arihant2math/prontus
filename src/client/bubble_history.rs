@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use reqwest::Client;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
@@ -51,7 +50,7 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn to_slint(self) -> crate::Message {
+    pub fn to_slint(self, parents: &Vec<Message>) -> crate::Message {
         let mut embeds = Vec::new();
         if let Some(resource) = self.resource {
             embeds.push(crate::Embed {
@@ -60,15 +59,24 @@ impl Message {
                 description: resource.snippet.clone().into(),
             })
         }
-        let images = Vec::new();
+        let mut images = Vec::new();
+        let temp_image = SharedPixelBuffer::<Rgba8Pixel>::new(100, 100); // TODO: load that default.jpg image ...
+        for _ in self.message_media {
+            images.push(Image::from_rgba8(temp_image.clone()));
+        }
+
+        let parent = if let Some(parent_id) = self.parent_message_id {
+            parents.iter().find(|parent| parent.id == parent_id)
+        } else { None };
         crate::Message {
             id: self.id as i32,
-            content: self.message.clone().into(),
+            content: self.message.into(),
             user: self.user.fullname.into(),
+            profile_picture: Image::from_rgba8(temp_image.clone()),
             images: ModelRc::new(VecModel::from(images)),
             embeds: ModelRc::new(VecModel::from(embeds)),
             has_parent: self.parent_message_id.is_some(),
-            parent_message: String::new().into() // TODO: Actually get the parent message
+            parent_message: parent.map(|parent| parent.message.clone()).unwrap_or_default().into(), // TODO: This should really be the previous message in the thread tbh
         }
     }
 }

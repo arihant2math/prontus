@@ -84,16 +84,18 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     loop {
         let loop_client = Arc::clone(&client);
         match rx.recv() {
+            // TODO: have a centralized message storage variable for time saving
+            // TODO: store users in memory and share that with the websocket worker and ui thread.
             Ok(WorkerTasks::ChangeChannel(channel_id)) => {
                 let history = loop_client.get_bubble_history(channel_id, None).await;
                 app.upgrade_in_event_loop(move |ui| {
                     let mut ui_messages = Vec::new();
                     for message in history.messages.clone().into_iter().rev() {
-                        ui_messages.push(message.to_slint());
+                        ui_messages.push(message.to_slint(&history.parentmessages));
                     }
                     ui.set_messages(ModelRc::new(VecModel::from(ui_messages)));
                     if history.messages.len() > 0 {
-                        ui.set_top_msg_id(history.messages.last().unwrap().id as i32); // TODO: this is confusing
+                        ui.set_top_msg_id(history.messages.last().unwrap().id as i32);
                     } else {
                         ui.set_top_msg_id(0);
                     }
@@ -105,23 +107,20 @@ async fn net_worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
                 let history = loop_client.get_bubble_history(channel_id, Some(top_msg_id)).await;
                 app.upgrade_in_event_loop(move |ui| {
-                    let mut reversed: Vec<Message> = history.messages.clone().into_iter().rev()
-                        .map(|msg| msg.to_slint()).collect();
-                    let mut ui_messages: Vec<Message> = ui.get_messages().iter().collect();
-                    reversed.append(&mut ui_messages);
-                    ui.set_messages(ModelRc::new(VecModel::from(reversed.clone())));
-                    ui.set_top_msg_id(reversed.first().map(|msg| msg.id).unwrap_or(0)); // TODO: this is confusing
+                    let messages = ui.get_messages();
+                    let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                    for message in history.messages.clone().into_iter() {
+                        messages.insert(0, message.to_slint(&history.parentmessages));
+                    }
+                    ui.set_top_msg_id(history.messages.last().map(|msg| msg.id).unwrap_or(0) as i32);
                 }).unwrap();
             }
             Ok(WorkerTasks::AddMessage(channel_id, parent_id, message)) => {
                 let message = client.post_message(user_id, channel_id, message, parent_id).await;
                 app.upgrade_in_event_loop(move |ui| {
-                    ui.set_messages(ModelRc::new(VecModel::from({
-                        let mut messages = ui.get_messages().iter()
-                            .collect::<Vec<Message>>();
-                        messages.push(message.message.clone().to_slint());
-                        messages
-                    })));
+                    let mut messages = ui.get_messages();
+                    let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                    messages.push(message.message.clone().to_slint(&Vec::new()));
                 }).unwrap();
             }
             Err(e) => {

@@ -1,3 +1,9 @@
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use chrono::Utc;
+use reqwest::header::{HeaderMap, HeaderValue};
+
 mod bubble;
 mod bubble_history;
 mod bubble_info;
@@ -7,12 +13,6 @@ mod message_create;
 mod message_edit;
 mod message_delete;
 mod user_info;
-
-use std::collections::HashMap;
-use std::sync::Arc;
-use chrono::Utc;
-use reqwest::header::{HeaderMap, HeaderValue};
-use crate::secret::PRONTO_API_TOKEN;
 
 pub struct ProntoClient {
     pub api_base_url: String,
@@ -35,7 +35,7 @@ impl ProntoClient {
         let mut headers = HeaderMap::new();
         headers.insert("Accept", HeaderValue::from_str("application/json, text/plain, */*").unwrap());
         headers.insert("Accept-Language", HeaderValue::from_str("en-US,en;q=0.5").unwrap());
-        headers.insert("Authorization", HeaderValue::from_str(&format!("Bearer {PRONTO_API_TOKEN}")).unwrap());
+        headers.insert("Authorization", HeaderValue::from_str(&format!("Bearer {pronto_api_token}")).unwrap());
         let client = reqwest::Client::builder()
             .cookie_store(true)
             .cookie_provider(Arc::new(jar))
