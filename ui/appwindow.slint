@@ -6,8 +6,8 @@ import { Channel, ChannelGroup, Sidebar } from "sidebar.slint";
 
 export component AppWindow inherits Window {
     title: "Prontus";
-    height: 500px;
-    width: 750px;
+    min-height: 500px;
+    min-width: 750px;
     in-out property <[ChannelGroup]> channels <=> side-bar.model;
     out property <int> current_sidebar_item_id <=> side-bar.current-item;
     in-out property <[Message]> messages;
