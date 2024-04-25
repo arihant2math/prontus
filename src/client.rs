@@ -89,10 +89,10 @@ impl ProntoClient {
     }
 
     pub async fn add_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
-        reaction_add::post(&self.api_base_url, &self.http_client, message_id, reaction_type.into()).await
+        reaction_add::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await
     }
 
     pub async fn remove_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
-        reaction_remove::post(&self.api_base_url, &self.http_client, message_id, reaction_type.into()).await
+        reaction_remove::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await
     }
 }

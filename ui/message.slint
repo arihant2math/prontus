@@ -1,9 +1,36 @@
 import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slint";
 
 export struct Reaction {
-    user_id: int
+    user_ids: [int],
+    id: int
 }
-// https://img.icons8.com/emoji/48/thumbs-up.png
+
+export component ReactionComponent inherits Rectangle {
+    in property <Reaction> reaction: {
+        user_ids: [1,5],
+        id: 1,
+    };
+
+    background: #f2f2f2;
+    border-radius: 5px;
+    width: 40px;
+    height: 25px;
+
+    HorizontalBox {
+        if reaction.id == 1: Image {
+            source: @image-url("thumbs-up.png");
+            height: 22px;
+            width: 22px;
+        }
+        // TODO: Add rest of the images
+
+        Text {
+            text: reaction.user_ids.length;
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+    }
+}
+
 // https://img.icons8.com/emoji/48/thumbs-down-emoji.png
 
 export struct Embed {
@@ -52,7 +79,8 @@ export struct Message {
     has_parent: bool,
     parent_message: string,
     images: [image],
-    embeds: [Embed]
+    embeds: [Embed],
+    reactions: [Reaction]
     // TODO: Embeds
 }
 
@@ -90,6 +118,11 @@ export component MessageComponent {
                 font-size: 14px;
                 wrap: word-wrap;
                 width: root.m-width - 80px;
+            }
+            HorizontalLayout {
+                for reaction in message.reactions: ReactionComponent {
+                    reaction: reaction;
+                }
             }
             HorizontalLayout {
                 for img in message.images: Image {

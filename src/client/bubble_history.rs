@@ -78,6 +78,13 @@ impl Message {
         let parent = if let Some(parent_id) = self.parent_message_id {
             parents.iter().find(|parent| parent.id == parent_id)
         } else { None };
+        let mut reactions = Vec::new();
+        for reaction in self.reactions {
+            reactions.push(crate::Reaction {
+                id: reaction.id as i32,
+                user_ids: ModelRc::new(VecModel::from(reaction.users.iter().map(|id| *id as i32).collect::<Vec<i32>>()))
+            });
+        }
         crate::Message {
             id: self.id as i32,
             content: self.message.into(),
@@ -87,6 +94,7 @@ impl Message {
             embeds: ModelRc::new(VecModel::from(embeds)),
             has_parent: self.parent_message_id.is_some(),
             parent_message: parent.map(|parent| parent.message.clone()).unwrap_or_default().into(), // TODO: This should really be the previous message in the thread tbh
+            reactions: ModelRc::new(VecModel::from(reactions)),
         }
     }
 }
