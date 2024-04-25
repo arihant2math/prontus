@@ -177,7 +177,7 @@ fn main() -> Result<(), slint::PlatformError> {
 
     ui.on_openLink({
         move |link| {
-            open::that(link).unwrap();
+            open::that(&link.to_string()).unwrap();
         }
     });
 
