@@ -22,12 +22,11 @@ export component AppWindow inherits Window {
     callback scrollChannel();
     callback sendMessage <=> send-box.accepted;
     callback deleteMessage(int);
+    callback openLink(string);
 
 
     HorizontalLayout {
-        side-bar := Sidebar {
-            title: "Prontus";
-        }
+        side-bar := Sidebar {}
         VerticalLayout {
             VerticalBox {
                 scroll-view := ScrollView {
@@ -55,6 +54,7 @@ export component AppWindow inherits Window {
                             m-width: root.width - 255px;
                             message: message;
                             delete(id) => {deleteMessage(id)}
+                            open-link(str) => {openLink(str)}
                         }
                     }
                 }

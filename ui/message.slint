@@ -58,9 +58,16 @@ export component MessageComponent {
 
     callback delete(int);
 
+    callback open-link(string);
+
     HorizontalLayout {
         padding-top: 10px;
         padding-bottom: 10px;
+        Image {
+            source: message.profile_picture;
+            width: 50px;
+            height: 50px;
+        }
         VerticalLayout {
             padding-left: 10px;
             Text {
@@ -76,7 +83,7 @@ export component MessageComponent {
                 text: message.content;
                 font-size: 14px;
                 wrap: word-wrap;
-                width: root.m-width - 30px;
+                width: root.m-width - 80px;
             }
             HorizontalLayout {
                 for img in message.images: Image {

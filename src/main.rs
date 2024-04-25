@@ -175,6 +175,12 @@ fn main() -> Result<(), slint::PlatformError> {
         }
     });
 
+    ui.on_openLink({
+        move |link| {
+            open::that(link).unwrap();
+        }
+    });
+
 
     // let image = storage::load_image(Arc::clone(&client), image.url.clone()).await;
     // let buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(

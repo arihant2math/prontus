@@ -13,6 +13,7 @@ futures = "0.3"
 futures-util = "0.3"
 home = "0.5"
 image = { version = "0.25", features = ["jpeg", "gif", "png", "webp", "ico", "avif"] }
+open = "5.1"
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.21"
 thiserror = "1.0"
