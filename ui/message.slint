@@ -6,10 +6,7 @@ export struct Reaction {
 }
 
 export component ReactionComponent inherits Rectangle {
-    in property <Reaction> reaction: {
-        user_ids: [1,5],
-        id: 1,
-    };
+    in property <Reaction> reaction;
 
     background: #f2f2f2;
     border-radius: 5px;
@@ -51,6 +48,24 @@ export component EmbedComponent inherits Rectangle {
     border-radius: 5px;
     border-width: 1px;
     border-color: grey;
+    
+    callback clicked <=> touch.clicked;
+    
+    states [
+        pressed when touch.pressed : {
+            state.opacity: 0.8;
+        }
+        hover when touch.has-hover : {
+            state.opacity: 0.6;
+        }
+    ]
+    
+    state := Rectangle {
+        opacity: 0;
+        background: grey;
+
+        animate opacity { duration: 150ms; }
+    }
 
     VerticalBox {
         Text {
@@ -68,6 +83,11 @@ export component EmbedComponent inherits Rectangle {
             wrap: word-wrap;
             width: root.m-width - 30px;
         }
+    }
+    
+    touch := TouchArea {
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -135,6 +155,7 @@ export component MessageComponent {
                 padding-top: 10px;
                 for embed in message.embeds: EmbedComponent {
                     embed: embed;
+                    clicked => {open-link(embed.link)}
                 }
             }
         }

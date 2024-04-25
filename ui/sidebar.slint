@@ -83,9 +83,9 @@ export component Sidebar inherits Rectangle {
         fs := FocusScope {
             key-pressed(event) => {
                 if (event.text == "\n") {
-                     root.current-item = root.current-focused;
+                    root.current-item = root.current-focused;
                     on-change(root.model[root.current-item].id);
-                     return accept;
+                    return accept;
                 }
                 return reject;
             }
