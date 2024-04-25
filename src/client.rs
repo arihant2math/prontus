@@ -13,6 +13,17 @@ mod message_create;
 mod message_edit;
 mod message_delete;
 mod user_info;
+mod reaction_add;
+mod reaction_remove;
+
+pub enum ReactionType {
+    Like = 1,
+    Dislike = 2,
+    Laugh = 3,
+    Love = 4,
+    Cry = 5,
+    Amazed = 6,
+}
 
 pub struct ProntoClient {
     pub api_base_url: String,
@@ -75,5 +86,13 @@ impl ProntoClient {
     pub async fn delete_message(&self, message_id: u64) -> HashMap<String, bool> {
         message_delete::post(&self.api_base_url, &self.http_client, message_id).await
         // TODO: Handle error
+    }
+
+    pub async fn add_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
+        reaction_add::post(&self.api_base_url, &self.http_client, message_id, reaction_type.into()).await
+    }
+
+    pub async fn remove_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
+        reaction_remove::post(&self.api_base_url, &self.http_client, message_id, reaction_type.into()).await
     }
 }

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, mpsc};
-use slint::{Image, Model, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel, Weak};
+use std::thread;
+use slint::{Model, ModelRc, VecModel, Weak};
 use tokio_tungstenite::connect_async;
 use futures_util::StreamExt;
 
