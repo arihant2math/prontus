@@ -15,6 +15,8 @@ mod message_delete;
 mod user_info;
 mod reaction_add;
 mod reaction_remove;
+mod user_login;
+mod user_token_login;
 
 pub enum ReactionType {
     Like = 1,
@@ -31,12 +33,11 @@ pub struct ProntoClient {
 }
 
 impl ProntoClient {
-    pub fn new(api_base_url: String, pronto_session: &str, pronto_api_token: &str, pacct_2245_5302428: &str) -> Self {
+    pub fn new(api_base_url: String, pronto_session: &str, pronto_api_token: &str) -> Self {
         // create the cookie store
         let cookies = vec![
             format!("pronto_session={}", pronto_session),
             format!("api_token={}", pronto_api_token),
-            format!("pacct_2245_5302428={}", pacct_2245_5302428),
         ];
         let jar = reqwest::cookie::Jar::default();
         for cookie in cookies {
