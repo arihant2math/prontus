@@ -107,7 +107,7 @@ pub struct GetBubbleHistoryResponse {
     pub parentmessages: Vec<Message>
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64, latest_message_id: Option<u64>) -> GetBubbleHistoryResponse {
+pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64, latest_message_id: Option<u64>) -> Result<GetBubbleHistoryResponse, reqwest::Error> {
     // TODO: catch {"ok":false,"error":"BUBBLE_NOTFOUND"}
     let r = if let Some(latest_message_id) = latest_message_id {
         client.get(format!("{pronto_base_url}v1/bubble.history"))
@@ -117,7 +117,7 @@ pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64, latest_
         client.get(format!("{pronto_base_url}v1/bubble.history"))
             .query(&json!({ "bubble_id": bubble_id }))
             .send()
-    }.await.unwrap();
-    let json = r.json::<GetBubbleHistoryResponse>().await.unwrap();
-    json
+    }.await?;
+    let json = r.json::<GetBubbleHistoryResponse>().await?;
+    Ok(json)
 }

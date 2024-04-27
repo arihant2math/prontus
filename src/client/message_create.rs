@@ -11,7 +11,7 @@ pub struct MessageModifyResponse {
     pub message: Message,
 }
 
-pub async fn post(pronto_base_url: &str, client: &Client, channel_id: u64, message: String, user_id: u64, time: DateTime<Utc>, parent: Option<u64>) -> MessageModifyResponse {
+pub async fn post(pronto_base_url: &str, client: &Client, channel_id: u64, message: String, user_id: u64, time: DateTime<Utc>, parent: Option<u64>) -> Result<MessageModifyResponse, reqwest::Error> {
     let uuid = Uuid::new_v4().to_string();
     let time_string = time.format("%Y-%m-%d %H:%M:%S").to_string();
     let request =
@@ -43,7 +43,7 @@ pub async fn post(pronto_base_url: &str, client: &Client, channel_id: u64, messa
             }
                 ))
         };
-    let response = request.send().await.unwrap();
-    let response: MessageModifyResponse = response.json().await.unwrap();
-    response
+    let response = request.send().await?;
+    let response: MessageModifyResponse = response.json().await?;
+    Ok(response)
 }

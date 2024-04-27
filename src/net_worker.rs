@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use std::sync::{Arc, mpsc};
+
 use slint::{Model, ModelRc, VecModel, Weak};
+
+use thiserror::Error;
+
 use crate::{AppWindow, Channel, ChannelGroup, Message, PRONTO_BASE_URL};
 use crate::client::ProntoClient;
 use crate::settings::Settings;
@@ -12,11 +16,16 @@ pub enum WorkerTasks {
     AddMessage(u64, Option<u64>, String)
 }
 
-#[tokio::main]
-pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
+#[derive(Debug, Error)]
+pub enum NetWorkerError {
+    #[error("Network error: {0}")]
+    NetworkError(#[from] reqwest::Error),
+}
+
+pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Result<(), NetWorkerError> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
-        Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &pronto_api_token.clone(), &settings.pronto_session.clone().unwrap_or("".to_string())))
+        Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &settings.pronto_session.clone().unwrap_or("".to_string()), &pronto_api_token.clone(), &settings.pacct.clone().unwrap_or("".to_string())))
     } else {
         panic!("No Pronto API token provided");
     };

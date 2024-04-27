@@ -34,10 +34,10 @@ pub struct UserLoginResponse {
 }
 
 
-pub async fn post(request: UserLoginRequest) -> UserLoginResponse {
+pub async fn post(request: UserLoginRequest) -> Result<UserLoginResponse, reqwest::Error> {
     let client = Client::new();
     let resp = client.post("https://accounts.pronto.io/api/v3/user.login");
-    let resp = resp.json(&request).send().await.unwrap();
-    let resp = resp.json::<UserLoginResponse>().await.unwrap();
-    return resp;
+    let resp = resp.json(&request).send().await?;
+    let resp = resp.json::<UserLoginResponse>().await?;
+    Ok(resp)
 }

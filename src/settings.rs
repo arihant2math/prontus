@@ -21,6 +21,7 @@ impl Default for ThemePreference {
 pub struct Settings {
     pub pronto_api_token: Option<String>,
     pub pronto_session: Option<String>,
+    pub pacct: Option<String>,
     pub websocket_auth_token: Option<String>,
     #[serde(default)]
     pub color_preference: ThemePreference

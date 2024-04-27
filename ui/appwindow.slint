@@ -1,6 +1,6 @@
 // TODO: Boxes instead of layouts
 
-import { Button, HorizontalBox, ScrollView, VerticalBox } from "std-widgets.slint";
+import { Button, HorizontalBox, LineEdit, ScrollView, VerticalBox } from "std-widgets.slint";
 import { Message, MessageComponent } from "message.slint";
 import { Channel, ChannelGroup, Sidebar } from "sidebar.slint";
 
@@ -17,6 +17,7 @@ export component AppWindow inherits Window {
     in-out property <int> top_msg_id;
     in-out property <int> channel_id;
     in-out property <string> message <=> send-box.text;
+    in property <bool> chat-visible <=> chat.visible;
 
     callback setChannel <=> side-bar.on-change;
     callback scrollChannel();
@@ -27,7 +28,7 @@ export component AppWindow inherits Window {
 
     HorizontalLayout {
         side-bar := Sidebar {}
-        VerticalLayout {
+        chat := VerticalLayout {
             VerticalBox {
                 scroll-view := ScrollView {
                     area := TouchArea {
@@ -39,7 +40,7 @@ export component AppWindow inherits Window {
                             scrollChannel();
                             // TODO: scrolling down doesn't work
                             if (parent.viewport-y < -20px) { // TODO: Obviously hacky and needs to be replaced with proper values at the very least
-                                parent.viewport-y += 25px;
+                                parent.viewport-y += e.delta_y;
                             } else if (parent.viewport-y < 0px) {
                                 parent.viewport-y = 0;
                             }
@@ -61,9 +62,12 @@ export component AppWindow inherits Window {
             }
             HorizontalLayout {
                 padding-left: 25px;
-                send-box := TextInput { // TODO: Focus on channel switch
-                    height: 50px;
-                    font-size: 16px;
+                padding-right: 25px;
+                padding-bottom: 10px;
+                send-box := LineEdit { // TODO: Focus on channel switch
+                    height: 40px;
+                    font-size: 14px;
+                    placeholder-text: "Message _______"; // TODO: replace
                 }
             }
         }

@@ -17,6 +17,7 @@ mod reaction_add;
 mod reaction_remove;
 mod user_login;
 mod user_token_login;
+mod user_verify;
 
 pub enum ReactionType {
     Like = 1,
@@ -33,11 +34,12 @@ pub struct ProntoClient {
 }
 
 impl ProntoClient {
-    pub fn new(api_base_url: String, pronto_session: &str, pronto_api_token: &str) -> Self {
+    pub fn new(api_base_url: String, pronto_session: &str, pronto_api_token: &str, pacct: &str) -> Self {
         // create the cookie store
         let cookies = vec![
             format!("pronto_session={}", pronto_session),
             format!("api_token={}", pronto_api_token),
+            format!("pacct_2245_5302428={}", pacct),
         ];
         let jar = reqwest::cookie::Jar::default();
         for cookie in cookies {
@@ -61,39 +63,39 @@ impl ProntoClient {
     }
 
     pub async fn get_user_info(&self) -> user_info::GetUserInfoResponse {
-        user_info::get(&self.api_base_url, &self.http_client).await
+        user_info::get(&self.api_base_url, &self.http_client).await.unwrap()
     }
 
     pub async fn get_bubble_list(&self) -> bubble_list::GetBubbleListResponse {
-        bubble_list::get(&self.api_base_url, &self.http_client).await
+        bubble_list::get(&self.api_base_url, &self.http_client).await.unwrap()
     }
 
     pub async fn get_bubble_info(&self, bubble_id: u64) -> bubble_info::GetBubbleInfoResponse {
-        bubble_info::get(&self.api_base_url, &self.http_client, bubble_id).await
+        bubble_info::get(&self.api_base_url, &self.http_client, bubble_id).await.unwrap()
     }
 
     pub async fn get_bubble_history(&self, bubble_id: u64, latest_message_id: Option<u64>) -> bubble_history::GetBubbleHistoryResponse {
-        bubble_history::get(&self.api_base_url, &self.http_client, bubble_id, latest_message_id).await
+        bubble_history::get(&self.api_base_url, &self.http_client, bubble_id, latest_message_id).await.unwrap()
     }
 
     pub async fn post_message(&self, user_id: u64, bubble_id: u64, message: String, parent_message_id: Option<u64>) -> message_create::MessageModifyResponse {
-        message_create::post(&self.api_base_url, &self.http_client, bubble_id, message, user_id, Utc::now(), parent_message_id).await
+        message_create::post(&self.api_base_url, &self.http_client, bubble_id, message, user_id, Utc::now(), parent_message_id).await.unwrap()
     }
 
     pub async fn edit_message(&self, message_id: u64, message: String) -> message_create::MessageModifyResponse {
-        message_edit::post(&self.api_base_url, &self.http_client, message_id, message).await
+        message_edit::post(&self.api_base_url, &self.http_client, message_id, message).await.unwrap()
     }
 
     pub async fn delete_message(&self, message_id: u64) -> HashMap<String, bool> {
-        message_delete::post(&self.api_base_url, &self.http_client, message_id).await
+        message_delete::post(&self.api_base_url, &self.http_client, message_id).await.unwrap()
         // TODO: Handle error
     }
 
     pub async fn add_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
-        reaction_add::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await
+        reaction_add::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await.unwrap()
     }
 
     pub async fn remove_reaction(&self, message_id: u64, reaction_type: ReactionType) -> message_create::MessageModifyResponse {
-        reaction_remove::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await
+        reaction_remove::post(&self.api_base_url, &self.http_client, message_id, reaction_type as i32 as u64).await.unwrap()
     }
 }

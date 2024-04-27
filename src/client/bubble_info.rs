@@ -21,12 +21,11 @@ pub struct GetBubbleInfoResponse {
     pub stats: BubbleStats,
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> GetBubbleInfoResponse {
+pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> Result<GetBubbleInfoResponse, reqwest::Error> {
     let r = client.get(format!("{pronto_base_url}v2/bubble.info"))
         .query(&json!({ "bubble_id": bubble_id }))
         .send()
-        .await
-        .unwrap();
-    let json = r.json::<GetBubbleInfoResponse>().await.unwrap();
-    json
+        .await?;
+    let json = r.json::<GetBubbleInfoResponse>().await?;
+    Ok(json)
 }

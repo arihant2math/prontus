@@ -4,6 +4,7 @@ use std::thread;
 use futures_util::StreamExt;
 use slint::Weak;
 use tokio_tungstenite::connect_async;
+use crate::net_worker::WorkerTasks;
 
 pub(crate) mod client;
 pub(crate) mod storage;
@@ -28,14 +29,19 @@ async fn websocket_worker(ui: Weak<AppWindow>, rx: mpsc::Receiver<WebsocketTasks
     // TODO
 }
 
+#[tokio::main]
+async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
+    net_worker::worker(ui_handle, rx).await.unwrap();
+}
+
 fn main() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
-    let (tx, rx) = mpsc::channel::<net_worker::WorkerTasks>();
+    let (tx, rx) = mpsc::channel::<WorkerTasks>();
 
     thread::spawn({
         let ui_handle = ui.as_weak();
         move || {
-            net_worker::worker(ui_handle, rx);
+            async_thread(ui_handle, rx);
         }
     });
 
@@ -45,7 +51,7 @@ fn main() -> Result<(), slint::PlatformError> {
         let ui_handle = ui.as_weak();
         move |channel_id| { // TODO: channel id is broken
             let ui = ui_handle.unwrap();
-            tx.send(net_worker::WorkerTasks::ChangeChannel(ui.get_current_sidebar_item_id() as u64)).unwrap();
+            tx.send(WorkerTasks::ChangeChannel(ui.get_current_sidebar_item_id() as u64)).unwrap();
         }
     });
 
@@ -58,7 +64,7 @@ fn main() -> Result<(), slint::PlatformError> {
             if ui.get_viewport_y() > -100.0 { // TODO: Do not hardcode
                 let top_msg_id = ui.get_top_msg_id();
                 let channel_id = ui.get_channel_id();
-                tx.send(net_worker::WorkerTasks::ScrollChannel(channel_id as u64, top_msg_id as u64)).unwrap();
+                tx.send(WorkerTasks::ScrollChannel(channel_id as u64, top_msg_id as u64)).unwrap();
             }
         }
     });
@@ -66,9 +72,9 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.on_sendMessage({
         let ui_handle = ui.as_weak();
         let tx = tx.clone();
-        move || { // TODO: preliminary message appending
+        move |message| {
             let ui = ui_handle.unwrap();
-            tx.send(net_worker::WorkerTasks::AddMessage(ui.get_channel_id() as u64, None, ui.get_message().to_string())).unwrap();
+            tx.send(WorkerTasks::AddMessage(ui.get_channel_id() as u64, None, ui.get_message().to_string())).unwrap();
             ui.set_message("".to_string().into());
         }
     });

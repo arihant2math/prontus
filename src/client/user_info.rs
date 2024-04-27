@@ -25,11 +25,10 @@ pub struct GetUserInfoResponse {
     pub user: UserInfo,
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client) -> GetUserInfoResponse {
+pub async fn get(pronto_base_url: &str, client: &Client) -> Result<GetUserInfoResponse, reqwest::Error> {
     let r = client.get(format!("{pronto_base_url}v1/user.info"))
         .send()
-        .await
-        .unwrap();
-    let json = r.json::<GetUserInfoResponse>().await.unwrap();
-    json
+        .await?;
+    let json = r.json::<GetUserInfoResponse>().await?;
+    Ok(json)
 }
