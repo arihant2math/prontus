@@ -15,7 +15,7 @@ export component AppWindow inherits Window {
     in-out property <length> viewport_y <=> scroll-view.viewport-y;
     out property <length> viewport_height <=> scroll-view.viewport-height;
     in-out property <int> top_msg_id;
-    in-out property <int> channel_id;
+    in-out property <Channel> current_channel;
     in-out property <string> message <=> send-box.text;
     in property <bool> chat-visible <=> chat.visible;
 
@@ -24,6 +24,7 @@ export component AppWindow inherits Window {
     callback sendMessage <=> send-box.accepted;
     callback deleteMessage(int);
     callback openLink(string);
+    callback messageLoad(int);
 
 
     HorizontalLayout {
@@ -56,6 +57,7 @@ export component AppWindow inherits Window {
                             message: message;
                             delete(id) => {deleteMessage(id)}
                             open-link(str) => {openLink(str)}
+                            on-init(id) => {messageLoad(id)}
                         }
                     }
                 }
@@ -64,6 +66,7 @@ export component AppWindow inherits Window {
                 padding-left: 25px;
                 padding-right: 25px;
                 padding-bottom: 10px;
+                // TODO: disable when sending isn't allowed
                 send-box := LineEdit { // TODO: Focus on channel switch
                     height: 40px;
                     font-size: 14px;

@@ -95,6 +95,8 @@ export struct Message {
     id: int,
     user: string, // TODO: user struct
     profile_picture: image,
+    profile_picture_loaded: bool,
+    profile_picture_url: string,
     content: string,
     has_parent: bool,
     parent_message: string,
@@ -113,6 +115,10 @@ export component MessageComponent {
     callback delete(int);
 
     callback open-link(string);
+
+    callback reaction-clicked(int);
+
+    callback on-init(int);
 
     HorizontalLayout {
         padding-top: 10px;
@@ -141,7 +147,7 @@ export component MessageComponent {
             }
             HorizontalLayout {
                 for reaction in message.reactions: ReactionComponent {
-                    reaction: reaction;
+                    reaction: reaction; // TODO: Clicked callback
                 }
             }
             HorizontalLayout {
@@ -159,5 +165,6 @@ export component MessageComponent {
                 }
             }
         }
+        init => { on-init(message.id); }
     }
 }

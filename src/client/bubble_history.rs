@@ -90,6 +90,8 @@ impl Message {
             content: self.message.into(),
             user: self.user.fullname.into(),
             profile_picture: Image::from_rgba8(temp_image.clone()),
+            profile_picture_loaded: false,
+            profile_picture_url: self.user.profilepicurl.clone().into(),
             images: ModelRc::new(VecModel::from(images)),
             embeds: ModelRc::new(VecModel::from(embeds)),
             has_parent: self.parent_message_id.is_some(),
