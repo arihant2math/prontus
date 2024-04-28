@@ -1,10 +1,12 @@
-use std::error::Error;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::Config;
+use log4rs::config::{Appender, Root};
+use log::LevelFilter;
 
-use futures_util::StreamExt;
-use slint::{Model, ModelRc, VecModel, Weak};
+use slint::{ModelRc, VecModel, Weak};
 
 use crate::net_worker::WorkerTasks;
 
@@ -16,6 +18,7 @@ mod net_worker;
 mod websocket_worker;
 
 pub use client::APIResult;
+use crate::client::ReactionType;
 
 slint::include_modules!();
 
@@ -31,6 +34,16 @@ async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks
 }
 
 fn main() -> Result<(), slint::PlatformError> {
+    // TODO: Date styling
+    let encoder = log4rs::encode::pattern::PatternEncoder::new("[{P} {i}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}");
+    let stdout = ConsoleAppender::builder().encoder(Box::new(encoder)).build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
+        .unwrap();
+    let _handle = log4rs::init_config(config).unwrap();
+
     let ui = AppWindow::new()?;
     let (tx, rx) = mpsc::channel::<WorkerTasks>();
 
@@ -80,6 +93,12 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.on_openLink({
         move |link| {
             open::that(&link.to_string()).unwrap();
+        }
+    });
+
+    ui.on_reactionClicked({
+        move |message_id, reaction_id, selected| {
+            tx.send(WorkerTasks::Reaction(message_id as u64, ReactionType::from(reaction_id), selected)).unwrap();
         }
     });
 

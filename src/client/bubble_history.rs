@@ -49,7 +49,7 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn to_slint(self, parents: &Vec<Message>) -> crate::Message {
+    pub fn to_slint(self, user_info: &UserInfo, parents: &Vec<Message>) -> crate::Message {
         let mut embeds = Vec::new();
         if let Some(resource) = self.resource {
             embeds.push(crate::Embed {
@@ -60,7 +60,7 @@ impl Message {
         }
         let mut images = Vec::new();
 
-        let temp_image = SharedPixelBuffer::<Rgba8Pixel>::new(100, 100); // TODO: load that default.jpg image ...
+        let temp_image = SharedPixelBuffer::<Rgba8Pixel>::new(100, 100);
         for _ in self.message_media {
             images.push(Image::from_rgba8(temp_image.clone()));
         }
@@ -82,7 +82,8 @@ impl Message {
         for reaction in self.reactions {
             reactions.push(crate::Reaction {
                 id: reaction.id as i32,
-                user_ids: ModelRc::new(VecModel::from(reaction.users.iter().map(|id| *id as i32).collect::<Vec<i32>>()))
+                user_ids: ModelRc::new(VecModel::from(reaction.users.iter().map(|id| *id as i32).collect::<Vec<i32>>())),
+                checked: reaction.users.iter().any(|id| *id == user_info.id)
             });
         }
         crate::Message {

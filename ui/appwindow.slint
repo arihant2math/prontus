@@ -25,6 +25,7 @@ export component AppWindow inherits Window {
     callback deleteMessage(int);
     callback openLink(string);
     callback messageLoad(int);
+    callback reactionClicked(int, int, bool);
 
 
     HorizontalLayout {
@@ -58,6 +59,7 @@ export component AppWindow inherits Window {
                             delete(id) => {deleteMessage(id)}
                             open-link(str) => {openLink(str)}
                             on-init(id) => {messageLoad(id)}
+                            reaction-clicked(message_id, reaction_id, selected) => {reactionClicked(message_id, reaction_id, selected)}
                         }
                     }
                 }

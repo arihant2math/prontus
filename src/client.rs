@@ -48,13 +48,29 @@ impl<T> APIResult<T> {
     }
 }
 
+#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum ReactionType {
+    Null = -1,
     Like = 1,
     Dislike = 2,
     Laugh = 3,
     Love = 4,
     Cry = 5,
     Amazed = 6,
+}
+
+impl From<i32> for ReactionType {
+    fn from(i: i32) -> Self {
+        match i {
+            1 => ReactionType::Like,
+            2 => ReactionType::Dislike,
+            3 => ReactionType::Laugh,
+            4 => ReactionType::Love,
+            5 => ReactionType::Cry,
+            6 => ReactionType::Amazed,
+            _ => ReactionType::Null,
+        }
+    }
 }
 
 pub struct ProntoClient {
