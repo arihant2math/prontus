@@ -28,11 +28,16 @@ pub struct TokenLoginUser {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct TokenLoginResponse {
+pub struct TokenLoginSuccess {
     pub ok: bool,
     pub users: Vec<TokenLoginUser>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub enum TokenLoginResponse {
+    Success(TokenLoginSuccess),
+    Error(crate::client::APIError)
+}
 
 pub async fn post(pronto_base_url: &str, client: &reqwest::Client, login_tokens: Vec<String>) -> Result<TokenLoginResponse, reqwest::Error> {
     let r = client.post(format!("{pronto_base_url}v1/user.tokenlogin"))

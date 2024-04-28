@@ -2,7 +2,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use crate::client::user_info::UserInfo;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DeviceInfo {
     pub browsername: String,
     pub browserversion: String,
@@ -11,14 +11,14 @@ pub struct DeviceInfo {
     pub r#type: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UserLoginRequest {
     pub email: String,
     pub code: String,
     pub device: DeviceInfo,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct LoginUser {
     pub user: UserInfo,
     #[serde(rename = "logintoken")]
@@ -27,17 +27,18 @@ pub struct LoginUser {
     pub token_expiration: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UserLoginResponse {
     pub ok: bool,
     pub users: Vec<LoginUser>
 }
 
+pub type UserLoginResult = crate::APIResult<UserLoginResponse>;
 
-pub async fn post(request: UserLoginRequest) -> Result<UserLoginResponse, reqwest::Error> {
+pub async fn post(request: UserLoginRequest) -> Result<UserLoginResult, reqwest::Error> {
     let client = Client::new();
     let resp = client.post("https://accounts.pronto.io/api/v3/user.login");
     let resp = resp.json(&request).send().await?;
-    let resp = resp.json::<UserLoginResponse>().await?;
+    let resp = resp.json().await?;
     Ok(resp)
 }

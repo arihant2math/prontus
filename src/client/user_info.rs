@@ -25,10 +25,12 @@ pub struct GetUserInfoResponse {
     pub user: UserInfo,
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client) -> Result<GetUserInfoResponse, reqwest::Error> {
+pub type GetUserInfoResult = crate::APIResult<GetUserInfoResponse>;
+
+pub async fn get(pronto_base_url: &str, client: &Client) -> Result<GetUserInfoResult, reqwest::Error> {
     let r = client.get(format!("{pronto_base_url}v1/user.info"))
         .send()
         .await?;
-    let json = r.json::<GetUserInfoResponse>().await?;
+    let json = r.json().await?;
     Ok(json)
 }

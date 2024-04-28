@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::client::bubble::Bubble;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BubbleStats {
     pub id: u64,
     pub user_id: u64,
@@ -14,18 +14,20 @@ pub struct BubbleStats {
     pub archived: u8,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetBubbleInfoResponse {
     pub ok: bool,
     pub bubble: Bubble,
     pub stats: BubbleStats,
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> Result<GetBubbleInfoResponse, reqwest::Error> {
+pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;
+
+pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64) -> Result<GetBubbleInfoResult, reqwest::Error> {
     let r = client.get(format!("{pronto_base_url}v2/bubble.info"))
         .query(&json!({ "bubble_id": bubble_id }))
         .send()
         .await?;
-    let json = r.json::<GetBubbleInfoResponse>().await?;
+    let json = r.json::<GetBubbleInfoResult>().await?;
     Ok(json)
 }

@@ -1,9 +1,11 @@
+use std::error::Error;
+use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
 
 use futures_util::StreamExt;
-use slint::Weak;
-use tokio_tungstenite::connect_async;
+use slint::{Model, ModelRc, VecModel, Weak};
+
 use crate::net_worker::WorkerTasks;
 
 pub(crate) mod client;
@@ -11,27 +13,21 @@ pub(crate) mod storage;
 mod websocket;
 pub(crate) mod settings;
 mod net_worker;
+mod websocket_worker;
+
+pub use client::APIResult;
 
 slint::include_modules!();
 
 static PRONTO_BASE_URL: &str = "https://stanfordohs.pronto.io/api/";
 
-#[derive(Clone, Debug)]
-enum WebsocketTasks {
-    ChangeChannel(u64)
-}
-
-async fn websocket_worker(ui: Weak<AppWindow>, rx: mpsc::Receiver<WebsocketTasks>) {
-    let url = url::Url::parse("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false").unwrap();
-    let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
-
-    let (write, read) = ws_stream.split();
-    // TODO
-}
 
 #[tokio::main]
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
-    net_worker::worker(ui_handle, rx).await.unwrap();
+    let result = net_worker::worker(ui_handle, rx).await;
+    if let Err(e) = result {
+        println!("{:?}", e);
+    }
 }
 
 fn main() -> Result<(), slint::PlatformError> {
@@ -45,13 +41,15 @@ fn main() -> Result<(), slint::PlatformError> {
         }
     });
 
+    let message_model = Rc::new(VecModel::from(vec![]));
+    let model_rc = ModelRc::from(message_model.clone());
+    ui.set_messages(model_rc);
+
 
     ui.on_setChannel({
         let tx = tx.clone();
-        let ui_handle = ui.as_weak();
-        move |channel_id| { // TODO: channel id is broken
-            let ui = ui_handle.unwrap();
-            tx.send(WorkerTasks::ChangeChannel(ui.get_current_sidebar_item_id() as u64)).unwrap();
+        move |channel| { // TODO: channel id is broken
+            tx.send(WorkerTasks::ChangeChannel(channel)).unwrap();
         }
     });
 
@@ -63,7 +61,7 @@ fn main() -> Result<(), slint::PlatformError> {
             println!("{} {} {}", ui.get_visible_height(), ui.get_viewport_y(), ui.get_viewport_height());
             if ui.get_viewport_y() > -100.0 { // TODO: Do not hardcode
                 let top_msg_id = ui.get_top_msg_id();
-                let channel_id = ui.get_channel_id();
+                let channel_id = ui.get_current_channel().id;
                 tx.send(WorkerTasks::ScrollChannel(channel_id as u64, top_msg_id as u64)).unwrap();
             }
         }
@@ -74,7 +72,7 @@ fn main() -> Result<(), slint::PlatformError> {
         let tx = tx.clone();
         move |message| {
             let ui = ui_handle.unwrap();
-            tx.send(WorkerTasks::AddMessage(ui.get_channel_id() as u64, None, ui.get_message().to_string())).unwrap();
+            tx.send(WorkerTasks::AddMessage(ui.get_current_channel().id as u64, None, ui.get_message().to_string())).unwrap();
             ui.set_message("".to_string().into());
         }
     });

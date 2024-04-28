@@ -21,10 +21,12 @@ pub struct GetBubbleListResponse {
     pub stats: Vec<BubbleStats>
 }
 
-pub async fn get(pronto_base_url: &str, client: &Client) -> Result<GetBubbleListResponse, reqwest::Error> {
+pub type GetBubbleListResult = crate::APIResult<GetBubbleListResponse>;
+
+pub async fn get(pronto_base_url: &str, client: &Client) -> Result<GetBubbleListResult, reqwest::Error> {
     let r = client.get(format!("{pronto_base_url}v2/bubble.list"))
         .send()
         .await?;
-    let json = r.json::<GetBubbleListResponse>().await?;
+    let json = r.json::<GetBubbleListResult>().await?;
     Ok(json)
 }

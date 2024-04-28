@@ -27,11 +27,10 @@ async fn save_url(client: Arc<ProntoClient>, url: &str, file: &PathBuf) {
 
 pub async fn load_url_path(client: Arc<ProntoClient>, url: String) -> PathBuf {
     let path = get_url_path(&url);
-    let p = path.clone();
     if !path.exists() {
         save_url(client, &url, &path).await;
     }
-    p
+    path
 }
 
 pub fn load_image_path(path_buf: PathBuf) -> image::RgbaImage {

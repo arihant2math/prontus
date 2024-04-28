@@ -15,13 +15,7 @@ pub struct UserVerifyResponseSuccess {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct UserVerifyResponseError {
-    pub ok: bool,
-    pub error: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum UserVerifyResponse {
     Success(UserVerifyResponseSuccess),
-    Error(UserVerifyResponseError),
+    Error(crate::client::APIError),
 }
