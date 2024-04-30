@@ -18,7 +18,7 @@ pub async fn post(pronto_base_url: &str, client: &Client, channel_id: u64, messa
     let time_string = time.format("%Y-%m-%d %H:%M:%S").to_string();
     let request =
         if parent.is_some() {
-            client.post("https://stanfordohs.pronto.io/api/v1/message.create")
+            client.post(format!("{pronto_base_url}v1/message.create"))
                 .json(&json!(
             {
                 "bubble_id": channel_id,

@@ -7,6 +7,7 @@ use log4rs::config::{Appender, Root};
 use log::LevelFilter;
 
 use slint::{ModelRc, VecModel, Weak};
+use tokio::join;
 
 use crate::net_worker::WorkerTasks;
 
@@ -27,10 +28,12 @@ static PRONTO_BASE_URL: &str = "https://stanfordohs.pronto.io/api/";
 
 #[tokio::main]
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
-    let result = net_worker::worker(ui_handle, rx).await;
-    if let Err(e) = result {
-        println!("{:?}", e);
-    }
+    let (websocket_tx, websocket_rx) = tokio::sync::mpsc::channel(128);
+    let net_worker_future = net_worker::worker(ui_handle.clone(), rx);
+    let websocket_worker_future = websocket_worker::worker(ui_handle, websocket_rx);
+    let (net_worker_result, websocket_worker_result) = join!(net_worker_future, websocket_worker_future);
+    net_worker_result.unwrap();
+    websocket_worker_result.unwrap();
 }
 
 fn main() -> Result<(), slint::PlatformError> {
@@ -97,8 +100,16 @@ fn main() -> Result<(), slint::PlatformError> {
     });
 
     ui.on_reactionClicked({
+        let tx = tx.clone();
         move |message_id, reaction_id, selected| {
             tx.send(WorkerTasks::Reaction(message_id as u64, ReactionType::from(reaction_id), selected)).unwrap();
+        }
+    });
+
+    ui.on_deleteMessage({
+        let tx = tx.clone();
+        move |message_id| {
+            tx.send(WorkerTasks::RemoveMessage(message_id as u64)).unwrap();
         }
     });
 

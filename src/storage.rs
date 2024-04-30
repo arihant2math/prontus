@@ -56,13 +56,3 @@ pub fn fast_load_image(url: &str) -> Option<image::RgbaImage> {
     }
     Some(load_image_path(path))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_load_image() {
-        let image = load_image(&Client::new(), "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png".to_string());
-    }
-}

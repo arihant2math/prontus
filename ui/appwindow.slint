@@ -72,7 +72,8 @@ export component AppWindow inherits Window {
                 send-box := LineEdit { // TODO: Focus on channel switch
                     height: 40px;
                     font-size: 14px;
-                    placeholder-text: "Message _______"; // TODO: replace
+                    placeholder-text: "Message \{current_channel.title}";
+                    enabled: current_channel.can_send_message;
                 }
             }
         }

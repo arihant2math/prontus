@@ -22,6 +22,7 @@ mod reaction_remove;
 mod user_login;
 mod user_token_login;
 mod user_verify;
+mod pusher_auth;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -58,6 +59,11 @@ pub enum ReactionType {
     Cry = 5,
     Amazed = 6,
 }
+
+// Pronto name -> api response permission mappings
+// Admin = System
+// Manager = Owner
+// User = Member
 
 impl From<i32> for ReactionType {
     fn from(i: i32) -> Self {
@@ -128,6 +134,10 @@ impl ProntoClient {
             api_base_url,
             http_client: client,
         })
+    }
+
+    pub async fn pusher_auth(&self, socket_id: &str, channel_name: &str) -> Result<pusher_auth::PusherAuthResponse, ResponseError> {
+        Ok(pusher_auth::post(&self.api_base_url, &self.http_client, socket_id, channel_name).await?)
     }
 
     pub async fn get_user_info(&self) -> Result<user_info::GetUserInfoResponse, ResponseError> {

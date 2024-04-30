@@ -10,6 +10,7 @@ pub struct UserInfo {
     pub profilepicurl: String,
     pub isverified: bool,
     pub isonline: bool,
+    pub role: String,
     pub mute: bool,
     pub isbot: u8,
     pub hasmobileapp: Option<bool>,

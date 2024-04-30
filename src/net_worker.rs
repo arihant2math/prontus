@@ -15,6 +15,7 @@ pub enum WorkerTasks {
     ChangeChannel(Channel),
     ScrollChannel(u64, u64),
     AddMessage(u64, Option<u64>, String),
+    RemoveMessage(u64),
     Reaction(u64, ReactionType, bool),
 }
 
@@ -41,6 +42,7 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
     } else {
         panic!("No Pronto API token provided");
     };
+
     info!("Created Client");
 
     let channels = client.get_bubble_list().await?;
@@ -65,7 +67,8 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
                 id: channel.id as i32,
                 title: channel.title.clone().into(),
                 unread: false,
-                notifications: channels.stats[count].unread as i32
+                notifications: channels.stats[count].unread as i32,
+                can_send_message: channel.grant_create_message
             };
             ui_channels_groups.get_mut(&key).unwrap().push(ui_channel);
         }
@@ -162,11 +165,24 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
             }
             Ok(WorkerTasks::AddMessage(channel_id, parent_id, message)) => {
                 info!("Add message to {}: {}", channel_id, message);
-                let message = loop_client.post_message(loop_user_info.id, channel_id, message, parent_id).await?;
+                let message_response = loop_client.post_message(loop_user_info.id, channel_id, message, parent_id).await;
+                if let Ok(message) = message_response {
+                    app.upgrade_in_event_loop(move |ui| {
+                        let messages = ui.get_messages();
+                        let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                        messages.push(message.message.clone().to_slint(&loop_user_info, &Vec::new()));
+                    })?;
+                } else {
+                    error!("Failed to add message to {}", channel_id); // TODO: log actual error
+                }
+            }
+            Ok(WorkerTasks::RemoveMessage(message_id)) => {
+                info!("Remove message {}", message_id);
+                loop_client.delete_message(message_id).await?;
                 app.upgrade_in_event_loop(move |ui| {
                     let messages = ui.get_messages();
                     let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
-                    messages.push(message.message.clone().to_slint(&loop_user_info, &Vec::new()));
+                    messages.remove(messages.iter().position(|x| x.id as u64 == message_id).unwrap());
                 })?;
             }
             Err(e) => {
