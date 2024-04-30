@@ -58,15 +58,16 @@ pub async fn worker(_ui: Weak<AppWindow>, mut rx: mpsc::Receiver<WebsocketTasks>
 
     write.send(tungstenite::Message::from(serde_json::to_string(&json).unwrap())).await.unwrap();
 
-    while let Ok(task) = rx.recv() {
+    loop {
+        let task = rx.recv().await.unwrap();
         match task {
             WebsocketTasks::ChangeChannel(channel_id) => { // TODO: Fix
                 let json = serde_json::json!({
-                    "event": "pusher:subscribe",
-                    "data": {
-                        "channel": format!("private-organization.{}", channel_id)
-                    }
-                });
+                "event": "pusher:subscribe",
+                "data": {
+                    "channel": format!("private-organization.{}", channel_id)
+                }
+            });
                 write.send(tungstenite::Message::from(serde_json::to_string(&json).unwrap())).await.unwrap();
             }
         }
