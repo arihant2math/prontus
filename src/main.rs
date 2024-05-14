@@ -12,11 +12,12 @@ use tokio::join;
 use crate::net_worker::WorkerTasks;
 
 pub(crate) mod client;
-pub(crate) mod storage;
 mod websocket;
 pub(crate) mod settings;
 mod net_worker;
 mod websocket_worker;
+mod image_service;
+pub(crate) mod util;
 
 pub use client::APIResult;
 use crate::client::ReactionType;
@@ -29,15 +30,14 @@ static PRONTO_BASE_URL: &str = "https://stanfordohs.pronto.io/api/";
 #[tokio::main]
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let (websocket_tx, websocket_rx) = tokio::sync::mpsc::channel(128);
-    let net_worker_future = net_worker::worker(ui_handle.clone(), rx);
+    let net_worker_future = net_worker::worker(ui_handle.clone(), rx, websocket_tx);
     let websocket_worker_future = websocket_worker::worker(ui_handle, websocket_rx);
-    let (net_worker_result, websocket_worker_result) = join!(net_worker_future, websocket_worker_future);
-    net_worker_result.unwrap();
-    websocket_worker_result.unwrap();
+    join!(net_worker_future, websocket_worker_future);
+    // join!(net_worker_future);
 }
 
 fn main() -> Result<(), slint::PlatformError> {
-    // TODO: Date styling
+    // TODO: Better date styling
     let encoder = log4rs::encode::pattern::PatternEncoder::new("[{P} {i}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}");
     let stdout = ConsoleAppender::builder().encoder(Box::new(encoder)).build();
 
@@ -82,6 +82,8 @@ fn main() -> Result<(), slint::PlatformError> {
             }
         }
     });
+
+    // TODO: on resize reset viewport y
 
     ui.on_sendMessage({
         let ui_handle = ui.as_weak();

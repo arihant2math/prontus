@@ -34,10 +34,14 @@ export component MessageComponent {
     HorizontalLayout {
         padding-top: 10px;
         padding-bottom: 10px;
-        Image {
-            source: message.profile_picture;
-            width: 50px;
-            height: 50px;
+        VerticalLayout {
+            padding-top: 25px;
+            Image {
+                vertical-alignment: center;
+                source: message.profile_picture;
+                width: 25px;
+                height: 25px;
+            }
         }
         VerticalLayout {
             padding-left: 10px;
@@ -50,7 +54,6 @@ export component MessageComponent {
                     text: message.user;
                     font-size: 15px;
                     max-height: 25px;
-                    padding-bottom: 5px;
                 }
             }
             HorizontalBox {
@@ -64,8 +67,8 @@ export component MessageComponent {
             HorizontalBox {
                 for img in message.images: Image {
                     source: img;
-                    height: img.height * 1px;
-                    width: img.width * 1px;
+                    height: max(img.height * 1px, 500px);
+                    width: max(img.width * 1px, 700px);
                 }
             }
             HorizontalBox {

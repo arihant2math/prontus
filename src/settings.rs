@@ -1,6 +1,7 @@
 use std::fs::OpenOptions;
 use std::io;
 use home::home_dir;
+use log::info;
 use serde::{Serialize, Deserialize};
 use thiserror::Error;
 
@@ -43,7 +44,7 @@ impl Settings {
         if !file_name.exists() {
             let create = options.create_new(true).write(true).open(&file_name)?;
             let _ = serde_json::to_writer_pretty(create, &Settings::default())?;
-            println!("Created settings file: {}", file_name.display());
+            info!("Created settings file: {}", file_name.display());
             return Ok(Settings::default());
         }
         let file = options.open(file_name)?;

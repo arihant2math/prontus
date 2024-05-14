@@ -3,7 +3,6 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use slint::{Image, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel};
 use crate::client::user_info::UserInfo;
-use crate::storage::fast_load_image;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageMedia {
@@ -64,16 +63,6 @@ impl Message {
         for _ in self.message_media {
             images.push(Image::from_rgba8(temp_image.clone()));
         }
-
-        let profile_picture = match fast_load_image(&self.user.profilepicurl) {
-            Some(image) => SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
-                image.as_raw(),
-                image.width(),
-                image.height(),
-            ),
-            None => temp_image.clone(),
-        };
-
 
         let parent = if let Some(parent_id) = self.parent_message_id {
             parents.iter().find(|parent| parent.id == parent_id)

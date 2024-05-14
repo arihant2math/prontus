@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use futures_util::{SinkExt, StreamExt};
+use log::{error, info};
 use serde::{Deserialize, Serialize};
 use slint::Weak;
 use tokio::sync::mpsc;
@@ -49,10 +50,10 @@ pub async fn worker(_ui: Weak<AppWindow>, mut rx: mpsc::Receiver<WebsocketTasks>
     read.for_each(|response| async move {
         match response {
             Ok(message) => {
-                let response: PusherResponse = serde_json::from_str(&message.to_string()).unwrap();
-                println!("Response: {:?}", response);
+                let response: Result<PusherResponse, serde_json::Error> = serde_json::from_str(&message.to_string());
+                info!("Response: {:?}", response);
             },
-            Err(e) => println!("Error: {:?}", e),
+            Err(e) => error!("Error: {:?}", e),
         }
     }).await;
 
@@ -72,7 +73,5 @@ pub async fn worker(_ui: Weak<AppWindow>, mut rx: mpsc::Receiver<WebsocketTasks>
             }
         }
     }
-
-    Ok(())
     // TODO
 }

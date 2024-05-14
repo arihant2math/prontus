@@ -1,14 +1,17 @@
 use std::collections::HashMap;
-use std::sync::{Arc, mpsc};
+use std::sync::{Arc, mpsc, Mutex};
+use std::thread;
 use log::{error, info};
 
-use slint::{EventLoopError, Model, ModelRc, VecModel, Weak};
+use slint::{EventLoopError, Image, Model, ModelRc, VecModel, Weak};
 
 use thiserror::Error;
 
 use crate::{AppWindow, Channel, ChannelGroup, Message, PRONTO_BASE_URL};
 use crate::client::{ProntoClient, ReactionType};
+use crate::image_service::ImageService;
 use crate::settings::Settings;
+use crate::websocket_worker::WebsocketTasks;
 
 #[derive(Clone, Debug)]
 pub enum WorkerTasks {
@@ -35,15 +38,67 @@ impl From<EventLoopError> for NetWorkerError {
     }
 }
 
-pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Result<(), NetWorkerError> {
+pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, message: crate::client::Message, _width: u32, _height: u32, set_image: F)
+    where F: Fn(AppWindow, Image) + Send + Copy + 'static {
+    // TODO: don't spawn thread if cached
+    // TODO: Return image
+    // TODO: Respect width and height
+    // TODO: Threadpool
+    info!("Loading pfp");
+    let message = message.clone();
+    let ui = ui.clone();
+    thread::spawn(move || {
+        let mut unlocked_service = image_service.lock().unwrap();
+        let pfp_image_loaded = unlocked_service.block_get(&message.user.profilepicurl);
+        drop(unlocked_service);
+        if let Ok(pfp_image) = pfp_image_loaded {
+            ui.upgrade_in_event_loop(move |ui| {
+                let image = Image::from_rgba8(pfp_image);
+                set_image(ui, image);
+            }).unwrap();
+        } else {
+            error!("Failed to load pfp");
+        }
+    });
+}
+
+pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, media: crate::client::MessageMedia, _width: u32, _height: u32, set_image: F)
+    where F: Fn(AppWindow, Image) + Send + Copy + 'static {
+    // TODO: don't spawn thread if cached
+    // TODO: Return image
+    // TODO: Respect width and height
+    // TODO: Threadpool
+    info!("Loading image");
+    let message = media.clone();
+    let ui = ui.clone();
+    thread::spawn(move || {
+        let mut unlocked_service = image_service.lock().unwrap();
+        let media_image_loaded = unlocked_service.block_get(&message.url);
+        drop(unlocked_service);
+        if let Ok(media_image) = media_image_loaded {
+            ui.upgrade_in_event_loop(move |ui| {
+                let image = Image::from_rgba8(media_image);
+                set_image(ui, image);
+            }).unwrap();
+        } else {
+            error!("Failed to load image");
+        }
+    });
+}
+
+// TODO: Lazy load embed
+
+pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, websocket_tx: mpsc::Sender<WebsocketTasks>) -> Result<(), NetWorkerError> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
         Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &settings.pronto_session.clone().unwrap_or("".to_string()), &pronto_api_token.clone(), &settings.pacct.clone().unwrap_or("".to_string())).unwrap())
     } else {
         panic!("No Pronto API token provided");
     };
-
     info!("Created Client");
+
+    let image_service = Arc::new(Mutex::new(ImageService::new(Arc::clone(&client))));
+    info!("Created Image Service");
 
     let channels = client.get_bubble_list().await?;
     app.upgrade_in_event_loop(move |ui| {
@@ -88,21 +143,46 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
     loop {
         let loop_client = Arc::clone(&client);
         let loop_user_info = Arc::clone(&user_info);
+        let loop_image_service = Arc::clone(&image_service);
+
         let message = rx.recv();
         match message {
             // TODO: have a centralized message storage variable for time saving
             // TODO: store users in memory and share that with the websocket worker and ui thread.
             Ok(WorkerTasks::ChangeChannel(channel)) => {
-                info!("Change channel to {}", channel.title);
+                info!("Change channel to \"{}\": \"{}\"", channel.id, channel.title);
                 let history_result = loop_client.get_bubble_history(channel.id as u64, None).await;
                 match history_result {
                     Ok(history) => {
+                        let weak_app = app.clone();
+                        websocket_tx.send(WebsocketTasks::ChangeChannel(channel.id as u64));
                         app.upgrade_in_event_loop(move |ui| {
                             let messages = ui.get_messages();
                             let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
                             let mut ui_messages = Vec::new();
-                            for message in history.messages.clone().into_iter().rev() {
-                                ui_messages.push(message.to_slint(&loop_user_info, &history.parentmessages));
+                            for (index, message) in history.messages.clone().into_iter().enumerate().rev() {
+                                ui_messages.push(message.clone().to_slint(&loop_user_info, &history.parentmessages));
+                                lazy_get_pfp(weak_app.clone(), Arc::clone(&loop_image_service), message.clone(), 200, 200, move |ui, image| {
+                                    // This closure is the "magic" part. Once the image is lazy
+                                    // loaded in the background, this closure will be called
+                                    // WITHIN the UI thread. We use the ui reference to
+                                    // get the existing card from model by index, set
+                                    // image and then set the data back on the model.
+                                    let len = ui.get_messages().iter().len() - 1;
+                                    let mut message = ui.get_messages().row_data(len - index).unwrap();
+                                    message.profile_picture = image;
+                                    ui.get_messages().set_row_data(len - index, message);
+                                });
+                                for (count, media) in message.message_media.iter().enumerate() {
+                                    lazy_get_image(weak_app.clone(), Arc::clone(&loop_image_service), media.clone(), 500, 200, move |ui, image| {
+                                        // Same as above
+                                        let len = ui.get_messages().iter().len() - 1;
+                                        let message = ui.get_messages().row_data(len - index).unwrap();
+                                        message.images.set_row_data(count, image);
+                                        ui.get_messages().set_row_data(len - index, message);
+                                    })
+                                }
+                                // TODO: Embed images
                             }
                             messages.set_vec(ui_messages);
                             if history.messages.len() > 0 {
@@ -122,7 +202,7 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
                 }
             },
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
-                info!("Scroll channel {} to {}", channel_id, top_msg_id);
+                info!("Scroll channel \"{}\" to {}", channel_id, top_msg_id);
                 let history_response = loop_client.get_bubble_history(channel_id, Some(top_msg_id)).await;
                 if let Ok(history) = history_response {
                     app.upgrade_in_event_loop(move |ui| {
@@ -134,7 +214,7 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) -> Re
                         ui.set_top_msg_id(history.messages.last().map(|msg| msg.id).unwrap_or(0) as i32);
                     })?;
                 } else {
-                    error!("Failed to get history for channel {}", channel_id); // TODO: log actual error
+                    error!("Failed to get history for channel \"{}\"", channel_id); // TODO: log actual error
                 }
             }
             Ok(WorkerTasks::Reaction(message_id, reaction_type, add)) => {
