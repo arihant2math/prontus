@@ -4,7 +4,7 @@ use std::thread;
 use log4rs::append::console::ConsoleAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
-use log::LevelFilter;
+use log::{debug, LevelFilter};
 
 use slint::{ModelRc, VecModel, Weak};
 use tokio::join;
@@ -74,7 +74,7 @@ fn main() -> Result<(), slint::PlatformError> {
         let tx = tx.clone();
         move || {
             let ui = ui_handle.unwrap();
-            println!("{} {} {}", ui.get_visible_height(), ui.get_viewport_y(), ui.get_viewport_height());
+            debug!("{} {} {}", ui.get_visible_height(), ui.get_viewport_y(), ui.get_viewport_height());
             if ui.get_viewport_y() > -100.0 { // TODO: Do not hardcode
                 let top_msg_id = ui.get_top_msg_id();
                 let channel_id = ui.get_current_channel().id;

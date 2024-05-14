@@ -36,7 +36,7 @@ async fn save_url(client: Arc<ProntoClient>, url: &str, path: &PathBuf) -> Resul
         .truncate(true)
         .open(path)
         .await?;
-    println!("Downloading {}...", url);
+    info!("Downloading {}...", url);
 
     let mut stream = client.http_client.get(url)
         .send()
