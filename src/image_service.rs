@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tokio::fs::{File, OpenOptions};
+use tokio::fs::OpenOptions;
 use tokio::io::AsyncWriteExt;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -10,7 +10,7 @@ use log::info;
 use slint::{Rgba8Pixel, SharedPixelBuffer};
 use thiserror::Error;
 use crate::client::ProntoClient;
-use crate::util::image_dir;
+use crate::util::{base_dir, image_dir};
 
 
 #[derive(Debug, Error)]
@@ -65,15 +65,20 @@ pub fn load_image_from_path(path_buf: &PathBuf) -> Result<image::RgbaImage, imag
 #[derive(Clone)]
 pub struct ImageService {
     client: Arc<ProntoClient>,
-    images: HashMap<String, SharedPixelBuffer<Rgba8Pixel>>
+    images: HashMap<String, SharedPixelBuffer<Rgba8Pixel>>,
+    loading_image: SharedPixelBuffer<Rgba8Pixel>
 }
 
 impl ImageService {
     pub fn new(client: Arc<ProntoClient>) -> Self {
-        Self {
+        let loading_image = load_image_from_path(&base_dir().join("default.jpg")).unwrap();
+        let mut r = Self {
             images: HashMap::new(),
+            loading_image: SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(loading_image.as_raw(), loading_image.width(), loading_image.height()),
             client
-        }
+        };
+        r.init();
+        r
     }
 
     pub fn init(&mut self) {
@@ -84,13 +89,14 @@ impl ImageService {
             let image = image.unwrap();
             let path = image.path();
             if path.is_file() {
-                let image_buffer = load_image_from_path(&path).unwrap();
-                // TODO: pre-multiply
-                self.images.insert(path.file_name().unwrap().to_str().unwrap().to_string(), SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
-                    image_buffer.as_raw(),
-                    image_buffer.width(),
-                    image_buffer.height(),
-                ));
+                let image_buffer = load_image_from_path(&path);
+                if let Ok(image_buffer) = image_buffer {
+                    self.images.insert(path.file_name().unwrap().to_str().unwrap().to_string(), SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
+                        image_buffer.as_raw(),
+                        image_buffer.width(),
+                        image_buffer.height(),
+                    ));
+                }
             }
         }
     }
@@ -120,5 +126,13 @@ impl ImageService {
 
     pub fn exists(&self, url: &str) -> bool {
         self.images.contains_key(url)
+    }
+
+    pub fn fast_get(&self, url: &str) -> Option<SharedPixelBuffer<Rgba8Pixel>> {
+        self.images.get(url).cloned()
+    }
+
+    pub fn loading_image(&self) -> SharedPixelBuffer<Rgba8Pixel> {
+        self.loading_image.clone()
     }
 }

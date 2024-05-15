@@ -39,6 +39,7 @@ impl From<EventLoopError> for NetWorkerError {
 }
 
 pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, message: crate::client::Message, _width: u32, _height: u32, set_image: F)
+    -> Image
     where F: Fn(AppWindow, Image) + Send + Copy + 'static {
     // TODO: don't spawn thread if cached
     // TODO: Return image
@@ -47,8 +48,9 @@ pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServic
     info!("Loading pfp");
     let message = message.clone();
     let ui = ui.clone();
+    let thread_image_service = Arc::clone(&image_service);
     thread::spawn(move || {
-        let mut unlocked_service = image_service.lock().unwrap();
+        let mut unlocked_service = thread_image_service.lock().unwrap();
         let pfp_image_loaded = unlocked_service.block_get(&message.user.profilepicurl);
         drop(unlocked_service);
         if let Ok(pfp_image) = pfp_image_loaded {
@@ -60,6 +62,10 @@ pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServic
             error!("Failed to load pfp");
         }
     });
+    let unlocked_service = image_service.lock().unwrap();
+    let loading_image = unlocked_service.loading_image();
+    drop(unlocked_service);
+    Image::from_rgba8(loading_image)
 }
 
 pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, media: crate::client::MessageMedia, _width: u32, _height: u32, set_image: F)
@@ -87,8 +93,8 @@ pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServ
 }
 
 // TODO: Lazy load embed
-
-pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, websocket_tx: mpsc::Sender<WebsocketTasks>) -> Result<(), NetWorkerError> {
+// TODO: Struct
+pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, websocket_tx: tokio::sync::mpsc::Sender<WebsocketTasks>) -> Result<(), NetWorkerError> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
         Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &settings.pronto_session.clone().unwrap_or("".to_string()), &pronto_api_token.clone(), &settings.pacct.clone().unwrap_or("".to_string())).unwrap())
@@ -140,6 +146,10 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
 
 
     let user_info = Arc::new(client.get_user_info().await?.user);
+    info!("Retrieved User Info");
+
+    websocket_tx.send(WebsocketTasks::SubscribeUser(user_info.id)).await;
+
     loop {
         let loop_client = Arc::clone(&client);
         let loop_user_info = Arc::clone(&user_info);
@@ -155,14 +165,14 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                 match history_result {
                     Ok(history) => {
                         let weak_app = app.clone();
-                        websocket_tx.send(WebsocketTasks::ChangeChannel(channel.id as u64));
+                        websocket_tx.send(WebsocketTasks::ChangeChannel(channel.id as u64)).await;
                         app.upgrade_in_event_loop(move |ui| {
                             let messages = ui.get_messages();
                             let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
                             let mut ui_messages = Vec::new();
                             for (index, message) in history.messages.clone().into_iter().enumerate().rev() {
-                                ui_messages.push(message.clone().to_slint(&loop_user_info, &history.parentmessages));
-                                lazy_get_pfp(weak_app.clone(), Arc::clone(&loop_image_service), message.clone(), 200, 200, move |ui, image| {
+                                let mut slint_message = message.clone().to_slint(&loop_user_info, &history.parentmessages);
+                                slint_message.profile_picture = lazy_get_pfp(weak_app.clone(), Arc::clone(&loop_image_service), message.clone(), 200, 200, move |ui, image| {
                                     // This closure is the "magic" part. Once the image is lazy
                                     // loaded in the background, this closure will be called
                                     // WITHIN the UI thread. We use the ui reference to
@@ -173,6 +183,7 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                                     message.profile_picture = image;
                                     ui.get_messages().set_row_data(len - index, message);
                                 });
+                                ui_messages.push(slint_message);
                                 for (count, media) in message.message_media.iter().enumerate() {
                                     lazy_get_image(weak_app.clone(), Arc::clone(&loop_image_service), media.clone(), 500, 200, move |ui, image| {
                                         // Same as above
@@ -211,6 +222,7 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                         for message in history.messages.clone().into_iter() {
                             messages.insert(0, message.to_slint(&loop_user_info, &history.parentmessages));
                         }
+                        // TODO: load images
                         ui.set_top_msg_id(history.messages.last().map(|msg| msg.id).unwrap_or(0) as i32);
                     })?;
                 } else {

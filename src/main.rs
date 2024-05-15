@@ -31,9 +31,9 @@ static PRONTO_BASE_URL: &str = "https://stanfordohs.pronto.io/api/";
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let (websocket_tx, websocket_rx) = tokio::sync::mpsc::channel(128);
     let net_worker_future = net_worker::worker(ui_handle.clone(), rx, websocket_tx);
-    let websocket_worker_future = websocket_worker::worker(ui_handle, websocket_rx);
-    join!(net_worker_future, websocket_worker_future);
-    // join!(net_worker_future);
+    // let websocket_worker_future = websocket_worker::worker(ui_handle, websocket_rx);
+    // join!(net_worker_future, websocket_worker_future);
+    join!(net_worker_future);
 }
 
 fn main() -> Result<(), slint::PlatformError> {
