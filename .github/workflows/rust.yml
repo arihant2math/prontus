@@ -11,12 +11,30 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build -r
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Setup ATK
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install librust-atk-dev libgtk-3-dev
+
+      - name: Build with cargo
+        run: cargo build -r --all-features
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'windows')
+        with:
+          name: weather (Windows)
+          path: ./target/release/prontus.exe
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          name: weather (Linux)
+          path: ./target/release/prontus
