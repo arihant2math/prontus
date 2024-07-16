@@ -1,15 +1,15 @@
+use crate::client::user_info::UserInfo;
 use reqwest::Client;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use slint::{Image, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel};
-use crate::client::user_info::UserInfo;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageMedia {
     pub id: u64,
     pub url: String,
     pub mediatype: String,
-    pub urlmimetype: String
+    pub urlmimetype: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,7 +19,7 @@ pub struct MessageResource {
     pub snippet: String,
     pub url: String,
     pub title: String,
-    pub thumbnailurl: String
+    pub thumbnailurl: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -27,7 +27,7 @@ pub struct Reactions {
     #[serde(rename = "reactiontype_id")]
     pub id: u64,
     pub count: u64,
-    users: Vec<u64>
+    users: Vec<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -44,7 +44,7 @@ pub struct Message {
     #[serde(default, rename = "messagemedia")]
     pub message_media: Vec<MessageMedia>,
     #[serde(default)]
-    pub resource: Option<MessageResource>
+    pub resource: Option<MessageResource>,
 }
 
 impl Message {
@@ -66,13 +66,21 @@ impl Message {
 
         let parent = if let Some(parent_id) = self.parent_message_id {
             parents.iter().find(|parent| parent.id == parent_id)
-        } else { None };
+        } else {
+            None
+        };
         let mut reactions = Vec::new();
         for reaction in self.reactions {
             reactions.push(crate::Reaction {
                 id: reaction.id as i32,
-                user_ids: ModelRc::new(VecModel::from(reaction.users.iter().map(|id| *id as i32).collect::<Vec<i32>>())),
-                checked: reaction.users.iter().any(|id| *id == user_info.id)
+                user_ids: ModelRc::new(VecModel::from(
+                    reaction
+                        .users
+                        .iter()
+                        .map(|id| *id as i32)
+                        .collect::<Vec<i32>>(),
+                )),
+                checked: reaction.users.iter().any(|id| *id == user_info.id),
             });
         }
         crate::Message {
@@ -85,7 +93,10 @@ impl Message {
             images: ModelRc::new(VecModel::from(images)),
             embeds: ModelRc::new(VecModel::from(embeds)),
             has_parent: self.parent_message_id.is_some(),
-            parent_message: parent.map(|parent| parent.message.clone()).unwrap_or_default().into(), // TODO: This should really be the previous message in the thread tbh
+            parent_message: parent
+                .map(|parent| parent.message.clone())
+                .unwrap_or_default()
+                .into(), // TODO: This should really be the previous message in the thread tbh
             reactions: ModelRc::new(VecModel::from(reactions)),
         }
     }
@@ -96,22 +107,30 @@ pub struct GetBubbleHistoryResponse {
     pub ok: bool,
     pub pagesize: u64,
     pub messages: Vec<Message>,
-    pub parentmessages: Vec<Message>
+    pub parentmessages: Vec<Message>,
 }
 
 pub type GetBubbleHistoryResult = crate::APIResult<GetBubbleHistoryResponse>;
 
-pub async fn get(pronto_base_url: &str, client: &Client, bubble_id: u64, latest_message_id: Option<u64>) -> Result<GetBubbleHistoryResult, reqwest::Error> {
+pub async fn get(
+    pronto_base_url: &str,
+    client: &Client,
+    bubble_id: u64,
+    latest_message_id: Option<u64>,
+) -> Result<GetBubbleHistoryResult, reqwest::Error> {
     // TODO: catch {"ok":false,"error":"BUBBLE_NOTFOUND"}
     let r = if let Some(latest_message_id) = latest_message_id {
-        client.get(format!("{pronto_base_url}v1/bubble.history"))
+        client
+            .get(format!("{pronto_base_url}v1/bubble.history"))
             .query(&json!({ "bubble_id": bubble_id, "latest": latest_message_id }))
             .send()
     } else {
-        client.get(format!("{pronto_base_url}v1/bubble.history"))
+        client
+            .get(format!("{pronto_base_url}v1/bubble.history"))
             .query(&json!({ "bubble_id": bubble_id }))
             .send()
-    }.await?;
+    }
+    .await?;
     let json = r.json::<GetBubbleHistoryResult>().await?;
     Ok(json)
 }

@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::client::user_info::UserInfo;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct DeviceInfo {
@@ -24,7 +24,7 @@ pub struct TokenLoginRequest {
 pub struct TokenLoginUser {
     #[serde(rename = "accesstoken")]
     pub access_token: String,
-    pub user: UserInfo
+    pub user: UserInfo,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -36,11 +36,16 @@ pub struct TokenLoginSuccess {
 #[derive(Serialize, Deserialize)]
 pub enum TokenLoginResponse {
     Success(TokenLoginSuccess),
-    Error(crate::client::APIError)
+    Error(crate::client::APIError),
 }
 
-pub async fn post(pronto_base_url: &str, client: &reqwest::Client, login_tokens: Vec<String>) -> Result<TokenLoginResponse, reqwest::Error> {
-    let r = client.post(format!("{pronto_base_url}v1/user.tokenlogin"))
+pub async fn post(
+    pronto_base_url: &str,
+    client: &reqwest::Client,
+    login_tokens: Vec<String>,
+) -> Result<TokenLoginResponse, reqwest::Error> {
+    let r = client
+        .post(format!("{pronto_base_url}v1/user.tokenlogin"))
         .json(&TokenLoginRequest {
             login_tokens,
             device: DeviceInfo {

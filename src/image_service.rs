@@ -1,17 +1,16 @@
-use std::collections::HashMap;
-use tokio::fs::OpenOptions;
-use tokio::io::AsyncWriteExt;
-use std::path::PathBuf;
-use std::sync::Arc;
-use base64::Engine;
+use crate::client::ProntoClient;
+use crate::util::{base_dir, image_dir};
 use base64::prelude::BASE64_URL_SAFE;
+use base64::Engine;
 use futures_util::StreamExt;
 use log::info;
 use slint::{Rgba8Pixel, SharedPixelBuffer};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::Arc;
 use thiserror::Error;
-use crate::client::ProntoClient;
-use crate::util::{base_dir, image_dir};
-
+use tokio::fs::OpenOptions;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Error)]
 pub enum StorageError {
@@ -29,7 +28,11 @@ pub fn get_url_path(url: &str) -> PathBuf {
     image_dir().join(filename)
 }
 
-async fn save_url(client: Arc<ProntoClient>, url: &str, path: &PathBuf) -> Result<(), StorageError> {
+async fn save_url(
+    client: Arc<ProntoClient>,
+    url: &str,
+    path: &PathBuf,
+) -> Result<(), StorageError> {
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
@@ -38,10 +41,7 @@ async fn save_url(client: Arc<ProntoClient>, url: &str, path: &PathBuf) -> Resul
         .await?;
     info!("Downloading {}...", url);
 
-    let mut stream = client.http_client.get(url)
-        .send()
-        .await?
-        .bytes_stream();
+    let mut stream = client.http_client.get(url).send().await?.bytes_stream();
 
     while let Some(chunk_result) = stream.next().await {
         let chunk = chunk_result?;
@@ -55,18 +55,18 @@ async fn save_url(client: Arc<ProntoClient>, url: &str, path: &PathBuf) -> Resul
 }
 
 pub fn load_image_from_path(path_buf: &PathBuf) -> Result<image::RgbaImage, image::ImageError> {
-    let reader = image::io::Reader::open(path_buf).unwrap().with_guessed_format().unwrap();
-    reader
-        .decode()
-        .map(|image| image.to_rgba8())
+    let reader = image::io::Reader::open(path_buf)
+        .unwrap()
+        .with_guessed_format()
+        .unwrap();
+    reader.decode().map(|image| image.to_rgba8())
 }
-
 
 #[derive(Clone)]
 pub struct ImageService {
     client: Arc<ProntoClient>,
     images: HashMap<String, SharedPixelBuffer<Rgba8Pixel>>,
-    loading_image: SharedPixelBuffer<Rgba8Pixel>
+    loading_image: SharedPixelBuffer<Rgba8Pixel>,
 }
 
 impl ImageService {
@@ -74,8 +74,12 @@ impl ImageService {
         let loading_image = load_image_from_path(&base_dir().join("default.jpg")).unwrap();
         let mut r = Self {
             images: HashMap::new(),
-            loading_image: SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(loading_image.as_raw(), loading_image.width(), loading_image.height()),
-            client
+            loading_image: SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
+                loading_image.as_raw(),
+                loading_image.width(),
+                loading_image.height(),
+            ),
+            client,
         };
         r.init();
         r
@@ -91,11 +95,14 @@ impl ImageService {
             if path.is_file() {
                 let image_buffer = load_image_from_path(&path);
                 if let Ok(image_buffer) = image_buffer {
-                    self.images.insert(path.file_name().unwrap().to_str().unwrap().to_string(), SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
-                        image_buffer.as_raw(),
-                        image_buffer.width(),
-                        image_buffer.height(),
-                    ));
+                    self.images.insert(
+                        path.file_name().unwrap().to_str().unwrap().to_string(),
+                        SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(
+                            image_buffer.as_raw(),
+                            image_buffer.width(),
+                            image_buffer.height(),
+                        ),
+                    );
                 }
             }
         }
@@ -121,7 +128,9 @@ impl ImageService {
     }
 
     pub fn block_get(&mut self, url: &str) -> Result<SharedPixelBuffer<Rgba8Pixel>, StorageError> {
-        tokio::runtime::Runtime::new().unwrap().block_on(self.get(url))
+        tokio::runtime::Runtime::new()
+            .unwrap()
+            .block_on(self.get(url))
     }
 
     pub fn exists(&self, url: &str) -> bool {

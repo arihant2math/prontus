@@ -9,8 +9,13 @@ pub struct DeleteMessageResult {
 
 pub type DeleteMessageResultResult = crate::APIResult<DeleteMessageResult>;
 
-pub async fn post(pronto_base_url: &str, client: &Client, message_id: u64) -> Result<DeleteMessageResultResult, reqwest::Error> {
-    let r = client.post(format!("{pronto_base_url}v1/message.delete"))
+pub async fn post(
+    pronto_base_url: &str,
+    client: &Client,
+    message_id: u64,
+) -> Result<DeleteMessageResultResult, reqwest::Error> {
+    let r = client
+        .post(format!("{pronto_base_url}v1/message.delete"))
         .json(&json!({"message_id": message_id }))
         .send()
         .await?;

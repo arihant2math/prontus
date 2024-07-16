@@ -1,17 +1,17 @@
-use std::collections::HashMap;
-use std::sync::{Arc, mpsc, Mutex};
-use std::thread;
 use log::{error, info};
+use std::collections::HashMap;
+use std::sync::{mpsc, Arc, Mutex};
+use std::thread;
 
 use slint::{EventLoopError, Image, Model, ModelRc, VecModel, Weak};
 
 use thiserror::Error;
 
-use crate::{AppWindow, Channel, ChannelGroup, Message};
 use crate::client::{ProntoClient, ReactionType};
 use crate::image_service::ImageService;
 use crate::settings::Settings;
 use crate::websocket_worker::WebsocketTasks;
+use crate::{AppWindow, Channel, ChannelGroup, Message};
 
 #[derive(Clone, Debug)]
 pub enum WorkerTasks {
@@ -38,9 +38,17 @@ impl From<EventLoopError> for NetWorkerError {
     }
 }
 
-pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, message: crate::client::Message, _width: u32, _height: u32, set_image: F)
-    -> Image
-    where F: Fn(AppWindow, Image) + Send + Copy + 'static {
+pub fn lazy_get_pfp<F>(
+    ui: Weak<AppWindow>,
+    image_service: Arc<Mutex<ImageService>>,
+    message: crate::client::Message,
+    _width: u32,
+    _height: u32,
+    set_image: F,
+) -> Image
+where
+    F: Fn(AppWindow, Image) + Send + Copy + 'static,
+{
     // TODO: don't spawn thread if cached
     // TODO: Return image
     // TODO: Respect width and height
@@ -57,7 +65,8 @@ pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServic
             ui.upgrade_in_event_loop(move |ui| {
                 let image = Image::from_rgba8(pfp_image);
                 set_image(ui, image);
-            }).unwrap();
+            })
+            .unwrap();
         } else {
             error!("Failed to load pfp");
         }
@@ -68,8 +77,16 @@ pub fn lazy_get_pfp<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServic
     Image::from_rgba8(loading_image)
 }
 
-pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageService>>, media: crate::client::MessageMedia, _width: u32, _height: u32, set_image: F)
-    where F: Fn(AppWindow, Image) + Send + Copy + 'static {
+pub fn lazy_get_image<F>(
+    ui: Weak<AppWindow>,
+    image_service: Arc<Mutex<ImageService>>,
+    media: crate::client::MessageMedia,
+    _width: u32,
+    _height: u32,
+    set_image: F,
+) where
+    F: Fn(AppWindow, Image) + Send + Copy + 'static,
+{
     // TODO: don't spawn thread if cached
     // TODO: Return image
     // TODO: Respect width and height
@@ -85,7 +102,8 @@ pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServ
             ui.upgrade_in_event_loop(move |ui| {
                 let image = Image::from_rgba8(media_image);
                 set_image(ui, image);
-            }).unwrap();
+            })
+            .unwrap();
         } else {
             error!("Failed to load image");
         }
@@ -94,7 +112,11 @@ pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServ
 
 // TODO: Lazy load embed
 // TODO: Struct
-pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, websocket_tx: tokio::sync::mpsc::Sender<WebsocketTasks>) -> Result<(), NetWorkerError> {
+pub async fn worker(
+    app: Weak<AppWindow>,
+    rx: mpsc::Receiver<WorkerTasks>,
+    websocket_tx: tokio::sync::mpsc::Sender<WebsocketTasks>,
+) -> Result<(), NetWorkerError> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
         Arc::new(ProntoClient::new(settings.base_url.clone(), &pronto_api_token).unwrap())
@@ -111,13 +133,17 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
         // TODO: Sort by priority
         let mut ui_channels_groups = HashMap::new();
         for (count, channel) in channels.bubbles.iter().enumerate() {
-            let category_name = &channel.category.clone().map(|c| c.title).unwrap_or_else(|| {
-                if channel.isdm {
-                    "Direct Messages".to_string()
-                } else {
-                    "Uncategorized".to_string()
-                }
-            });
+            let category_name = &channel
+                .category
+                .clone()
+                .map(|c| c.title)
+                .unwrap_or_else(|| {
+                    if channel.isdm {
+                        "Direct Messages".to_string()
+                    } else {
+                        "Uncategorized".to_string()
+                    }
+                });
             let category_id = &channel.category.clone().map(|c| c.id).unwrap_or(0);
             let key = (*category_id, category_name.to_string());
 
@@ -129,26 +155,29 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                 title: channel.title.clone().into(),
                 unread: false,
                 notifications: channels.stats[count].unread as i32,
-                can_send_message: channel.grant_create_message
+                can_send_message: channel.grant_create_message,
             };
             ui_channels_groups.get_mut(&key).unwrap().push(ui_channel);
         }
         let mut ui_channels = Vec::new();
-        for ((category_id, category_name), ui_channels_group) in ui_channels_groups.clone().into_iter() {
+        for ((category_id, category_name), ui_channels_group) in
+            ui_channels_groups.clone().into_iter()
+        {
             ui_channels.push(ChannelGroup {
                 id: category_id as i32,
                 title: category_name.into(),
-                channels: ModelRc::new(VecModel::from(ui_channels_group))
+                channels: ModelRc::new(VecModel::from(ui_channels_group)),
             });
         }
         ui.set_channels(ModelRc::new(VecModel::from(ui_channels)));
     })?;
 
-
     let user_info = Arc::new(client.get_user_info().await?.user);
     info!("Retrieved User Info");
 
-    websocket_tx.send(WebsocketTasks::SubscribeUser(user_info.id)).await;
+    websocket_tx
+        .send(WebsocketTasks::SubscribeUser(user_info.id))
+        .await;
 
     loop {
         let loop_client = Arc::clone(&client);
@@ -160,38 +189,68 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
             // TODO: have a centralized message storage variable for time saving
             // TODO: store users in memory and share that with the websocket worker and ui thread.
             Ok(WorkerTasks::ChangeChannel(channel)) => {
-                info!("Change channel to \"{}\": \"{}\"", channel.id, channel.title);
-                let history_result = loop_client.get_bubble_history(channel.id as u64, None).await;
+                info!(
+                    "Change channel to \"{}\": \"{}\"",
+                    channel.id, channel.title
+                );
+                let history_result = loop_client
+                    .get_bubble_history(channel.id as u64, None)
+                    .await;
                 match history_result {
                     Ok(history) => {
                         let weak_app = app.clone();
-                        websocket_tx.send(WebsocketTasks::ChangeChannel(channel.id as u64)).await;
+                        websocket_tx
+                            .send(WebsocketTasks::ChangeChannel(channel.id as u64))
+                            .await;
                         app.upgrade_in_event_loop(move |ui| {
                             let messages = ui.get_messages();
-                            let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                            let messages = messages
+                                .as_any()
+                                .downcast_ref::<VecModel<Message>>()
+                                .unwrap();
                             let mut ui_messages = Vec::new();
-                            for (index, message) in history.messages.clone().into_iter().enumerate().rev() {
-                                let mut slint_message = message.clone().to_slint(&loop_user_info, &history.parentmessages);
-                                slint_message.profile_picture = lazy_get_pfp(weak_app.clone(), Arc::clone(&loop_image_service), message.clone(), 200, 200, move |ui, image| {
-                                    // This closure is the "magic" part. Once the image is lazy
-                                    // loaded in the background, this closure will be called
-                                    // WITHIN the UI thread. We use the ui reference to
-                                    // get the existing card from model by index, set
-                                    // image and then set the data back on the model.
-                                    let len = ui.get_messages().iter().len() - 1;
-                                    let mut message = ui.get_messages().row_data(len - index).unwrap();
-                                    message.profile_picture = image;
-                                    ui.get_messages().set_row_data(len - index, message);
-                                });
+                            for (index, message) in
+                                history.messages.clone().into_iter().enumerate().rev()
+                            {
+                                let mut slint_message = message
+                                    .clone()
+                                    .to_slint(&loop_user_info, &history.parentmessages);
+                                slint_message.profile_picture = lazy_get_pfp(
+                                    weak_app.clone(),
+                                    Arc::clone(&loop_image_service),
+                                    message.clone(),
+                                    200,
+                                    200,
+                                    move |ui, image| {
+                                        // This closure is the "magic" part. Once the image is lazy
+                                        // loaded in the background, this closure will be called
+                                        // WITHIN the UI thread. We use the ui reference to
+                                        // get the existing card from model by index, set
+                                        // image and then set the data back on the model.
+                                        let len = ui.get_messages().iter().len() - 1;
+                                        let mut message =
+                                            ui.get_messages().row_data(len - index).unwrap();
+                                        message.profile_picture = image;
+                                        ui.get_messages().set_row_data(len - index, message);
+                                    },
+                                );
                                 ui_messages.push(slint_message);
                                 for (count, media) in message.message_media.iter().enumerate() {
-                                    lazy_get_image(weak_app.clone(), Arc::clone(&loop_image_service), media.clone(), 500, 200, move |ui, image| {
-                                        // Same as above
-                                        let len = ui.get_messages().iter().len() - 1;
-                                        let message = ui.get_messages().row_data(len - index).unwrap();
-                                        message.images.set_row_data(count, image);
-                                        ui.get_messages().set_row_data(len - index, message);
-                                    })
+                                    lazy_get_image(
+                                        weak_app.clone(),
+                                        Arc::clone(&loop_image_service),
+                                        media.clone(),
+                                        500,
+                                        200,
+                                        move |ui, image| {
+                                            // Same as above
+                                            let len = ui.get_messages().iter().len() - 1;
+                                            let message =
+                                                ui.get_messages().row_data(len - index).unwrap();
+                                            message.images.set_row_data(count, image);
+                                            ui.get_messages().set_row_data(len - index, message);
+                                        },
+                                    )
                                 }
                                 // TODO: Embed images
                             }
@@ -208,25 +267,39 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                     }
                     Err(e) => {
                         info!("{:?}", channel);
-                        error!("Failed to get history for channel {channel_id}: {e}", channel_id = channel.id);
+                        error!(
+                            "Failed to get history for channel {channel_id}: {e}",
+                            channel_id = channel.id
+                        );
                     }
                 }
-            },
+            }
             Ok(WorkerTasks::ScrollChannel(channel_id, top_msg_id)) => {
                 info!("Scroll channel \"{}\" to {}", channel_id, top_msg_id);
-                let history_response = loop_client.get_bubble_history(channel_id, Some(top_msg_id)).await;
+                let history_response = loop_client
+                    .get_bubble_history(channel_id, Some(top_msg_id))
+                    .await;
                 if let Ok(history) = history_response {
                     app.upgrade_in_event_loop(move |ui| {
                         let messages = ui.get_messages();
-                        let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                        let messages = messages
+                            .as_any()
+                            .downcast_ref::<VecModel<Message>>()
+                            .unwrap();
                         for message in history.messages.clone().into_iter() {
-                            messages.insert(0, message.to_slint(&loop_user_info, &history.parentmessages));
+                            messages.insert(
+                                0,
+                                message.to_slint(&loop_user_info, &history.parentmessages),
+                            );
                         }
                         // TODO: load images
-                        ui.set_top_msg_id(history.messages.last().map(|msg| msg.id).unwrap_or(0) as i32);
+                        ui.set_top_msg_id(
+                            history.messages.last().map(|msg| msg.id).unwrap_or(0) as i32
+                        );
                     })?;
                 } else {
-                    error!("Failed to get history for channel \"{}\"", channel_id); // TODO: log actual error
+                    error!("Failed to get history for channel \"{}\"", channel_id);
+                    // TODO: log actual error
                 }
             }
             Ok(WorkerTasks::Reaction(message_id, reaction_type, add)) => {
@@ -234,20 +307,34 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                 if add {
                     loop_client.add_reaction(message_id, reaction_type).await?;
                 } else {
-                    loop_client.remove_reaction(message_id, reaction_type).await?;
+                    loop_client
+                        .remove_reaction(message_id, reaction_type)
+                        .await?;
                 }
                 app.upgrade_in_event_loop(move |ui| {
                     let messages = ui.get_messages();
-                    let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
+                    let messages = messages
+                        .as_any()
+                        .downcast_ref::<VecModel<Message>>()
+                        .unwrap();
                     for message in messages.iter() {
                         if message.id as u64 == message_id {
                             for reaction in message.reactions.iter() {
                                 if reaction.id == reaction_type as i32 {
-                                    let user_ids = reaction.user_ids.as_any().downcast_ref::<VecModel<i32>>().unwrap();
+                                    let user_ids = reaction
+                                        .user_ids
+                                        .as_any()
+                                        .downcast_ref::<VecModel<i32>>()
+                                        .unwrap();
                                     if add {
                                         user_ids.push(loop_user_info.id as i32);
                                     } else {
-                                        user_ids.remove(user_ids.iter().position(|x| x == loop_user_info.id as i32).unwrap());
+                                        user_ids.remove(
+                                            user_ids
+                                                .iter()
+                                                .position(|x| x == loop_user_info.id as i32)
+                                                .unwrap(),
+                                        );
                                     }
                                 }
                             }
@@ -257,12 +344,22 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
             }
             Ok(WorkerTasks::AddMessage(channel_id, parent_id, message)) => {
                 info!("Add message to {}: {}", channel_id, message);
-                let message_response = loop_client.post_message(loop_user_info.id, channel_id, message, parent_id).await;
+                let message_response = loop_client
+                    .post_message(loop_user_info.id, channel_id, message, parent_id)
+                    .await;
                 if let Ok(message) = message_response {
                     app.upgrade_in_event_loop(move |ui| {
                         let messages = ui.get_messages();
-                        let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
-                        messages.push(message.message.clone().to_slint(&loop_user_info, &Vec::new()));
+                        let messages = messages
+                            .as_any()
+                            .downcast_ref::<VecModel<Message>>()
+                            .unwrap();
+                        messages.push(
+                            message
+                                .message
+                                .clone()
+                                .to_slint(&loop_user_info, &Vec::new()),
+                        );
                     })?;
                 } else {
                     error!("Failed to add message to {}", channel_id); // TODO: log actual error
@@ -273,8 +370,16 @@ pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, webso
                 loop_client.delete_message(message_id).await?;
                 app.upgrade_in_event_loop(move |ui| {
                     let messages = ui.get_messages();
-                    let messages = messages.as_any().downcast_ref::<VecModel<Message>>().unwrap();
-                    messages.remove(messages.iter().position(|x| x.id as u64 == message_id).unwrap());
+                    let messages = messages
+                        .as_any()
+                        .downcast_ref::<VecModel<Message>>()
+                        .unwrap();
+                    messages.remove(
+                        messages
+                            .iter()
+                            .position(|x| x.id as u64 == message_id)
+                            .unwrap(),
+                    );
                 })?;
             }
             Err(e) => {

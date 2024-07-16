@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use home::home_dir;
+use std::path::PathBuf;
 
 pub fn base_dir() -> PathBuf {
     home_dir().unwrap().join(".prontus")

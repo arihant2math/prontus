@@ -1,6 +1,6 @@
+use crate::client::user_info::UserInfo;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use crate::client::user_info::UserInfo;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DeviceInfo {
@@ -30,7 +30,7 @@ pub struct LoginUser {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct UserLoginResponse {
     pub ok: bool,
-    pub users: Vec<LoginUser>
+    pub users: Vec<LoginUser>,
 }
 
 pub type UserLoginResult = crate::APIResult<UserLoginResponse>;

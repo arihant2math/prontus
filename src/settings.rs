@@ -1,15 +1,15 @@
-use std::fs::OpenOptions;
-use std::io;
 use home::home_dir;
 use log::info;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::fs::OpenOptions;
+use std::io;
 use thiserror::Error;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Copy, Clone)]
 pub enum ThemePreference {
     Light,
     Dark,
-    System
+    System,
 }
 
 impl Default for ThemePreference {
@@ -37,7 +37,7 @@ pub enum SettingsError {
     #[error("IO error")]
     IO(#[from] io::Error),
     #[error("JSON error")]
-    SerdeJson(#[from] serde_json::Error)
+    SerdeJson(#[from] serde_json::Error),
 }
 
 impl Settings {
