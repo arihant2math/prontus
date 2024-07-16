@@ -7,7 +7,7 @@ use slint::{EventLoopError, Image, Model, ModelRc, VecModel, Weak};
 
 use thiserror::Error;
 
-use crate::{AppWindow, Channel, ChannelGroup, Message, PRONTO_BASE_URL};
+use crate::{AppWindow, Channel, ChannelGroup, Message};
 use crate::client::{ProntoClient, ReactionType};
 use crate::image_service::ImageService;
 use crate::settings::Settings;
@@ -97,7 +97,7 @@ pub fn lazy_get_image<F>(ui: Weak<AppWindow>, image_service: Arc<Mutex<ImageServ
 pub async fn worker(app: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>, websocket_tx: tokio::sync::mpsc::Sender<WebsocketTasks>) -> Result<(), NetWorkerError> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
-        Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &settings.pronto_session.clone().unwrap_or("".to_string()), &pronto_api_token.clone(), &settings.pacct.clone().unwrap_or("".to_string())).unwrap())
+        Arc::new(ProntoClient::new(settings.base_url.clone(), &pronto_api_token).unwrap())
     } else {
         panic!("No Pronto API token provided");
     };

@@ -18,14 +18,18 @@ impl Default for ThemePreference {
     }
 }
 
+fn default_base_url() -> String {
+    "https://stanfordohs.pronto.io/api/".to_string()
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Settings {
     pub pronto_api_token: Option<String>,
-    pub pronto_session: Option<String>,
-    pub pacct: Option<String>,
     pub websocket_auth_token: Option<String>,
     #[serde(default)]
-    pub color_preference: ThemePreference
+    pub color_preference: ThemePreference,
+    #[serde(default = "default_base_url")]
+    pub base_url: String,
 }
 
 #[derive(Debug, Error)]

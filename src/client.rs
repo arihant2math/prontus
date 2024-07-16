@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub use api_error::APIError;
+pub use user_login::DeviceInfo;
 pub use bubble_history::{Message, MessageMedia};
 
 pub mod api_error;
@@ -20,9 +21,9 @@ mod message_delete;
 mod user_info;
 mod reaction_add;
 mod reaction_remove;
-mod user_login;
-mod user_token_login;
-mod user_verify;
+pub mod user_login;
+pub mod user_token_login;
+pub mod user_verify;
 mod pusher_auth;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -110,12 +111,11 @@ impl From<APIError> for ResponseError {
 }
 
 impl ProntoClient {
-    pub fn new(api_base_url: String, pronto_session: &str, pronto_api_token: &str, pacct: &str) -> Result<Self, NewClientError> {
+    /// Create a new ProntoClient
+    pub fn new(api_base_url: String, pronto_api_token: &str) -> Result<Self, NewClientError> {
         // create the cookie store
         let cookies = vec![
-            format!("pronto_session={}", pronto_session),
-            format!("api_token={}", pronto_api_token),
-            format!("pacct_2245_5302428={}", pacct),
+            format!("api_token={}", pronto_api_token)
         ];
         let jar = reqwest::cookie::Jar::default();
         for cookie in cookies {

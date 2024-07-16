@@ -7,7 +7,7 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::{AppWindow, PRONTO_BASE_URL};
+use crate::AppWindow;
 use crate::client::ProntoClient;
 use crate::settings::Settings;
 
@@ -48,12 +48,12 @@ pub enum PusherRequest {
 pub async fn worker(_ui: Weak<AppWindow>, mut rx: mpsc::Receiver<WebsocketTasks>) -> Result<(), ()> {
     let settings = Settings::load("settings.json").unwrap();
     let client = if let Some(pronto_api_token) = settings.pronto_api_token {
-        Arc::new(ProntoClient::new(PRONTO_BASE_URL.to_string(), &settings.pronto_session.clone().unwrap_or("".to_string()), &pronto_api_token.clone(), &settings.pacct.clone().unwrap_or("".to_string())).unwrap())
+        Arc::new(ProntoClient::new(settings.base_url.clone(), &pronto_api_token.clone()).unwrap())
     } else {
         panic!("No Pronto API token provided");
     };
     let url = url::Url::parse("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false").unwrap();
-    let (mut ws_stream, _) = connect_async(url).await.expect("Failed to connect");
+    // let (mut ws_stream, _) = connect_async(url).await.expect("Failed to connect");
 
     let auth = client.pusher_auth("707489.396716", "private-organization.2245").await.unwrap().auth;
     let auth_string = format!("f44139496d9b75f37d27.w{auth}");
@@ -65,35 +65,36 @@ pub async fn worker(_ui: Weak<AppWindow>, mut rx: mpsc::Receiver<WebsocketTasks>
             "channel": "private-organization.2245"
         }
     });
-    ws_stream.send(Message::Text(json.to_string())).await.unwrap();
+    // ws_stream.send(Message::Text(json.to_string())).await.unwrap();
     loop {
-        match ws_stream.next().await {
-            Some(Ok(Message::Text(text))) => {
-                println!("Received: {text}");
-                if let Ok(response) = serde_json::from_str::<PusherResponse>(&text) {
-                    match response {
-                        #[allow(unused_variables)]
-                        PusherResponse::ConnectionEstablished { data } => {
-                            info!("Responding with pong");
-                            ws_stream.send(Message::Pong(vec![])).await.unwrap();
-                        }
-                        r => {
-                            println!("Other: {r:?}");
-                        }
-                    }
-                }
-            }
-            Some(Ok(Message::Ping(_))) => {
-                ws_stream.send(Message::Pong(vec![])).await.unwrap();
-            }
-            Some(Ok(Message::Close(_))) => {
-                error!("Connection closed");
-            }
-            Some(Ok(Message::Binary(_))) => {
-                error!("Received binary message");
-            }
-            _ => {}
-        }
+    //     match ws_stream.next().await {
+    //         Some(Ok(Message::Text(text))) => {
+    //             println!("Received: {text}");
+    //             if let Ok(response) = serde_json::from_str::<PusherResponse>(&text) {
+    //                 match response {
+    //                     #[allow(unused_variables)]
+    //                     PusherResponse::ConnectionEstablished { data } => {
+    //                         info!("Responding with pong");
+    //                         ws_stream.send(Message::Pong(vec![])).await.unwrap();
+    //                     }
+    //                     r => {
+    //                         println!("Other: {r:?}");
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         Some(Ok(Message::Ping(_))) => {
+    //             ws_stream.send(Message::Pong(vec![])).await.unwrap();
+    //         }
+    //         Some(Ok(Message::Close(_))) => {
+    //             error!("Connection closed");
+    //         }
+    //         Some(Ok(Message::Binary(_))) => {
+    //             error!("Received binary message");
+    //         }
+    //         _ => {}
+    //     }
     }
     // TODO
+    Ok(())
 }

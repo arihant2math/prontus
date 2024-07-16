@@ -1,6 +1,9 @@
+// TODO: Support text fallback for profile pictures
+
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
+use inquire::Text;
 use log4rs::append::console::ConsoleAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
@@ -21,11 +24,10 @@ pub(crate) mod util;
 
 pub use client::APIResult;
 use crate::client::ReactionType;
+use crate::client::user_verify::UserVerifyResult;
+use crate::settings::Settings;
 
 slint::include_modules!();
-
-static PRONTO_BASE_URL: &str = "https://stanfordohs.pronto.io/api/";
-
 
 #[tokio::main]
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
@@ -36,17 +38,7 @@ async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks
     join!(net_worker_future);
 }
 
-fn main() -> Result<(), slint::PlatformError> {
-    // TODO: Better date styling
-    let encoder = log4rs::encode::pattern::PatternEncoder::new("[{P} {i}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}");
-    let stdout = ConsoleAppender::builder().encoder(Box::new(encoder)).build();
-
-    let config = Config::builder()
-        .appender(Appender::builder().build("stdout", Box::new(stdout)))
-        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
-        .unwrap();
-    let _handle = log4rs::init_config(config).unwrap();
-
+fn run() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
     let (tx, rx) = mpsc::channel::<WorkerTasks>();
 
@@ -125,4 +117,27 @@ fn main() -> Result<(), slint::PlatformError> {
     // let slint_image = Image::from_rgba8(buffer);
 
     ui.run()
+}
+
+fn main() {
+    // TODO: Better date styling
+    let encoder = log4rs::encode::pattern::PatternEncoder::new("[{P} {i}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}");
+    let stdout = ConsoleAppender::builder().encoder(Box::new(encoder)).build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
+        .unwrap();
+    let _handle = log4rs::init_config(config).unwrap();
+
+    let mut settings = Settings::load("settings.json").unwrap();
+    if settings.pronto_api_token.is_none() {
+        tokio::runtime::Runtime::new().unwrap().block_on(async {
+            let e = Text::new("What is your pronto api token?").prompt().unwrap();
+            settings.pronto_api_token = Some(e.trim_matches(' ').to_string());
+            settings.save("settings.json").unwrap();
+            // TODO: prompt with real UI
+        });
+    }
+    run().unwrap();
 }
