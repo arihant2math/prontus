@@ -30,11 +30,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: weather (Windows)
+          name: prontus_x86_64.exe (Windows)
           path: ./target/release/prontus.exe
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
         with:
-          name: weather (Linux)
+          name: prontus_x86_64 (Linux)
           path: ./target/release/prontus
