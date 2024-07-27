@@ -1,14 +1,14 @@
 // TODO: Support text fallback for profile pictures
 
 use inquire::Text;
-use log::{debug, LevelFilter};
+use log::{debug, error, info, LevelFilter};
 use log4rs::append::console::ConsoleAppender;
-use log4rs::config::{Appender, Root};
+use log4rs::config::{Appender, Logger, Root};
 use log4rs::Config;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
-
+use futures_util::{FutureExt, TryFutureExt};
 use slint::{ModelRc, VecModel, Weak};
 use tokio::join;
 
@@ -32,10 +32,27 @@ slint::include_modules!();
 #[tokio::main]
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let (websocket_tx, websocket_rx) = tokio::sync::mpsc::channel(128);
-    let net_worker_future = net_worker::worker(ui_handle.clone(), rx, websocket_tx);
-    // let websocket_worker_future = websocket_worker::worker(ui_handle, websocket_rx);
-    // join!(net_worker_future, websocket_worker_future);
-    join!(net_worker_future);
+    info!("Starting net worker");
+    let net_worker = net_worker::worker(ui_handle.clone(), rx, websocket_tx).then(|r| {
+        if let Err(e) = r {
+            error!("Net worker failed: {:?}", e);
+        }
+        futures::future::ready(())
+    });
+    tokio::task::spawn(net_worker);
+
+    info!("Starting websocket worker");
+    let websocket_worker = websocket_worker::worker(ui_handle, websocket_rx)
+        .then(|r| {
+            if let Err(e) = r {
+                error!("Websocket worker failed: {:?}", e);
+            }
+            futures::future::ready(())
+        });
+    tokio::task::spawn(websocket_worker);
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(500)).await;
+    }
 }
 
 fn run() -> Result<(), slint::PlatformError> {
@@ -142,7 +159,7 @@ fn run() -> Result<(), slint::PlatformError> {
 fn main() {
     // TODO: Better date styling
     let encoder = log4rs::encode::pattern::PatternEncoder::new(
-        "[{P} {i}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}",
+        "[{M}] {h([{d(%Y-%m-%d %H:%M:%S)} {l}])} {m}{n}",
     );
     let stdout = ConsoleAppender::builder()
         .encoder(Box::new(encoder))
@@ -150,7 +167,10 @@ fn main() {
 
     let config = Config::builder()
         .appender(Appender::builder().build("stdout", Box::new(stdout)))
-        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
+        .logger(Logger::builder().build("cookie_store", LevelFilter::Info))
+        .logger(Logger::builder().build("reqwest", LevelFilter::Info))
+        .logger(Logger::builder().build("tungstenite", LevelFilter::Info))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Debug))
         .unwrap();
     let _handle = log4rs::init_config(config).unwrap();
 

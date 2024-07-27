@@ -126,7 +126,7 @@ pub async fn worker(
     info!("Created Client");
 
     let image_service = Arc::new(Mutex::new(ImageService::new(Arc::clone(&client))));
-    info!("Created Image Service");
+    info!("Started Image Service");
 
     let channels = client.get_bubble_list().await?;
     app.upgrade_in_event_loop(move |ui| {
