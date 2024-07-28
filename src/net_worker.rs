@@ -13,6 +13,7 @@ use crate::{AppWindow, Channel, ChannelGroup, Message};
 use thiserror::Error;
 use tokio::runtime;
 use tokio::runtime::Runtime;
+use crate::client::UserInfo;
 
 #[derive(Clone, Debug)]
 pub enum WorkerTasks {
@@ -154,8 +155,14 @@ impl NetWorker {
         let image_service = Arc::new(Mutex::new(ImageService::new(Arc::clone(&client))));
         info!("Started Image Service");
 
-        let channels = client.get_bubble_list().await?;
+       let channels = client.get_bubble_list().await?;
+        let user_info = Arc::new(client.get_user_info().await?.user);
+        let user_name = user_info.fullname.clone();
+        info!("Retrieved User Info");
+
+
         self.app.upgrade_in_event_loop(move |ui| {
+            ui.set_user_name(user_name.into());
             // TODO: Sort by priority
             let mut ui_channels_groups = HashMap::new();
             for (count, channel) in channels.bubbles.iter().enumerate() {
@@ -197,9 +204,6 @@ impl NetWorker {
             }
             ui.set_channels(ModelRc::new(VecModel::from(ui_channels)));
         })?;
-
-        let user_info = Arc::new(client.get_user_info().await?.user);
-        info!("Retrieved User Info");
 
         self.websocket_tx
             .send(WebsocketTasks::SubscribeUser(user_info.id))
