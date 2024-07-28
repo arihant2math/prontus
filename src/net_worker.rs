@@ -179,8 +179,8 @@ impl NetWorker {
                 let ui_channel = Channel {
                     id: channel.id as i32,
                     title: channel.title.clone().into(),
-                    unread: false,
-                    notifications: channels.stats[count].unread as i32,
+                    unread: channels.stats[count].unread as i32 > 0,
+                    notifications: channels.stats[count].unread_mentions as i32,
                     can_send_message: channel.grant_create_message,
                 };
                 ui_channels_groups.get_mut(&key).unwrap().push(ui_channel);
