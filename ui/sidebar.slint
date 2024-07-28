@@ -69,6 +69,7 @@ export component SidebarItem inherits Rectangle {
 
 export component Sidebar inherits Rectangle {
     in property <[ChannelGroup]> model: [];
+    in property <string> name;
     out property <int> current-item: 0;
     out property <Channel> current-channel;
     out property <int> current-focused: -1; // The currently focused tab
@@ -90,6 +91,17 @@ export component Sidebar inherits Rectangle {
         navigation := VerticalLayout {
             alignment: start;
             vertical-stretch: 0;
+            HorizontalBox {
+                padding-top: 10px;
+                padding-bottom: 10px;
+                padding-left: 25px;
+                padding-right: 25px;
+                Text {
+                    text: name;
+                    color: black;
+                    font-size: 20px;
+                }
+            }
             for category in root.model : VerticalLayout {
                 HorizontalBox {
                     Text {

@@ -1,16 +1,15 @@
 // TODO: Support text fallback for profile pictures
 
+use futures_util::FutureExt;
 use inquire::Text;
 use log::{debug, error, info, LevelFilter};
 use log4rs::append::console::ConsoleAppender;
 use log4rs::config::{Appender, Logger, Root};
 use log4rs::Config;
+use slint::{ModelRc, VecModel, Weak};
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::thread;
-use futures_util::{FutureExt, TryFutureExt};
-use slint::{ModelRc, VecModel, Weak};
-use tokio::join;
 
 use crate::net_worker::WorkerTasks;
 
@@ -33,22 +32,18 @@ slint::include_modules!();
 async fn async_thread(ui_handle: Weak<AppWindow>, rx: mpsc::Receiver<WorkerTasks>) {
     let (websocket_tx, websocket_rx) = tokio::sync::mpsc::channel(128);
     info!("Starting net worker");
-    let net_worker = net_worker::worker(ui_handle.clone(), rx, websocket_tx).then(|r| {
+    thread::spawn({
+        let ui_handle = ui_handle.clone();
+        move || net_worker::NetWorker::new(ui_handle, rx, websocket_tx).run()
+    });
+
+    info!("Starting websocket worker");
+    let websocket_worker = websocket_worker::worker(ui_handle, websocket_rx).then(|r| {
         if let Err(e) = r {
-            error!("Net worker failed: {:?}", e);
+            error!("Websocket worker failed: {:?}", e);
         }
         futures::future::ready(())
     });
-    tokio::task::spawn(net_worker);
-
-    info!("Starting websocket worker");
-    let websocket_worker = websocket_worker::worker(ui_handle, websocket_rx)
-        .then(|r| {
-            if let Err(e) = r {
-                error!("Websocket worker failed: {:?}", e);
-            }
-            futures::future::ready(())
-        });
     tokio::task::spawn(websocket_worker);
     loop {
         tokio::time::sleep(tokio::time::Duration::from_secs(500)).await;

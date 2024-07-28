@@ -1,9 +1,9 @@
 use futures_util::{SinkExt, StreamExt};
 use log::{debug, error, info};
+use pusher::PusherBuilder;
 use serde::{Deserialize, Serialize};
 use slint::Weak;
 use std::sync::Arc;
-use pusher::PusherBuilder;
 use tokio::sync::mpsc;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
