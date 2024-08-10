@@ -7,6 +7,7 @@ use thiserror::Error;
 
 pub use api_error::APIError;
 pub use bubble_history::{Message, MessageMedia};
+pub use bubble_info::GetBubbleInfoResponse;
 pub use user_info::UserInfo;
 
 pub mod api_error;

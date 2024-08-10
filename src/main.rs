@@ -13,7 +13,6 @@ use std::thread;
 
 use crate::net_worker::WorkerTasks;
 
-pub(crate) mod client;
 mod image_service;
 mod net_worker;
 pub(crate) mod settings;
@@ -21,8 +20,8 @@ pub(crate) mod util;
 mod websocket;
 mod websocket_worker;
 
-use crate::client::user_verify::UserVerifyResult;
-use crate::client::ReactionType;
+use client::user_verify::UserVerifyResult;
+use client::ReactionType;
 use crate::settings::Settings;
 pub use client::APIResult;
 
@@ -136,6 +135,14 @@ fn run() -> Result<(), slint::PlatformError> {
         let tx = tx.clone();
         move |message_id| {
             tx.send(WorkerTasks::RemoveMessage(message_id as u64))
+                .unwrap();
+        }
+    });
+
+    ui.on_showChannelInfo({
+        let tx = tx.clone();
+        move || {
+            tx.send(WorkerTasks::ShowChannelInfo)
                 .unwrap();
         }
     });

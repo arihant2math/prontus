@@ -8,7 +8,7 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::client::ProntoClient;
+use client::ProntoClient;
 use crate::settings::Settings;
 use crate::AppWindow;
 

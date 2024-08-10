@@ -1,4 +1,4 @@
-use crate::client::user_info::UserInfo;
+use crate::user_info::UserInfo;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -36,7 +36,7 @@ pub struct TokenLoginSuccess {
 #[derive(Serialize, Deserialize)]
 pub enum TokenLoginResponse {
     Success(TokenLoginSuccess),
-    Error(crate::client::APIError),
+    Error(crate::APIError),
 }
 
 pub async fn post(

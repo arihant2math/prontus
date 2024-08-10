@@ -1,4 +1,4 @@
-use crate::client::bubble::Bubble;
+use crate::bubble::Bubble;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 

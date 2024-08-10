@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
-use slint::{EventLoopError, Image, Model, ModelRc, VecModel, Weak};
+use slint::{ComponentHandle, EventLoopError, Image, Model, ModelRc, Rgba8Pixel, SharedPixelBuffer, VecModel, Weak};
 
-use crate::client::{ProntoClient, ReactionType};
+use client::{ProntoClient, ReactionType, UserInfo};
 use crate::image_service::ImageService;
 use crate::settings::Settings;
 use crate::websocket_worker::WebsocketTasks;
@@ -13,7 +13,59 @@ use crate::{AppWindow, Channel, ChannelGroup, Message};
 use thiserror::Error;
 use tokio::runtime;
 use tokio::runtime::Runtime;
-use crate::client::UserInfo;
+
+fn message_to_slint(message: client::Message, user_info: &UserInfo, parents: &Vec<client::Message>) -> Message {
+    let mut embeds = Vec::new();
+    if let Some(resource) = message.resource {
+        embeds.push(crate::Embed {
+            link: resource.url.clone().into(),
+            title: resource.title.clone().into(),
+            description: resource.snippet.clone().into(),
+        })
+    }
+    let mut images = Vec::new();
+
+    let temp_image = SharedPixelBuffer::<Rgba8Pixel>::new(100, 100);
+    for _ in message.message_media {
+        images.push(Image::from_rgba8(temp_image.clone()));
+    }
+
+    let parent = if let Some(parent_id) = message.parent_message_id {
+        parents.iter().find(|parent| parent.id == parent_id)
+    } else {
+        None
+    };
+    let mut reactions = Vec::new();
+    for reaction in message.reactions {
+        reactions.push(crate::Reaction {
+            id: reaction.id as i32,
+            user_ids: ModelRc::new(VecModel::from(
+                reaction
+                    .users
+                    .iter()
+                    .map(|id| *id as i32)
+                    .collect::<Vec<i32>>(),
+            )),
+            checked: reaction.users.iter().any(|id| *id == user_info.id),
+        });
+    }
+    crate::Message {
+        id: message.id as i32,
+        content: message.message.into(),
+        user: message.user.fullname.into(),
+        profile_picture: Image::from_rgba8(temp_image.clone()),
+        profile_picture_loaded: false,
+        profile_picture_url: message.user.profilepicurl.clone().into(),
+        images: ModelRc::new(VecModel::from(images)),
+        embeds: ModelRc::new(VecModel::from(embeds)),
+        has_parent: message.parent_message_id.is_some(),
+        parent_message: parent
+            .map(|parent| parent.message.clone())
+            .unwrap_or_default()
+            .into(), // TODO: This should really be the previous message in the thread tbh
+        reactions: ModelRc::new(VecModel::from(reactions)),
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum WorkerTasks {
@@ -22,6 +74,7 @@ pub enum WorkerTasks {
     AddMessage(u64, Option<u64>, String),
     RemoveMessage(u64),
     Reaction(u64, ReactionType, bool),
+    ShowChannelInfo,
 }
 
 #[derive(Debug, Error)]
@@ -29,7 +82,7 @@ pub enum NetWorkerError {
     #[error("Network error: {0}")]
     NetworkError(#[from] reqwest::Error),
     #[error("Response error: {0}")]
-    APIError(#[from] crate::client::ResponseError),
+    APIError(#[from] client::ResponseError),
     #[error("Event loop error: {0}")]
     EventLoopError(EventLoopError),
 }
@@ -43,7 +96,7 @@ impl From<EventLoopError> for NetWorkerError {
 pub fn lazy_get_pfp<F>(
     ui: Weak<AppWindow>,
     image_service: Arc<Mutex<ImageService>>,
-    message: crate::client::Message,
+    message: client::Message,
     _width: u32,
     _height: u32,
     set_image: F,
@@ -68,7 +121,7 @@ where
                 let image = Image::from_rgba8(pfp_image);
                 set_image(ui, image);
             })
-            .unwrap();
+                .unwrap();
         } else {
             error!("Failed to load pfp");
         }
@@ -82,7 +135,7 @@ where
 pub fn lazy_get_image<F>(
     ui: Weak<AppWindow>,
     image_service: Arc<Mutex<ImageService>>,
-    media: crate::client::MessageMedia,
+    media: client::MessageMedia,
     _width: u32,
     _height: u32,
     set_image: F,
@@ -105,7 +158,7 @@ pub fn lazy_get_image<F>(
                 let image = Image::from_rgba8(media_image);
                 set_image(ui, image);
             })
-            .unwrap();
+                .unwrap();
         } else {
             error!("Failed to load image");
         }
@@ -116,6 +169,7 @@ pub fn lazy_get_image<F>(
 pub struct Context {
     pub client: Arc<ProntoClient>,
     pub user_info: Arc<UserInfo>,
+    pub channel_info: Arc<Mutex<Option<client::GetBubbleInfoResponse>>>,
     pub image_service: Arc<Mutex<ImageService>>,
 }
 
@@ -155,7 +209,7 @@ impl NetWorker {
         let image_service = Arc::new(Mutex::new(ImageService::new(Arc::clone(&client))));
         info!("Started Image Service");
 
-       let channels = client.get_bubble_list().await?;
+        let channels = client.get_bubble_list().await?;
         let user_info = Arc::new(client.get_user_info().await?.user);
         let user_name = user_info.fullname.clone();
         info!("Retrieved User Info");
@@ -212,6 +266,7 @@ impl NetWorker {
         let context = Context {
             client: Arc::clone(&client),
             user_info: Arc::clone(&user_info),
+            channel_info: Arc::new(Mutex::new(None)),
             image_service: Arc::clone(&image_service),
         };
 
@@ -227,6 +282,9 @@ impl NetWorker {
                         "Change channel to \"{}\": \"{}\"",
                         channel.id, channel.title
                     );
+                    let info = loop_context.client.get_bubble_info(channel.id as u64).await?;
+                    loop_context.channel_info.lock().unwrap().replace(info);
+
                     let history_result = loop_context.client
                         .get_bubble_history(channel.id as u64, None)
                         .await;
@@ -246,9 +304,8 @@ impl NetWorker {
                                 for (index, message) in
                                     history.messages.clone().into_iter().enumerate().rev()
                                 {
-                                    let mut slint_message = message
-                                        .clone()
-                                        .to_slint(&loop_context.user_info, &history.parentmessages);
+                                    let mut slint_message = message_to_slint(message
+                                        .clone(), &loop_context.user_info, &history.parentmessages);
                                     slint_message.profile_picture = lazy_get_pfp(
                                         weak_app.clone(),
                                         Arc::clone(&loop_context.image_service),
@@ -329,7 +386,7 @@ impl NetWorker {
                                 for message in history.messages.clone().into_iter() {
                                     messages.insert(
                                         0,
-                                        message.to_slint(&loop_context.user_info, &history.parentmessages),
+                                        message_to_slint(message, &loop_context.user_info, &history.parentmessages),
                                     );
                                 }
                                 // TODO: load images
@@ -396,10 +453,13 @@ impl NetWorker {
                                 .downcast_ref::<VecModel<Message>>()
                                 .unwrap();
                             messages.push(
-                                message
-                                    .message
-                                    .clone()
-                                    .to_slint(&loop_context.user_info, &Vec::new()),
+                                message_to_slint(
+                                    message
+                                        .message
+                                        .clone(),
+                                    &loop_context.user_info,
+                                    &Vec::new()
+                                ),
                             );
                         })?;
                     } else {
@@ -423,6 +483,9 @@ impl NetWorker {
                         );
                     })?;
                 }
+                Ok(WorkerTasks::ShowChannelInfo) => {
+                    // TODO: find a way to ensure it only appears once
+                }
                 Err(e) => {
                     panic!("{}", e);
                 }
@@ -440,7 +503,7 @@ impl NetWorker {
             );
             runtime.block_on(self.run_async())
         })
-        .join()
-        .unwrap()
+            .join()
+            .unwrap()
     }
 }

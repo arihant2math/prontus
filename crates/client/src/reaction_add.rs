@@ -1,4 +1,4 @@
-use crate::client::message_create::MessageModifyResult;
+use crate::message_create::MessageModifyResult;
 use reqwest::Client;
 use serde_json::json;
 

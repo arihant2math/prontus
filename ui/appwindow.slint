@@ -1,8 +1,24 @@
 // TODO: Boxes instead of layouts
 
-import { Button, HorizontalBox, LineEdit, ScrollView, VerticalBox } from "std-widgets.slint";
+import { Button, HorizontalBox, LineEdit, StandardButton, ScrollView, VerticalBox } from "std-widgets.slint";
 import { Message, MessageComponent } from "message.slint";
 import { Channel, ChannelGroup, Sidebar } from "sidebar.slint";
+
+import { ChannelInfo } from "dialog/channel.slint";
+
+export component ChannelDialog inherits Dialog {
+    title: "Channel Info";
+    in-out property <ChannelInfo> info;
+
+    VerticalBox {
+        alignment: center;
+        Text {
+            font-size: 20px;
+            text: info.name;
+        }
+    }
+    StandardButton { kind: ok; }
+}
 
 export component AppWindow inherits Window {
     title: "Prontus";
@@ -28,9 +44,18 @@ export component AppWindow inherits Window {
     callback messageLoad(int);
     callback reactionClicked(int, int, bool);
 
+    callback showChannelInfo();
+
     HorizontalLayout {
         side-bar := Sidebar {}
         chat := VerticalLayout {
+            HorizontalLayout {
+                alignment: end;
+                Button {
+                    text: "Chat Info";
+                    clicked => {showChannelInfo()}
+                }
+            }
             VerticalBox {
                 scroll-view := ScrollView {
                     area := TouchArea {

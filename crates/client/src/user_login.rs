@@ -1,4 +1,4 @@
-use crate::client::user_info::UserInfo;
+use crate::user_info::UserInfo;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
