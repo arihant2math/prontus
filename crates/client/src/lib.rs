@@ -6,8 +6,9 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub use api_error::APIError;
-pub use bubble_history::{Message, MessageMedia};
-pub use bubble_info::GetBubbleInfoResponse;
+pub use bubble::{Bubble, Category};
+pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
+pub use bubble_info::{GetBubbleInfoResponse};
 pub use user_info::UserInfo;
 
 pub mod api_error;
@@ -188,15 +189,15 @@ impl ProntoClient {
         &self,
         bubble_id: u64,
         latest_message_id: Option<u64>,
-    ) -> Result<bubble_history::GetBubbleHistoryResponse, ResponseError> {
+    ) -> Result<GetBubbleHistoryResponse, ResponseError> {
         Ok(bubble_history::get(
             &self.api_base_url,
             &self.http_client,
             bubble_id,
             latest_message_id,
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
     }
 
     pub async fn post_message(
@@ -215,8 +216,8 @@ impl ProntoClient {
             Utc::now(),
             parent_message_id,
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
     }
 
     pub async fn edit_message(
