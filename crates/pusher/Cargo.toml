@@ -4,5 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1" }
-tokio-tungstenite = "0.23"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.23", features = ["native-tls"] }
+futures-channel = "0.3.30"
+futures-util = "0.3.30"
+
+[[example]]
+name = "sandbox"
+path = "examples/sandbox.rs"

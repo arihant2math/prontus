@@ -1,16 +1,23 @@
 use client::{Bubble, Message, ProntoClient, UserInfo};
-use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::{Mutex, RwLock};
 use tauri::{Manager, State};
 
 struct AppData {
+    user_info: RwLock<Option<UserInfo>>,
     users: RwLock<Vec<UserInfo>>,
     client: ProntoClient,
     channel_list: Mutex<Vec<Bubble>>,
     // TODO: atomic is better
     current_channel: Mutex<u64>,
     message_list: RwLock<Vec<Message>>
+}
+
+#[tauri::command]
+async fn load_user_info(state: State<'_, AppData>) -> Result<(), ()> {
+    let user_info = state.client.get_user_info().await.unwrap();
+    *state.user_info.write().unwrap() = Some(user_info.user);
+    Ok(())
 }
 
 #[tauri::command]
@@ -44,7 +51,6 @@ fn get_channel_list(state: State<'_, AppData>) -> Vec<Bubble> {
 async fn load_messages(state: State<'_, AppData>) -> Result<(), ()> {
     let id = *state.current_channel.lock().unwrap().deref();
     let mut messages = state.client.get_bubble_history(id, None).await.unwrap();
-    messages.messages.reverse();
     *state.message_list.write().unwrap() = messages.messages;
     Ok(())
 }
@@ -52,6 +58,23 @@ async fn load_messages(state: State<'_, AppData>) -> Result<(), ()> {
 #[tauri::command]
 fn get_messages(state: State<'_, AppData>) -> Vec<Message> {
     state.message_list.read().unwrap().clone()
+}
+
+#[tauri::command]
+async fn get_more_messages(state: State<'_, AppData>, last_message_id: u64) -> Result<Vec<Message>, ()> {
+    let id = *state.current_channel.lock().unwrap().deref();
+    let mut messages = state.client.get_bubble_history(id, Some(last_message_id)).await.unwrap();
+    state.message_list.write().unwrap().append(&mut messages.messages);
+    Ok(messages.messages)
+}
+
+#[tauri::command]
+async fn send_message(state: State<'_, AppData>, message: String) -> Result<Message, ()> {
+    // FIXME: Message not being inputed properly (it's just blank)
+    let user_id = state.user_info.read().unwrap().as_ref().unwrap().id;
+    let id = *state.current_channel.lock().unwrap().deref();
+    let response = state.client.post_message(user_id, id, message, None).await.unwrap();
+    Ok(response.message)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -66,12 +89,13 @@ pub fn run() {
                 client,
                 channel_list: Mutex::new(Vec::new()),
                 current_channel: Mutex::new(0),
-                message_list: RwLock::new(Vec::new())
+                message_list: RwLock::new(Vec::new()),
+                user_info: RwLock::new(None)
             });
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![load_channel, get_channel_list, load_channel_list, get_messages, load_messages])
+        .invoke_handler(tauri::generate_handler![load_user_info, load_channel, get_channel_list, load_channel_list, get_messages, get_more_messages, load_messages, send_message])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -36,6 +36,7 @@ pub struct Message {
     pub bubble_id: u64,
     pub message: String,
     pub user: UserInfo,
+    pub systemevent: Option<String>,
     #[serde(default, rename = "parentmessage_id")]
     pub parent_message_id: Option<u64>,
     #[serde(default, rename = "reactionsummary")]
