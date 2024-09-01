@@ -20,7 +20,7 @@
     $: mention = mention;
 </script>
 <li>
-    <button on:click={btnClick} class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+    <button on:click={btnClick} class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-ellipsis">
         { #if notifications > 0 }
             <span class="ms-3 flex-1 whitespace-nowrap text-ellipsis">{name}</span>
             {#if mention}
@@ -29,7 +29,7 @@
                 <span class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">{notifications}</span>
             {/if}
         {:else}
-            <span class="ms-3 text-ellipsis">{name}</span>
+            <span class="ms-3">{name}</span>
         {/if}
     </button>
 </li>
