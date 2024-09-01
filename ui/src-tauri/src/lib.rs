@@ -64,6 +64,7 @@ fn get_messages(state: State<'_, AppData>) -> Vec<Message> {
 async fn get_more_messages(state: State<'_, AppData>, last_message_id: u64) -> Result<Vec<Message>, ()> {
     let id = *state.current_channel.lock().unwrap().deref();
     let mut messages = state.client.get_bubble_history(id, Some(last_message_id)).await.unwrap();
+    // FIXME: Scrolling up while there are no further messages results in repeating.
     state.message_list.write().unwrap().append(&mut messages.messages);
     Ok(messages.messages)
 }
