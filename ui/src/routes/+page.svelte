@@ -2,7 +2,10 @@
     import "../app.css";
     import {invoke} from "@tauri-apps/api/core";
     import Message from "./message.svelte";
-    import Sideitem from "./sideitem.svelte";
+    import Sidecategory from "./sidecategory.svelte"
+
+    let userInfo;
+
 
     async function loadUserInfo() {
         return await invoke("load_user_info");
@@ -37,12 +40,13 @@
     }
 
     function spawnMessage(next, message) {
+        console.debug(message)
         if (next != null) {
             let messageElement = new Message({
                 target: document.querySelector("#messages"),
                 props: {
                     message_id: message.id,
-                    user: message.user.fullname,
+                    user: message.user,
                     message: message.message,
                     timestamp: message.timestamp,
                     pfp_url: message.user.profilepicurl,
@@ -50,6 +54,7 @@
                     reactions: message.reactionsummary,
                     repeat: next.user.fullname == message.user.fullname && next.systemevent != null,
                     systemMessage: message.systemevent != null,
+                    currentUser: userInfo,
                 }
             });
         } else {
@@ -57,7 +62,7 @@
                 target: document.querySelector("#messages"),
                 props: {
                     message_id: message.id,
-                    user: message.user.fullname,
+                    user: message.user,
                     message: message.message,
                     timestamp: message.timestamp,
                     pfp_url: message.user.profilepicurl,
@@ -65,15 +70,19 @@
                     reactions: message.reactionsummary,
                     repeat: false,
                     systemMessage: message.systemevent != null,
+                    currentUser: userInfo,
                 }
             });
         }
     }
 
     function appendMessages(messages) {
+        /// TODO: use previous append message calls as context
+        if (messages.length === 0) {
+            return
+        }
         let previousMessage = null;
         for (let message of messages) {
-            console.debug(message);
             if (previousMessage != null) {
                 spawnMessage(message, previousMessage);
             }
@@ -114,27 +123,55 @@
             console.info("Loading more messages");
             let messages = await getMessages();
             let last = messages[messages.length - 1].id;
-            await getMoreMessages(last).then(async () => {
-                let messages = await getMessages();
+            await getMoreMessages(last).then(async (messages) => {
                 appendMessages(messages);
             });
             updating = false;
         }
     }
 
+
+    loadUserInfo().then((info) => {
+        userInfo = info;
+    });
+
     loadChannelList().then(async () => {
-        await loadUserInfo();
         let channels = await getChannelList();
+        let categories = {};
+        let categoryInfo = {};
         for (let channel of channels) {
-            let sideitem = new Sideitem({
-                target: document.querySelector("#sidebar-list"),
+            let category = channel.category;
+            if (category == null && channel.isdm) {
+                category = {
+                    "id": -2,
+                    "title": "Direct Messages",
+                };
+            } else if (category == null) {
+                category = {
+                    "id": -1,
+                    "title": "Uncategorized",
+                };
+            }
+            if (categories[category.id] == null) {
+                categories[category.id] = [];
+                categoryInfo[category.id] = category;
+            }
+            categories[category.id].push(channel);
+
+        }
+
+        console.log(categoryInfo);
+        console.log(categories);
+
+        let sidebarList = document.querySelector("#sidebar-list");
+        for (let category in categories) {
+            let categoryElement = new Sidecategory({
+                target: sidebarList,
                 props: {
-                    bubbleId: channel.id,
-                    name: channel.title,
-                    notifications: channel.notifications,
-                    mention: channel.mention,
+                    name: categoryInfo[category].title,
+                    items: categories[category],
                     buttonClick: handleSidebarClick,
-                },
+                }
             });
         }
     });
@@ -143,7 +180,7 @@
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-gray-900">
     <aside id="default-sidebar"
            aria-label="Sidebar">
-        <div class="h-full max-w-[350px] overflow-y-auto px-3 py-4 bg-gray-50 dark:bg-gray-800">
+        <div class="h-full w-[375px] overflow-y-auto overflow-x-hidden px-3 py-4 bg-gray-50 dark:bg-gray-800">
             <ul class="space-y-2 font-medium" id="sidebar-list">
             </ul>
         </div>
@@ -151,8 +188,8 @@
     <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
         <div id="messages" class="overflow-y-auto bg-white dark:bg-gray-900 flex flex-col-reverse" on:scroll={messageScroll}>
         </div>
-        <div class="w-full border-t border-gray-500 mt-auto">
-            <input id="messageInput" type="text" class="outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
+        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-gray-900">
+            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-gray-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
         </div>
     </div>
 </div>

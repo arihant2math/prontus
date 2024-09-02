@@ -3,7 +3,7 @@
     import Reaction from "./reaction.svelte";
 
     export let message_id = -1;
-    export let user = "";
+    export let user;
     export let timestamp = "";
     export let pfp_url = "";
     export let message = "";
@@ -11,9 +11,12 @@
     export let reactions;
     export let repeat = false;
     export let systemMessage = false;
+    export let currentUser;
 
-
+    // TODO: use id comparison instead of string comparison
+    $: isCurrentUser = currentUser.fullname == user.fullname;
     $: user = user;
+    $: currentUser = currentUser;
     $: timestamp = timestamp;
     $: pfp_url = pfp_url;
     $: message = message;
@@ -33,21 +36,22 @@
 {#if !systemMessage}
     <div class="{mt} flex items-start gap-2.5">
         {#if !repeat}
-            <img class="w-8 h-8 rounded-full" src="{pfp_url}" alt="{user} image">
+            <img class="w-8 h-8 rounded-full" src="{pfp_url}" alt="{user.fullname} image">
         {/if}
         <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
             {#if !repeat}
                 <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">{user}</span>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{timestamp}</span>
                 </div>
             {/if}
             <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message}</p>
             {#if embed}
-                <Embed title="{embed.title}" shortUrl="{embed.providerurl}" description="{embed.snipped}" image="{embed.thumbnailurl}"/>
+                <Embed title="{embed.title}" shortUrl="{embed.providerurl}" description="{embed.snippet}" image="{embed.thumbnailurl}"/>
             {/if}
             <div class="flex items-center space-x-2">
                 {#each reactions as reaction}
+                    <!--TODO: Check if reaction is checked-->
                     <Reaction id={reaction.reactiontype_id} count={reaction.count}/>
                 {/each}
             </div>
@@ -68,19 +72,21 @@
                 <li>
                     <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Copy</a>
                 </li>
-                <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Report</a>
-                </li>
-                <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete</a>
-                </li>
+                {#if isCurrentUser}
+                    <li>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete</a>
+                    </li>
+                {/if}
             </ul>
         </div>
     </div>
 {:else}
     <div class="{mt} flex items-start gap-2.5">
         <div class="flex flex-row items-center p-4">
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">{user}</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
             <p class="ml-2 text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message}</p>
         </div>
     </div>

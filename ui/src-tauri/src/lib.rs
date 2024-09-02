@@ -8,28 +8,22 @@ struct AppData {
     users: RwLock<Vec<UserInfo>>,
     client: ProntoClient,
     channel_list: Mutex<Vec<Bubble>>,
-    // TODO: atomic is better
+    // TODO: atomic is better for u64
     current_channel: Mutex<u64>,
     message_list: RwLock<Vec<Message>>
 }
 
 #[tauri::command]
-async fn load_user_info(state: State<'_, AppData>) -> Result<(), ()> {
+async fn load_user_info(state: State<'_, AppData>) -> Result<UserInfo, ()> {
     let user_info = state.client.get_user_info().await.unwrap();
-    *state.user_info.write().unwrap() = Some(user_info.user);
-    Ok(())
-}
-
-#[tauri::command]
-fn get_user_by_name(state: State<'_, AppData>, name: &str) -> UserInfo {
-    let users = state.users.read().unwrap();
-    users.iter().find(|u| u.fullname == name).unwrap().clone()
+    *state.user_info.write().unwrap() = Some(user_info.user.clone());
+    Ok(user_info.user)
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn load_channel(state: State<'_, AppData>, id: u64) -> Result<(), ()> {
-    // FIXME: This panics
+    // FIXME: This commented statement panics
     // let bubble_info = state.client.get_bubble_info(id).await.unwrap();
     *state.current_channel.lock().unwrap() = id;
     Ok(())
@@ -64,14 +58,14 @@ fn get_messages(state: State<'_, AppData>) -> Vec<Message> {
 async fn get_more_messages(state: State<'_, AppData>, last_message_id: u64) -> Result<Vec<Message>, ()> {
     let id = *state.current_channel.lock().unwrap().deref();
     let mut messages = state.client.get_bubble_history(id, Some(last_message_id)).await.unwrap();
-    // FIXME: Scrolling up while there are no further messages results in repeating.
-    state.message_list.write().unwrap().append(&mut messages.messages);
+    state.message_list.write().unwrap().append(&mut messages.messages.clone());
     Ok(messages.messages)
 }
 
 #[tauri::command]
 async fn send_message(state: State<'_, AppData>, message: String) -> Result<Message, ()> {
-    // FIXME: Message not being inputed properly (it's just blank)
+    // FIXME: test below
+    // FIXME: Message not being inputted properly (it's just blank)
     let user_id = state.user_info.read().unwrap().as_ref().unwrap().id;
     let id = *state.current_channel.lock().unwrap().deref();
     let response = state.client.post_message(user_id, id, message, None).await.unwrap();

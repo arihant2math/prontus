@@ -21,14 +21,13 @@ async fn read_stdin(tx: futures_channel::mpsc::UnboundedSender<Message>) {
 async fn main() {
     // wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false
     let initial_request = Request::builder()
-        .uri("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&version=1.0.0")
+        .uri("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false")
         .method("GET")
         .header("Accept", "*/*")
         .header("Accept-Encoding", "gzip, deflate, br")
         .header("Accept-Language", "en-US,en;q=0.5")
         .header("Cache-Control", "no-cache")
         .header("Connection", "keep-alive, Upgrade")
-        .header("DNT", "1")
         .header("Host", "ws-mt1.pusher.com")
         .header("Origin", "https://stanfordohs.pronto.io")
         .header("Pragma", "no-cache")
@@ -45,22 +44,35 @@ async fn main() {
     let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
     tokio::spawn(read_stdin(stdin_tx));
 
-    let (mut ws_stream, _) = connect_async(initial_request)
+    let (mut ws_stream, _) = connect_async("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false")
         .await
         .unwrap();
 
     let m1 = r#"{"event":"pusher:subscribe","data":{"auth":"f44139496d9b75f37d27:8eec9fb482c6566096a08f1b64aa85b83a8f3fc3bee50fe9d52ccefa4e9dca1c","channel":"private-organization.2245"}}"#;
     let m2 = r#"{"event":"pusher:subscribe","data":{"auth":"f44139496d9b75f37d27:c6c60fb49b9780cfc8a234beb480c7220bc972da8d7a1852c1654fa3e102b13c","channel":"private-user.5302428"}}"#;
-    let m3 = r#"{"event":"pusher:subscribe","data":{"auth":"f44139496d9b75f37d27:83c28b904087efb705cd8852dd604d566386857b9877554a59401d43c6382a01","channel":"private-bubble.3729522.NVeMQpBjWNn5JwUCOErZivL6C7gQxn6yDNxNB8WA"}}"#;
 
-
-    let (write, read) = ws_stream.split();
+    let (mut write, read) = ws_stream.split();
 
     let stdin_to_ws = stdin_rx.map(Ok).forward(write);
     let ws_to_stdout = {
-        read.for_each(|message| async {
-            let data = message.unwrap().into_data();
-            tokio::io::stdout().write_all(&data).await.unwrap();
+        read.for_each(|message| async move {
+            match message {
+                Ok(message) => {
+                    match message {
+                        Message::Ping(_) => {
+                            write.send(Message::Pong(vec![])).await.unwrap();
+                        }
+                        other => {
+                            println!("{:?}", other);
+                        }
+                    }
+                }
+                Err(e) => {
+                    println!("Error: {:?}", e);
+                }
+            }
+            // let data = message.unwrap().into_data();
+            // tokio::io::stdout().write_all(&data).await.unwrap();
         })
     };
 

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+client = { path = "../client" }
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.23", features = ["native-tls"] }
 futures-channel = "0.3.30"
