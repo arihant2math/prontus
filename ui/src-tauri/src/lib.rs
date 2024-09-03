@@ -57,9 +57,10 @@ fn get_messages(state: State<'_, AppData>) -> Vec<Message> {
 #[tauri::command]
 async fn get_more_messages(state: State<'_, AppData>, last_message_id: u64) -> Result<Vec<Message>, ()> {
     let id = *state.current_channel.lock().unwrap().deref();
-    let mut messages = state.client.get_bubble_history(id, Some(last_message_id)).await.unwrap();
-    state.message_list.write().unwrap().append(&mut messages.messages.clone());
-    Ok(messages.messages)
+    let messages = state.client.get_bubble_history(id, Some(last_message_id)).await.unwrap();
+    let mut messages = messages.messages;
+    state.message_list.write().unwrap().extend_from_slice(&mut messages.clone());
+    Ok(messages)
 }
 
 #[tauri::command]

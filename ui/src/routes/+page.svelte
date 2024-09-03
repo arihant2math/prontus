@@ -51,8 +51,9 @@
                     timestamp: message.timestamp,
                     pfp_url: message.user.profilepicurl,
                     embed: message.resource,
+                    media: message.messagemedia,
                     reactions: message.reactionsummary,
-                    repeat: next.user.fullname == message.user.fullname && next.systemevent != null,
+                    repeat: next.user.fullname == message.user.fullname && next.systemevent == null,
                     systemMessage: message.systemevent != null,
                     currentUser: userInfo,
                 }
@@ -67,6 +68,7 @@
                     timestamp: message.timestamp,
                     pfp_url: message.user.profilepicurl,
                     embed: message.resource,
+                    media: message.messagemedia,
                     reactions: message.reactionsummary,
                     repeat: false,
                     systemMessage: message.systemevent != null,
@@ -76,7 +78,7 @@
         }
     }
 
-    function appendMessages(messages) {
+    async function appendMessages(messages) {
         /// TODO: use previous append message calls as context
         if (messages.length === 0) {
             return
@@ -98,16 +100,16 @@
         document.querySelector("#messages").innerHTML = "";
         // clear input
         document.querySelector("#messageInput").value = "";
-        appendMessages(messages);
+        await appendMessages(messages);
         let messagesDiv = document.querySelector("#messages");
         messagesDiv.scrollTop = 0;
     }
 
     async function handleMessageKeyDown(event) {
         if (event.keyCode === 13) {
-            await sendMessage(document.querySelector("#messageInput").value).then((message) => {
+            await sendMessage(document.querySelector("#messageInput").value).then(async (message) => {
                 document.querySelector("#messageInput").value = "";
-                appendMessages([message]);
+                await appendMessages([message]);
             });
         }
     }
@@ -124,7 +126,7 @@
             let messages = await getMessages();
             let last = messages[messages.length - 1].id;
             await getMoreMessages(last).then(async (messages) => {
-                appendMessages(messages);
+                await appendMessages(messages);
             });
             updating = false;
         }

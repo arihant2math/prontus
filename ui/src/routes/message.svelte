@@ -1,6 +1,7 @@
 <script>
-    import Embed from "./embed.svelte";
-    import Reaction from "./reaction.svelte";
+    import Embed from "./messageComponents/embed.svelte";
+    import Media from "./messageComponents/media.svelte";
+    import Reaction from "./messageComponents/reaction.svelte";
 
     export let message_id = -1;
     export let user;
@@ -8,6 +9,7 @@
     export let pfp_url = "";
     export let message = "";
     export let embed;
+    export let media = [];
     export let reactions;
     export let repeat = false;
     export let systemMessage = false;
@@ -20,6 +22,7 @@
     $: timestamp = timestamp;
     $: pfp_url = pfp_url;
     $: message = message;
+    $: media = media;
     $: embed = embed;
     $: reactions = reactions;
     $: repeat = repeat;
@@ -46,6 +49,9 @@
                 </div>
             {/if}
             <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message}</p>
+            {#each media as mediaItem}
+                <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>
+            {/each}
             {#if embed}
                 <Embed title="{embed.title}" shortUrl="{embed.providerurl}" description="{embed.snippet}" image="{embed.thumbnailurl}"/>
             {/if}

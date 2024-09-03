@@ -15,7 +15,7 @@
     $: mention = mention;
 </script>
 <li>
-    <button on:click={btnClick} class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 w-full text-ellipsis">
+    <button on:click={btnClick} class="flex items-start p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 w-full text-ellipsis">
         { #if notifications > 0 }
             <span class="ms-3 flex-1 whitespace-nowrap text-truncate">{name}</span>
             {#if mention}
