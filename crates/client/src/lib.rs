@@ -10,6 +10,8 @@ pub use bubble::{Bubble, Category};
 pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
 pub use bubble_info::{GetBubbleInfoResponse};
 pub use user_info::UserInfo;
+use crate::user_login::DeviceInfo;
+use crate::user_token_login::{TokenLoginResponse, TokenLoginResult};
 
 pub mod api_error;
 mod bubble;
@@ -269,7 +271,13 @@ impl ProntoClient {
             message_id,
             reaction_type as i32 as u64,
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
+    }
+
+    pub async fn user_token_login(&self, token: &str, _device_info: DeviceInfo) -> Result<TokenLoginResponse, ResponseError> {
+        // TODO: pass in device info
+        Ok(user_token_login::post(&self.api_base_url, &self.http_client, vec![token.to_string()])
+            .await?.to_result()?)
     }
 }
