@@ -72,6 +72,16 @@ pub struct PusherServerMessageAddedEvent {
     pub message: client::Message,
 }
 
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub struct MessageId {
+    pub id: u64,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerMessageRemovedEvent {
+    pub message: MessageId,
+}
+
 // Received other message: RawPusherMessage { event: "client-App\\Events\\UserTyping", data: String("{\"user_id\":5302428,\"thread_id\":null}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
 // Received other message: RawPusherMessage { event: "client-App\\Events\\UserStoppedTyping", data: String("{\"user_id\":5302428}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
 // Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5302428,\"mark\":88072979,\"markupdated\":\"2024-09-04 05:55:31\"}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
@@ -84,6 +94,7 @@ pub enum PusherServerEventType {
     PusherServerBubbleStatsEvent(PusherServerBubbleStatsEvent),
     PusherServerMessageUpdatedEvent(PusherServerMessageUpdatedEvent),
     PusherServerMessageAddedEvent(PusherServerMessageAddedEvent),
+    PusherServerMessageRemovedEvent(PusherServerMessageRemovedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -163,6 +174,14 @@ impl From<String> for PusherServerMessage {
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
                     event: PusherServerEventType::PusherServerMessageAddedEvent(data),
+                })
+            }
+            "App\\Events\\MessageRemoved" => {
+                let data: PusherServerMessageRemovedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerMessageRemovedEvent(data),
                 })
             }
             _ => Self::Other(raw),
