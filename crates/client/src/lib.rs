@@ -5,9 +5,13 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::user_login::DeviceInfo;
+use crate::user_token_login::TokenLoginResponse;
 pub use api_error::APIError;
-pub use bubble_history::{Message, MessageMedia};
+pub use bubble::{Bubble, Category};
+pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
 pub use bubble_info::GetBubbleInfoResponse;
+pub use bubble_list::{BubbleStats, GetBubbleListResponse};
 pub use user_info::UserInfo;
 
 pub mod api_error;
@@ -188,7 +192,7 @@ impl ProntoClient {
         &self,
         bubble_id: u64,
         latest_message_id: Option<u64>,
-    ) -> Result<bubble_history::GetBubbleHistoryResponse, ResponseError> {
+    ) -> Result<GetBubbleHistoryResponse, ResponseError> {
         Ok(bubble_history::get(
             &self.api_base_url,
             &self.http_client,
@@ -267,6 +271,21 @@ impl ProntoClient {
             &self.http_client,
             message_id,
             reaction_type as i32 as u64,
+        )
+        .await?
+        .to_result()?)
+    }
+
+    pub async fn user_token_login(
+        &self,
+        token: &str,
+        _device_info: DeviceInfo,
+    ) -> Result<TokenLoginResponse, ResponseError> {
+        // TODO: pass in device info
+        Ok(user_token_login::post(
+            &self.api_base_url,
+            &self.http_client,
+            vec![token.to_string()],
         )
         .await?
         .to_result()?)

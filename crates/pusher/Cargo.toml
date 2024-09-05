@@ -4,5 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1" }
-tokio-tungstenite = "0.23"
+client = { path = "../client" }
+futures-channel = "0.3.30"
+futures-util = "0.3.30"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.23", features = ["native-tls"] }
+
+[[example]]
+name = "sandbox"
+path = "examples/sandbox.rs"

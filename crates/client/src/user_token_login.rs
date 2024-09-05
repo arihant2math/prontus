@@ -2,7 +2,7 @@ use crate::user_info::UserInfo;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-struct DeviceInfo {
+pub struct DeviceInfo {
     pub browsername: String,
     pub browserversion: String,
     pub osname: String,
@@ -28,38 +28,34 @@ pub struct TokenLoginUser {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct TokenLoginSuccess {
+pub struct TokenLoginResponse {
     pub ok: bool,
     pub users: Vec<TokenLoginUser>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub enum TokenLoginResponse {
-    Success(TokenLoginSuccess),
-    Error(crate::APIError),
-}
+pub type TokenLoginResult = crate::APIResult<TokenLoginResponse>;
 
 pub async fn post(
     pronto_base_url: &str,
     client: &reqwest::Client,
     login_tokens: Vec<String>,
-) -> Result<TokenLoginResponse, reqwest::Error> {
+) -> Result<TokenLoginResult, reqwest::Error> {
     let r = client
         .post(format!("{pronto_base_url}v1/user.tokenlogin"))
         .json(&TokenLoginRequest {
             login_tokens,
             device: DeviceInfo {
-                browsername: "Prontus".to_string(),
-                browserversion: "1.0.0".to_string(),
+                browsername: "firefox".to_string(),
+                browserversion: "130.0.0".to_string(),
                 osname: "macOS".to_string(),
-                r#type: "desktop".to_string(),
-                uuid: "".to_string(),
+                r#type: "WEB".to_string(),
+                uuid: "314c9314-d5e5-4ae4-84e2-9f2f3938ca28".to_string(),
                 osversion: "10.15.6".to_string(),
                 appversion: "1.0.0".to_string(),
             },
         })
         .send()
         .await?;
-    let json = r.json::<TokenLoginResponse>().await?;
+    let json = r.json::<TokenLoginResult>().await?;
     Ok(json)
 }

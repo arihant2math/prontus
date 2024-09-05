@@ -11,6 +11,7 @@ pub struct Category {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Bubble {
     pub id: u64,
+    pub channelcode: String,
     pub user_id: u64,
     pub title: String,
     pub isdm: bool,
@@ -26,8 +27,10 @@ pub struct Bubble {
     pub create_message: String,
     pub grant_create_message: bool,
     pub voice_only: bool,
-    pub issupergroup: Option<bool>,
+    #[serde(rename = "issupergroup")]
+    pub is_supergroup: Option<bool>,
     pub archived: u8,
-    pub dmpartner: Option<UserInfo>,
+    #[serde(rename = "dmpartner")]
+    pub dm_partner: Option<UserInfo>,
     pub category: Option<Category>,
 }
