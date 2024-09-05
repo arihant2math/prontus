@@ -63,7 +63,6 @@ pub async fn get(
     bubble_id: u64,
     latest_message_id: Option<u64>,
 ) -> Result<GetBubbleHistoryResult, reqwest::Error> {
-    // TODO: catch {"ok":false,"error":"BUBBLE_NOTFOUND"}
     let r = if let Some(latest_message_id) = latest_message_id {
         client
             .get(format!("{pronto_base_url}v1/bubble.history"))
