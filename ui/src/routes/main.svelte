@@ -14,7 +14,9 @@
     } from "./api.js";
 
     let currentUser;
-    let messages = []
+    let messages = [];
+    let sidebarCategoriesInfo = {};
+    let sidebarCategories = [];
 
     async function appendMessages(newMessages) {
         messages = messages.concat(newMessages);
@@ -87,18 +89,8 @@
         console.log(categoryInfo);
         console.log(categories);
 
-        let sidebarList = document.querySelector("#sidebar-list");
-        // TODO: Don't append, make it stateful
-        for (let category in categories) {
-            let categoryElement = new Sidecategory({
-                target: sidebarList,
-                props: {
-                    name: categoryInfo[category].title,
-                    items: categories[category],
-                    buttonClick: handleSidebarClick,
-                }
-            });
-        }
+        sidebarCategoriesInfo = categoryInfo;
+        sidebarCategories = categories;
     }
 
     init().then(() => {
@@ -115,6 +107,9 @@
            aria-label="Sidebar">
         <div class="h-full w-[375px] overflow-y-auto overflow-x-hidden px-3 py-4 bg-gray-50 dark:bg-gray-800">
             <ul class="space-y-2 font-medium" id="sidebar-list">
+                {#each Object.keys(sidebarCategories) as category}
+                    <Sidecategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                {/each}
             </ul>
         </div>
     </aside>

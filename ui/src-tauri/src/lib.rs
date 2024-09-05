@@ -36,7 +36,7 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
         let state = context.inner();
         let mut state_ = state.write().await;
         let state = state_.try_inner_mut()?;
-        // TODO: make this portable
+        // TODO: make this portable (don't have constant org id)
         pusher_client
             .subscribe("private-organization.2245".to_string())
             .await;
@@ -63,6 +63,7 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
                         match event.event {
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
                                 // TODO: create setting or smth
+                                // TODO: Also make sure app in not in foreground
                                 // Notification::new()
                                 //     .summary("New Message")
                                 //     .body(event.message.message.clone())
@@ -95,6 +96,19 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
                                 state.message_list.retain(|m| m.id != event.message.id);
+                            }
+                            PusherServerEventType::PusherServerBubbleStatsEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                // TODO: double for loop, ew
+                                for (bubble, stats) in state.channel_list.iter_mut() {
+                                    for stat in event.stats.iter() {
+                                        if bubble.id == stat.bubble_id {
+                                            *stats = stat.clone();
+                                        }
+                                    }
+                                }
                             }
                             // TODO: handle other
                             _ => {}

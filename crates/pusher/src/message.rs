@@ -85,7 +85,6 @@ pub struct PusherServerMessageRemovedEvent {
 // Received other message: RawPusherMessage { event: "client-App\\Events\\UserTyping", data: String("{\"user_id\":5302428,\"thread_id\":null}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
 // Received other message: RawPusherMessage { event: "client-App\\Events\\UserStoppedTyping", data: String("{\"user_id\":5302428}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
 // Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5302428,\"mark\":88072979,\"markupdated\":\"2024-09-04 05:55:31\"}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
-// Received other message: RawPusherMessage { event: "App\\Events\\BubbleStats", data: String("{\"stats\":[{\"bubble_id\":3738656,\"mark\":88072979,\"updated\":\"2024-09-04 05:55:31\",\"unread\":0,\"unread_mentions\":0,\"latest_message_id\":88072950,\"latest_message_created_at\":\"2024-09-04 05:54:29\",\"unclaimed_task_count\":0}]}"), channel: Some("private-user.5302428") }
 // Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5279855,\"mark\":88072124,\"markupdated\":\"2024-09-04 05:55:56\"}"), channel: Some("private-bubble.3742021.y25TRXwZdNfCdzZKN5FzAEIev6AWdZp8edRH99ZW") }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
