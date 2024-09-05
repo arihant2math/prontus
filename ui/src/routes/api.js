@@ -40,6 +40,10 @@ export async function sendMessage(message) {
     return await invoke("send_message", {message});
 }
 
-export async function setReactionState(messageId, reactionId, state) {
-    return await invoke("set_reaction_state", {messageId, reactionId, state});
+export async function deleteMessage(messageId) {
+    return await invoke("delete_message", {messageId});
+}
+
+export async function setReactionState(messageId, reactionId, active) {
+    return await invoke("set_reaction_state", {messageId, reactionId, active});
 }

@@ -107,7 +107,6 @@
 
     setInterval(async () => {
         messages = await getMessages();
-        console.log(messages);
     }, 10);
 </script>
 
