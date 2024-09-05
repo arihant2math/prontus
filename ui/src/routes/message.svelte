@@ -2,6 +2,7 @@
     import Embed from "./messageComponents/embed.svelte";
     import Media from "./messageComponents/media.svelte";
     import Reaction from "./messageComponents/reaction.svelte";
+    import {deleteMessage} from "./api.js";
 
     export let message;
     export let repeat = false;
@@ -27,6 +28,11 @@
         console.log("Toggling dropdown");
         let dropdown = document.getElementById(dropdownId);
         dropdown.classList.toggle("hidden");
+    }
+
+    async function remove() {
+        console.log("Deleting message " + message.id);
+        await deleteMessage(message.id);
     }
 </script>
 {#if !systemMessage}
@@ -59,24 +65,24 @@
                 <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
             </svg>
         </button>
-        <div id="{dropdownId}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-40 dark:bg-gray-700 dark:divide-gray-600">
+        <div id="{dropdownId}" class="fixed left-[1000px] z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-40 dark:bg-gray-700 dark:divide-gray-600">
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownMenuIconButton">
                 <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Reply</a>
+                    <button class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>Reply</button>
                 </li>
                 <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Forward</a>
+                    <button class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>Forward</button>
                 </li>
                 <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Copy</a>
+                    <button class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>Copy</button>
                 </li>
                 {#if isCurrentUser}
                     <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
+                        <button class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>Edit</button>
                     </li>
                     <li>
-                        <a href="#"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete</a>
+                        <button
+                                class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={remove}>Delete</button>
                     </li>
                 {/if}
             </ul>
