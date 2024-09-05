@@ -62,6 +62,13 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
                     PusherServerMessage::Event(event) => {
                         match event.event {
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
+                                // TODO: create setting or smth
+                                // Notification::new()
+                                //     .summary("New Message")
+                                //     .body(event.message.message.clone())
+                                //     .icon("thunderbird")
+                                //     .timeout(Timeout::Milliseconds(6000))
+                                //     .show().unwrap();
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
