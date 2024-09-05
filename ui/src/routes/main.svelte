@@ -3,72 +3,29 @@
     import Message from "./message.svelte";
     import Sidecategory from "./sidecategory.svelte"
 
-    import {load, loadChannel, getChannelList, getMessages, getMoreMessages, loadMessages, sendMessage} from "./api.js";
+    import {
+        loadChannel,
+        getChannelList,
+        getMessages,
+        getMoreMessages,
+        loadMessages,
+        sendMessage,
+        getCurrentUser
+    } from "./api.js";
 
-    let userInfo;
+    let currentUser;
+    let messages = []
 
-    function spawnMessage(next, message) {
-        console.debug(message)
-        if (next != null) {
-            let messageElement = new Message({
-                target: document.querySelector("#messages"),
-                props: {
-                    message_id: message.id,
-                    user: message.user,
-                    message: message.message,
-                    timestamp: message.timestamp,
-                    pfp_url: message.user.profilepicurl,
-                    embed: message.resource,
-                    media: message.messagemedia,
-                    reactions: message.reactionsummary,
-                    repeat: next.user.fullname == message.user.fullname && next.systemevent == null,
-                    systemMessage: message.systemevent != null,
-                    currentUser: userInfo,
-                }
-            });
-        } else {
-            let messageElement = new Message({
-                target: document.querySelector("#messages"),
-                props: {
-                    message_id: message.id,
-                    user: message.user,
-                    message: message.message,
-                    timestamp: message.timestamp,
-                    pfp_url: message.user.profilepicurl,
-                    embed: message.resource,
-                    media: message.messagemedia,
-                    reactions: message.reactionsummary,
-                    repeat: false,
-                    systemMessage: message.systemevent != null,
-                    currentUser: userInfo,
-                }
-            });
-        }
-    }
-
-    async function appendMessages(messages) {
-        /// TODO: use previous append message calls as context
-        if (messages.length === 0) {
-            return
-        }
-        let previousMessage = null;
-        for (let message of messages) {
-            if (previousMessage != null) {
-                spawnMessage(message, previousMessage);
-            }
-            previousMessage = message;
-        }
-        spawnMessage(null, previousMessage);
+    async function appendMessages(newMessages) {
+        messages = messages.concat(newMessages);
     }
 
     async function handleSidebarClick(id) {
         await loadChannel(id);
         await loadMessages();
-        let messages = await getMessages();
-        document.querySelector("#messages").innerHTML = "";
+        messages = await getMessages();
         // clear input
         document.querySelector("#messageInput").value = "";
-        await appendMessages(messages);
         let messagesDiv = document.querySelector("#messages");
         messagesDiv.scrollTop = 0;
     }
@@ -77,7 +34,7 @@
         if (event.keyCode === 13) {
             await sendMessage(document.querySelector("#messageInput").value).then(async (message) => {
                 document.querySelector("#messageInput").value = "";
-                await appendMessages([message]);
+                // TODO: Add message, but shade it to a grey color, to indicate it has not yet been sent
             });
         }
     }
@@ -100,13 +57,15 @@
         }
     }
 
-    load().then(async () => {
+    async function init() {
+        currentUser = await getCurrentUser();
         let channels = await getChannelList();
+        console.debug(channels);
         let categories = {};
         let categoryInfo = {};
         for (let channel of channels) {
-            let category = channel.category;
-            if (category == null && channel.isdm) {
+            let category = channel[0].category;
+            if (category == null && channel[0].isdm) {
                 category = {
                     "id": -2,
                     "title": "Direct Messages",
@@ -129,6 +88,7 @@
         console.log(categories);
 
         let sidebarList = document.querySelector("#sidebar-list");
+        // TODO: Don't append, make it stateful
         for (let category in categories) {
             let categoryElement = new Sidecategory({
                 target: sidebarList,
@@ -139,7 +99,16 @@
                 }
             });
         }
+    }
+
+    init().then(() => {
+        console.log("Main init complete");
     });
+
+    setInterval(async () => {
+        messages = await getMessages();
+        console.log(messages);
+    }, 10);
 </script>
 
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-gray-900">
@@ -150,8 +119,12 @@
             </ul>
         </div>
     </aside>
-    <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
+    <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col ml-5">
         <div id="messages" class="overflow-y-auto bg-white dark:bg-gray-900 flex flex-col-reverse" on:scroll={messageScroll}>
+            {#each messages as message}
+                <!--TODO: Get repeat working-->
+                <Message message={message} repeat={false} currentUser={currentUser}/>
+            {/each}
         </div>
         <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-gray-900">
             <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-gray-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>

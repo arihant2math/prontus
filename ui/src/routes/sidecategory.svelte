@@ -25,7 +25,8 @@
     </button>
     <ul id="{dropdownId}" class="hidden py-2 space-y-2">
         {#each items as item}
-            <li><Sideitem bubbleId={item.id} name={item.title} notifications={item.notifications} mention={item.mention} buttonClick={buttonClick}/></li>
+            <!--TODO: Fix how mentions/unread count works-->
+            <li><Sideitem bubbleId={item[0].id} name={item[0].title} notifications={item[1].unread} mention={item[1].unread_mentions > 0} buttonClick={buttonClick}/></li>
         {/each}
     </ul>
 </li>

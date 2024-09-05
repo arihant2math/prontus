@@ -3,32 +3,25 @@
     import Media from "./messageComponents/media.svelte";
     import Reaction from "./messageComponents/reaction.svelte";
 
-    export let message_id = -1;
-    export let user;
-    export let timestamp = "";
-    export let pfp_url = "";
-    export let message = "";
-    export let embed;
-    export let media = [];
-    export let reactions;
+    export let message;
     export let repeat = false;
-    export let systemMessage = false;
     export let currentUser;
+
+    console.log(message);
 
     // TODO: use id comparison instead of string comparison
     $: isCurrentUser = currentUser.fullname == user.fullname;
-    $: user = user;
-    $: currentUser = currentUser;
-    $: timestamp = timestamp;
-    $: pfp_url = pfp_url;
-    $: message = message;
-    $: media = media;
-    $: embed = embed;
-    $: reactions = reactions;
+    $: systemMessage = message.systemevent != null;
+    $: user = message.user;
+    $: timestamp = "";
+    $: pfp_url = message.user.profilepicurl;
+    $: media = message.messagemedia;
+    $: embed = message.resource;
+    $: reactions = message.reactionsummary;
     $: repeat = repeat;
     $: mt = repeat ? "mt-2" : "mt-10";
     $: ml = repeat ? "ml-10" : "ml-0";
-    $: dropdownId = message_id.toString() + "MessageDropdown";
+    $: dropdownId = message.id.toString() + "MessageDropdown";
 
     function handleDropdownToggle() {
         console.log("Toggling dropdown");
@@ -48,7 +41,7 @@
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{timestamp}</span>
                 </div>
             {/if}
-            <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message}</p>
+            <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.message}</p>
             {#each media as mediaItem}
                 <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>
             {/each}
@@ -58,7 +51,7 @@
             <div class="flex items-center space-x-2">
                 {#each reactions as reaction}
                     <!--TODO: Check if reaction is checked-->
-                    <Reaction id={reaction.reactiontype_id} count={reaction.count}/>
+                    <Reaction id={reaction.reactiontype_id} messageId={message.id} count={reaction.count}/>
                 {/each}
             </div>
         </div>
@@ -93,7 +86,7 @@
     <div class="{mt} flex items-start gap-2.5">
         <div class="flex flex-row items-center p-4">
             <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
-            <p class="ml-2 text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message}</p>
+            <p class="ml-2 text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.message}</p>
         </div>
     </div>
 {/if}

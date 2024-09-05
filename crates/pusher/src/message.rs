@@ -1,6 +1,7 @@
-use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Arc;
+
 use client::ProntoClient;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -58,8 +59,32 @@ pub struct PusherServerUserPresenceEvent {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerBubbleStatsEvent {
+    pub stats: Vec<client::BubbleStats>
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerMessageUpdatedEvent {
+    pub message: client::Message
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerMessageAddedEvent{
+    pub message: client::Message
+}
+
+// Received other message: RawPusherMessage { event: "client-App\\Events\\UserTyping", data: String("{\"user_id\":5302428,\"thread_id\":null}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
+// Received other message: RawPusherMessage { event: "client-App\\Events\\UserStoppedTyping", data: String("{\"user_id\":5302428}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
+// Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5302428,\"mark\":88072979,\"markupdated\":\"2024-09-04 05:55:31\"}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
+// Received other message: RawPusherMessage { event: "App\\Events\\BubbleStats", data: String("{\"stats\":[{\"bubble_id\":3738656,\"mark\":88072979,\"updated\":\"2024-09-04 05:55:31\",\"unread\":0,\"unread_mentions\":0,\"latest_message_id\":88072950,\"latest_message_created_at\":\"2024-09-04 05:54:29\",\"unclaimed_task_count\":0}]}"), channel: Some("private-user.5302428") }
+// Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5279855,\"mark\":88072124,\"markupdated\":\"2024-09-04 05:55:56\"}"), channel: Some("private-bubble.3742021.y25TRXwZdNfCdzZKN5FzAEIev6AWdZp8edRH99ZW") }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
-    PusherServerUserPresenceEvent(PusherServerUserPresenceEvent)
+    PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),
+    PusherServerBubbleStatsEvent(PusherServerBubbleStatsEvent),
+    PusherServerMessageUpdatedEvent(PusherServerMessageUpdatedEvent),
+    PusherServerMessageAddedEvent(PusherServerMessageAddedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,7 +105,7 @@ pub enum PusherServerMessage {
     ConnectionEstablished(PusherServerConnectionEstablished),
     SubscriptionSucceeded(PusherServerSubscriptionSucceeded),
     Error(PusherServerError),
-    UserPresence(PusherServerEvent),
+    Event(PusherServerEvent),
     Other(RawPusherMessage)
 }
 
@@ -110,9 +135,30 @@ impl From<String> for PusherServerMessage {
             }
             "App\\Events\\UserPresence" => {
                 let data: PusherServerUserPresenceEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
-                Self::UserPresence(PusherServerEvent {
+                Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
                     event: PusherServerEventType::PusherServerUserPresenceEvent(data)
+                })
+            }
+            "App\\Events\\BubbleStats" => {
+                let data: PusherServerBubbleStatsEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerBubbleStatsEvent(data)
+                })
+            }
+            "App\\Events\\MessageUpdated" => {
+                let data: PusherServerMessageUpdatedEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerMessageUpdatedEvent(data)
+                })
+            }
+            "App\\Events\\MessageAdded" => {
+                let data: PusherServerMessageAddedEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerMessageAddedEvent(data)
                 })
             }
             _ => {

@@ -12,6 +12,10 @@ export async function load() {
     return await invoke("load");
 }
 
+export async function getCurrentUser() {
+    return await invoke("get_current_user");
+}
+
 export async function loadChannel(id) {
     await invoke("load_channel", {id});
 }
@@ -34,4 +38,8 @@ export async function loadMessages() {
 
 export async function sendMessage(message) {
     return await invoke("send_message", {message});
+}
+
+export async function setReactionState(messageId, reactionId, state) {
+    return await invoke("set_reaction_state", {messageId, reactionId, state});
 }

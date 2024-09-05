@@ -2,7 +2,7 @@ use crate::user_info::UserInfo;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-struct DeviceInfo {
+pub struct DeviceInfo {
     pub browsername: String,
     pub browserversion: String,
     pub osname: String,

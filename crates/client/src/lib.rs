@@ -5,13 +5,14 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::user_login::DeviceInfo;
+use crate::user_token_login::TokenLoginResponse;
 pub use api_error::APIError;
 pub use bubble::{Bubble, Category};
 pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
 pub use bubble_info::{GetBubbleInfoResponse};
+pub use bubble_list::{BubbleStats, GetBubbleListResponse};
 pub use user_info::UserInfo;
-use crate::user_login::DeviceInfo;
-use crate::user_token_login::{TokenLoginResponse, TokenLoginResult};
 
 pub mod api_error;
 mod bubble;
