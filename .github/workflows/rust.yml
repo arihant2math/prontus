@@ -31,22 +31,22 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         with:
           name: ui.exe
-          path: "D:\a\prontus\prontus\ui\src-tauri\target\release\ui.exe"
+          path: "./ui/src-tauri/target/release/ui.exe"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
           name: ui_0.1.0_x64_en-US.msi
-          path: "D:\a\prontus\prontus\ui\src-tauri\target\release\bundle\msi\ui_0.1.0_x64_en-US.msi"
+          path: "./ui/src-tauri/target/release/bundle/msi/ui_0.1.0_x64_en-US.msi"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
           name: ui_0.1.0_x64-setup.exe
-          path: "D:\a\prontus\prontus\ui\src-tauri\target\release\bundle\nsis\ui_0.1.0_x64-setup.exe"
+          path: "./ui/src-tauri/target/release/bundle/nsis/ui_0.1.0_x64-setup.exe"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
         with:
           name: prontus_x86_64 (Linux)
-          path: ./ui/target/release/
+          path: ./ui/src-tauri/target/release/
