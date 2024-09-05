@@ -1,7 +1,7 @@
 {
-  "productName": "ui",
+  "productName": "prontus",
   "version": "0.1.0",
-  "identifier": "com.prontus.ui",
+  "identifier": "com.prontus.prontus",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -11,9 +11,9 @@
   "app": {
     "windows": [
       {
-        "title": "ui",
-        "width": 800,
-        "height": 600
+        "title": "Prontus",
+        "width": 1000,
+        "height": 800
       }
     ],
     "security": {

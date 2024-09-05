@@ -30,20 +30,20 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: ui.exe
-          path: "./ui/src-tauri/target/release/ui.exe"
+          name: prontus.exe
+          path: "./ui/src-tauri/target/release/prontus.exe"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: ui_0.1.0_x64_en-US.msi
-          path: "./ui/src-tauri/target/release/bundle/msi/ui_0.1.0_x64_en-US.msi"
+          name: prontus_0.1.0_x64_en-US.msi
+          path: "./ui/src-tauri/target/release/bundle/msi/prontus_0.1.0_x64_en-US.msi"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: ui_0.1.0_x64-setup.exe
-          path: "./ui/src-tauri/target/release/bundle/nsis/ui_0.1.0_x64-setup.exe"
+          name: prontus_0.1.0_x64-setup.exe
+          path: "./ui/src-tauri/target/release/bundle/nsis/prontus_0.1.0_x64-setup.exe"
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
