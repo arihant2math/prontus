@@ -22,7 +22,7 @@ jobs:
           submodules: 'true'
       - name: Setup ATK
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install librust-atk-dev libgtk-3-dev
+        run: sudo apt-get install librust-atk-dev libgtk-3-dev libsoup3
 
       - name: Build
         run: cd ui && npm install && npm run tauri build
