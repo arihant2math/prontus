@@ -134,10 +134,10 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
             r#type: "".to_string(),
         },
     })
-    .await
-    .unwrap()
-    .to_result()
-    .unwrap();
+        .await
+        .unwrap()
+        .to_result()
+        .unwrap();
     let token = &response.users[0].login_token;
     let mut settings = settings::Settings::load()?;
     settings.api_key = Some(token.clone());
@@ -317,6 +317,19 @@ async fn set_reaction_state(
     Ok(())
 }
 
+#[command]
+async fn delete_message(
+    state: State<'_, AppState>,
+    message_id: u64,
+) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.read().await;
+    let state = state.try_inner()?;
+
+    state.client.delete_message(message_id).await?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -344,7 +357,8 @@ pub fn run() {
             get_more_messages,
             load_messages,
             send_message,
-            set_reaction_state
+            set_reaction_state,
+            delete_message
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
