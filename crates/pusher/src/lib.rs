@@ -18,7 +18,10 @@ pub enum PusherServerMessageWrapper {
     Shutdown,
 }
 
-async fn read_task(stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>, message_output: broadcast::Sender<PusherServerMessageWrapper>) {
+async fn read_task(
+    stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
+    message_output: broadcast::Sender<PusherServerMessageWrapper>,
+) {
     loop {
         let message = stream.write().await.next().await;
         let message = match message {
@@ -54,7 +57,10 @@ pub enum PusherClientMessageWrapper {
     Shutdown,
 }
 
-async fn write_task(stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>, mut message_input: mpsc::Receiver<PusherClientMessageWrapper>) {
+async fn write_task(
+    stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
+    mut message_input: mpsc::Receiver<PusherClientMessageWrapper>,
+) {
     loop {
         let message = message_input.recv().await;
         let message = match message {
@@ -65,7 +71,11 @@ async fn write_task(stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>
         };
         match message {
             PusherClientMessageWrapper::PusherClientMessage(pcm) => {
-                let _ = stream.write().await.send(Message::Text(pcm.to_string())).await;
+                let _ = stream
+                    .write()
+                    .await
+                    .send(Message::Text(pcm.to_string()))
+                    .await;
             }
             PusherClientMessageWrapper::Pong => {
                 let _ = stream.write().await.send(Message::Pong(vec![])).await;
@@ -78,8 +88,10 @@ async fn write_task(stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>
     }
 }
 
-async fn ping_task(mut server_messages: broadcast::Receiver<PusherServerMessageWrapper>,
-                   client_message: mpsc::Sender<PusherClientMessageWrapper>) {
+async fn ping_task(
+    mut server_messages: broadcast::Receiver<PusherServerMessageWrapper>,
+    client_message: mpsc::Sender<PusherClientMessageWrapper>,
+) {
     loop {
         let message = server_messages.recv().await;
         let message = match message {
@@ -93,7 +105,9 @@ async fn ping_task(mut server_messages: broadcast::Receiver<PusherServerMessageW
                 let _ = client_message.send(PusherClientMessageWrapper::Pong).await;
             }
             PusherServerMessageWrapper::Shutdown => {
-                let _ = client_message.send(PusherClientMessageWrapper::Shutdown).await;
+                let _ = client_message
+                    .send(PusherClientMessageWrapper::Shutdown)
+                    .await;
                 break;
             }
             _ => {}
@@ -102,11 +116,13 @@ async fn ping_task(mut server_messages: broadcast::Receiver<PusherServerMessageW
 }
 
 #[tokio::main]
-async fn task_thread(ws_stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
-                     server_messages_tx: broadcast::Sender<PusherServerMessageWrapper>,
-                     server_messages_rx: broadcast::Receiver<PusherServerMessageWrapper>,
-                     client_messages_tx: mpsc::Sender<PusherClientMessageWrapper>,
-                     client_messages_rx: mpsc::Receiver<PusherClientMessageWrapper>) {
+async fn task_thread(
+    ws_stream: Arc<RwLock<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
+    server_messages_tx: broadcast::Sender<PusherServerMessageWrapper>,
+    server_messages_rx: broadcast::Receiver<PusherServerMessageWrapper>,
+    client_messages_tx: mpsc::Sender<PusherClientMessageWrapper>,
+    client_messages_rx: mpsc::Receiver<PusherClientMessageWrapper>,
+) {
     let write_task = write_task(ws_stream.clone(), client_messages_rx);
     let ping_task = ping_task(server_messages_rx, client_messages_tx);
     let read_task = read_task(ws_stream, server_messages_tx);
@@ -123,7 +139,7 @@ pub struct PusherClient {
     client: Arc<ProntoClient>,
     server_messages: Arc<RwLock<broadcast::Receiver<PusherServerMessageWrapper>>>,
     client_message: Arc<RwLock<mpsc::Sender<PusherClientMessageWrapper>>>,
-    details: Arc<RwLock<Option<PusherServerConnectionEstablished>>>
+    details: Arc<RwLock<Option<PusherServerConnectionEstablished>>>,
 }
 
 impl PusherClient {
@@ -139,7 +155,13 @@ impl PusherClient {
             let message_output_rx = message_output_tx.subscribe();
             let message_input_tx = message_input_tx.clone();
             move || {
-                task_thread(ws_stream, message_output_tx, message_output_rx, message_input_tx, message_input_rx);
+                task_thread(
+                    ws_stream,
+                    message_output_tx,
+                    message_output_rx,
+                    message_input_tx,
+                    message_input_rx,
+                );
             }
         });
 
@@ -147,7 +169,7 @@ impl PusherClient {
             client,
             server_messages: Arc::new(RwLock::new(message_output_rx)),
             client_message: Arc::new(RwLock::new(message_input_tx)),
-            details: Arc::new(RwLock::new(None))
+            details: Arc::new(RwLock::new(None)),
         };
 
         client
@@ -157,7 +179,9 @@ impl PusherClient {
         loop {
             let message = self.server_messages().await.recv().await.unwrap();
             match message {
-                PusherServerMessageWrapper::PusherServerMessage(PusherServerMessage::ConnectionEstablished(details)) => {
+                PusherServerMessageWrapper::PusherServerMessage(
+                    PusherServerMessage::ConnectionEstablished(details),
+                ) => {
                     let mut details_guard = self.details.write().await;
                     *details_guard = Some(details);
                     break;
@@ -169,8 +193,13 @@ impl PusherClient {
 
     pub async fn subscribe(&self, channel: String) {
         let details = self.details.read().await.clone().unwrap();
-        let message = PusherClientMessage::subscribe(self.client.clone(), &details.socket_id, &channel).await;
-        let _ = self.client_message().await.send(PusherClientMessageWrapper::PusherClientMessage(message)).await;
+        let message =
+            PusherClientMessage::subscribe(self.client.clone(), &details.socket_id, &channel).await;
+        let _ = self
+            .client_message()
+            .await
+            .send(PusherClientMessageWrapper::PusherClientMessage(message))
+            .await;
     }
 
     pub async fn server_messages(&self) -> broadcast::Receiver<PusherServerMessageWrapper> {

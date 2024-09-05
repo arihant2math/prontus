@@ -1,16 +1,19 @@
 use client::user_login::{DeviceInfo, UserLoginRequest};
 use client::{Bubble, BubbleStats, Message, ProntoClient, ReactionType, UserInfo};
-use pusher::{PusherClient, PusherServerEvent, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
+use futures::future::join_all;
+use pusher::{
+    PusherClient, PusherServerEvent, PusherServerEventType, PusherServerMessage,
+    PusherServerMessageWrapper,
+};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
-use futures::future::join_all;
 use tauri::{command, Manager, State};
 
 mod error;
 pub use error::BackendError;
 mod state;
-pub use state::{InnerAppState, AppState, AppData};
+pub use state::{AppData, AppState, InnerAppState};
 
 // TODO: Should not be backend error result
 #[tokio::main]
@@ -34,11 +37,18 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
         let mut state_ = state.write().await;
         let state = state_.try_inner_mut()?;
         // TODO: make this portable
-        pusher_client.subscribe("private-organization.2245".to_string()).await;
-        pusher_client.subscribe(format!("private-user.{}", state.user_info.id)).await;
+        pusher_client
+            .subscribe("private-organization.2245".to_string())
+            .await;
+        pusher_client
+            .subscribe(format!("private-user.{}", state.user_info.id))
+            .await;
         let mut tasks = vec![];
         for channel in state.channel_list.iter() {
-            tasks.push(pusher_client.subscribe(format!("private-bubble.{}.{}", channel.0.id, channel.0.channelcode)))
+            tasks.push(pusher_client.subscribe(format!(
+                "private-bubble.{}.{}",
+                channel.0.id, channel.0.channelcode
+            )))
         }
         drop(state_);
         join_all(tasks).await;
@@ -77,7 +87,10 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
 
 #[command]
 async fn get_code(email: String) -> Result<(), BackendError> {
-    let _response = client::user_verify::post(client::user_verify::UserVerifyRequest::Email(email)).await.unwrap().to_result();
+    let _response = client::user_verify::post(client::user_verify::UserVerifyRequest::Email(email))
+        .await
+        .unwrap()
+        .to_result();
     // TODO: Error handling
     Ok(())
 }
@@ -94,20 +107,30 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
             osname: "".to_string(),
             r#type: "".to_string(),
         },
-    }).await.unwrap().to_result().unwrap();
+    })
+    .await
+    .unwrap()
+    .to_result()
+    .unwrap();
     let token = &response.users[0].login_token;
     let mut settings = settings::Settings::load()?;
     settings.api_key = Some(token.clone());
     settings.save()?;
     // TODO: This is the part where we can switch base urls
-    let client = ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
+    let client =
+        ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
     // TODO: Standardize device info
-    let response = client.user_token_login(token, DeviceInfo {
-        browsername: "".to_string(),
-        browserversion: "".to_string(),
-        osname: "".to_string(),
-        r#type: "".to_string(),
-    }).await?;
+    let response = client
+        .user_token_login(
+            token,
+            DeviceInfo {
+                browsername: "".to_string(),
+                browserversion: "".to_string(),
+                osname: "".to_string(),
+                r#type: "".to_string(),
+            },
+        )
+        .await?;
 
     let mut settings = settings::Settings::load()?;
     settings.api_key = Some(response.users[0].access_token.clone());
@@ -122,7 +145,11 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         return Ok(());
     }
     let settings = settings::Settings::load()?;
-    let client = ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), &settings.api_key.ok_or(BackendError::NotAuthenticated)?).unwrap();
+    let client = ProntoClient::new(
+        "https://stanfordohs.pronto.io/api/".to_string(),
+        &settings.api_key.ok_or(BackendError::NotAuthenticated)?,
+    )
+    .unwrap();
     let user_info_future = client.get_user_info();
     let channel_list_future = client.get_bubble_list();
     let (user_info, channel_list) = futures::join!(user_info_future, channel_list_future);
@@ -130,14 +157,19 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     let mut users = HashMap::new();
     users.insert(user_info.id, user_info.clone());
     let channel_list = channel_list?;
-    let channel_list = channel_list.bubbles.clone().into_iter().zip(channel_list.stats.clone().into_iter()).collect();
+    let channel_list = channel_list
+        .bubbles
+        .clone()
+        .into_iter()
+        .zip(channel_list.stats.clone().into_iter())
+        .collect();
     let data = AppData {
         user_info,
         users,
         client: Arc::new(client),
         channel_list,
         current_channel: 0,
-        message_list: vec![]
+        message_list: vec![],
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
@@ -166,7 +198,9 @@ async fn get_current_user(state: State<'_, AppState>) -> Result<UserInfo, Backen
 }
 
 #[command]
-async fn get_channel_list(state: State<'_, AppState>) -> Result<Vec<(Bubble, BubbleStats)>, BackendError> {
+async fn get_channel_list(
+    state: State<'_, AppState>,
+) -> Result<Vec<(Bubble, BubbleStats)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -196,40 +230,63 @@ async fn get_messages(state: State<'_, AppState>) -> Result<Vec<Message>, Backen
 }
 
 #[command]
-async fn get_more_messages(state: State<'_, AppState>, last_message_id: u64) -> Result<Vec<Message>, BackendError> {
+async fn get_more_messages(
+    state: State<'_, AppState>,
+    last_message_id: u64,
+) -> Result<Vec<Message>, BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
     let id = state.current_channel;
-    let messages = state.client.get_bubble_history(id, Some(last_message_id)).await?;
+    let messages = state
+        .client
+        .get_bubble_history(id, Some(last_message_id))
+        .await?;
     let messages = messages.messages;
     state.message_list.extend_from_slice(&mut messages.clone());
     Ok(messages)
 }
 
 #[command]
-async fn send_message(state: State<'_, AppState>, message: String) -> Result<Message, BackendError> {
+async fn send_message(
+    state: State<'_, AppState>,
+    message: String,
+) -> Result<Message, BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
     let user_id = state.user_info.id;
     let id = state.current_channel;
-    let response = state.client.post_message(user_id, id, message, None).await?;
+    let response = state
+        .client
+        .post_message(user_id, id, message, None)
+        .await?;
     Ok(response.message)
 }
 
 #[command]
-async fn set_reaction_state(state: State<'_, AppState>, message_id: u64, reaction_id: u64, active: bool) -> Result<(), BackendError> {
+async fn set_reaction_state(
+    state: State<'_, AppState>,
+    message_id: u64,
+    reaction_id: u64,
+    active: bool,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
     if active {
-        state.client.add_reaction(message_id, ReactionType::from(reaction_id as i32)).await?;
+        state
+            .client
+            .add_reaction(message_id, ReactionType::from(reaction_id as i32))
+            .await?;
     } else {
-        state.client.remove_reaction(message_id, ReactionType::from(reaction_id as i32)).await?;
+        state
+            .client
+            .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
+            .await?;
     }
     Ok(())
 }
@@ -250,7 +307,19 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![get_code, send_code, load, load_channel, get_current_user, get_channel_list, get_messages, get_more_messages, load_messages, send_message, set_reaction_state])
+        .invoke_handler(tauri::generate_handler![
+            get_code,
+            send_code,
+            load,
+            load_channel,
+            get_current_user,
+            get_channel_list,
+            get_messages,
+            get_more_messages,
+            load_messages,
+            send_message,
+            set_reaction_state
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -1,9 +1,9 @@
+use crate::BackendError;
+use client::{Bubble, BubbleStats, Message, ProntoClient, UserInfo};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use client::{Bubble, BubbleStats, Message, ProntoClient, UserInfo};
-use crate::BackendError;
 
 pub struct AppData {
     pub user_info: UserInfo,
@@ -11,7 +11,7 @@ pub struct AppData {
     pub client: Arc<ProntoClient>,
     pub channel_list: Vec<(Bubble, BubbleStats)>,
     pub current_channel: u64,
-    pub message_list: Vec<Message>
+    pub message_list: Vec<Message>,
 }
 
 pub enum InnerAppState {
@@ -37,7 +37,7 @@ impl InnerAppState {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub inner: Arc<RwLock<InnerAppState>>
+    pub inner: Arc<RwLock<InnerAppState>>,
 }
 
 impl AppState {
@@ -54,7 +54,7 @@ impl AppState {
 
     pub fn unloaded() -> Self {
         Self {
-            inner: Arc::new(RwLock::new(InnerAppState::Unloaded))
+            inner: Arc::new(RwLock::new(InnerAppState::Unloaded)),
         }
     }
 }

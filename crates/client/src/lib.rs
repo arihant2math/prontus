@@ -10,7 +10,7 @@ use crate::user_token_login::TokenLoginResponse;
 pub use api_error::APIError;
 pub use bubble::{Bubble, Category};
 pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
-pub use bubble_info::{GetBubbleInfoResponse};
+pub use bubble_info::GetBubbleInfoResponse;
 pub use bubble_list::{BubbleStats, GetBubbleListResponse};
 pub use user_info::UserInfo;
 
@@ -199,8 +199,8 @@ impl ProntoClient {
             bubble_id,
             latest_message_id,
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn post_message(
@@ -219,8 +219,8 @@ impl ProntoClient {
             Utc::now(),
             parent_message_id,
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn edit_message(
@@ -272,13 +272,22 @@ impl ProntoClient {
             message_id,
             reaction_type as i32 as u64,
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
-    pub async fn user_token_login(&self, token: &str, _device_info: DeviceInfo) -> Result<TokenLoginResponse, ResponseError> {
+    pub async fn user_token_login(
+        &self,
+        token: &str,
+        _device_info: DeviceInfo,
+    ) -> Result<TokenLoginResponse, ResponseError> {
         // TODO: pass in device info
-        Ok(user_token_login::post(&self.api_base_url, &self.http_client, vec![token.to_string()])
-            .await?.to_result()?)
+        Ok(user_token_login::post(
+            &self.api_base_url,
+            &self.http_client,
+            vec![token.to_string()],
+        )
+        .await?
+        .to_result()?)
     }
 }

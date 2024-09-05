@@ -26,13 +26,12 @@ impl PusherClientMessage {
 
     pub fn to_string(&self) -> String {
         match self {
-            Self::Subscribe(sub) => {
-                serde_json::to_string(&RawPusherMessage {
-                    event: "pusher:subscribe".to_string(),
-                    data: serde_json::to_value(&sub).unwrap(),
-                    channel: None,
-                }).unwrap()
-            }
+            Self::Subscribe(sub) => serde_json::to_string(&RawPusherMessage {
+                event: "pusher:subscribe".to_string(),
+                data: serde_json::to_value(&sub).unwrap(),
+                channel: None,
+            })
+            .unwrap(),
         }
     }
 }
@@ -40,12 +39,12 @@ impl PusherClientMessage {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerConnectionEstablished {
     pub socket_id: String,
-    pub activity_timeout: u64
+    pub activity_timeout: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerSubscriptionSucceeded {
-    pub channel: String
+    pub channel: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -55,22 +54,22 @@ pub struct PusherServerUserPresenceEvent {
     pub is_online: bool,
     // TODO: the presence time is actually a date (UTC or smth it seems)
     #[serde(rename = "lastpresencetime")]
-    pub last_presence_time: String
+    pub last_presence_time: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerBubbleStatsEvent {
-    pub stats: Vec<client::BubbleStats>
+    pub stats: Vec<client::BubbleStats>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerMessageUpdatedEvent {
-    pub message: client::Message
+    pub message: client::Message,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PusherServerMessageAddedEvent{
-    pub message: client::Message
+pub struct PusherServerMessageAddedEvent {
+    pub message: client::Message,
 }
 
 // Received other message: RawPusherMessage { event: "client-App\\Events\\UserTyping", data: String("{\"user_id\":5302428,\"thread_id\":null}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
@@ -90,14 +89,14 @@ pub enum PusherServerEventType {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerEvent {
     pub channel: String,
-    pub event: PusherServerEventType
+    pub event: PusherServerEventType,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerError {
     // TODO: check spec
     pub code: Option<()>,
-    pub message: String
+    pub message: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -106,7 +105,7 @@ pub enum PusherServerMessage {
     SubscriptionSucceeded(PusherServerSubscriptionSucceeded),
     Error(PusherServerError),
     Event(PusherServerEvent),
-    Other(RawPusherMessage)
+    Other(RawPusherMessage),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -121,12 +120,13 @@ impl From<String> for PusherServerMessage {
         let raw: RawPusherMessage = serde_json::from_str(&s).unwrap();
         match raw.event.as_str() {
             "pusher:connection_established" => {
-                let data: PusherServerConnectionEstablished = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                let data: PusherServerConnectionEstablished =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::ConnectionEstablished(data)
             }
             "pusher_internal:subscription_succeeded" => {
                 Self::SubscriptionSucceeded(PusherServerSubscriptionSucceeded {
-                    channel: raw.channel.unwrap()
+                    channel: raw.channel.unwrap(),
                 })
             }
             "pusher:error" => {
@@ -134,36 +134,38 @@ impl From<String> for PusherServerMessage {
                 Self::Error(data)
             }
             "App\\Events\\UserPresence" => {
-                let data: PusherServerUserPresenceEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                let data: PusherServerUserPresenceEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
-                    event: PusherServerEventType::PusherServerUserPresenceEvent(data)
+                    event: PusherServerEventType::PusherServerUserPresenceEvent(data),
                 })
             }
             "App\\Events\\BubbleStats" => {
-                let data: PusherServerBubbleStatsEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                let data: PusherServerBubbleStatsEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
-                    event: PusherServerEventType::PusherServerBubbleStatsEvent(data)
+                    event: PusherServerEventType::PusherServerBubbleStatsEvent(data),
                 })
             }
             "App\\Events\\MessageUpdated" => {
-                let data: PusherServerMessageUpdatedEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                let data: PusherServerMessageUpdatedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
-                    event: PusherServerEventType::PusherServerMessageUpdatedEvent(data)
+                    event: PusherServerEventType::PusherServerMessageUpdatedEvent(data),
                 })
             }
             "App\\Events\\MessageAdded" => {
-                let data: PusherServerMessageAddedEvent = serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                let data: PusherServerMessageAddedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
-                    event: PusherServerEventType::PusherServerMessageAddedEvent(data)
+                    event: PusherServerEventType::PusherServerMessageAddedEvent(data),
                 })
             }
-            _ => {
-                Self::Other(raw)
-            }
+            _ => Self::Other(raw),
         }
     }
 }
