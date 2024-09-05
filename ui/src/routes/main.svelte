@@ -110,7 +110,7 @@
     }, 10);
 </script>
 
-<div class="flex flex-row font-sans h-dvh bg-white dark:bg-gray-900">
+<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900">
     <aside id="default-sidebar"
            aria-label="Sidebar">
         <div class="h-full w-[375px] overflow-y-auto overflow-x-hidden px-3 py-4 bg-gray-50 dark:bg-gray-800">
@@ -118,15 +118,15 @@
             </ul>
         </div>
     </aside>
-    <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
-        <div id="messages" class="overflow-y-auto bg-white dark:bg-gray-900 flex flex-col-reverse" on:scroll={messageScroll}>
+    <div id="content" class="h-full w-full bg-white dark:bg-slate-900 flex flex-col">
+        <div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
             {#each messages as message}
                 <!--TODO: Get repeat working-->
                 <Message message={message} repeat={false} currentUser={currentUser}/>
             {/each}
         </div>
-        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-gray-900">
-            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-gray-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
+        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-slate-900">
+            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-slate-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
         </div>
     </div>
 </div>

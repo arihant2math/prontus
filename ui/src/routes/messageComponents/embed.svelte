@@ -11,7 +11,7 @@
     $: shortUrl = shortUrl;
 </script>
 
-<a target="_blank" href="{url}" class="bg-gray-50 dark:bg-gray-600 rounded-xl p-4 mb-2 hover:bg-gray-200 dark:hover:bg-gray-500">
+<a target="_blank" href="{url}" class="bg-gray-50 dark:bg-slate-700 rounded-xl p-4 mb-2 hover:bg-gray-200 dark:hover:bg-slate-600">
     {#if image}
         <img src="{image}" class="rounded-lg mb-2 object-contain h-[40px]"/>
     {/if}
