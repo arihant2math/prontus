@@ -77,7 +77,7 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
 
 #[command]
 async fn get_code(email: String) -> Result<(), BackendError> {
-    let response = client::user_verify::post(client::user_verify::UserVerifyRequest::Email(email)).await.unwrap().to_result();
+    let _response = client::user_verify::post(client::user_verify::UserVerifyRequest::Email(email)).await.unwrap().to_result();
     // TODO: Error handling
     Ok(())
 }
