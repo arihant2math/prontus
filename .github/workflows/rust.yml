@@ -48,5 +48,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
         with:
-          name: prontus_x86_64 (Linux)
+          name: prontus_x86_64 target (Linux)
+          path: ./ui/src-tauri/target/release/
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'macos')
+        with:
+          name: prontus target (macOS)
           path: ./ui/src-tauri/target/release/
