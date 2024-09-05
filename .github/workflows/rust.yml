@@ -24,17 +24,17 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install librust-atk-dev libgtk-3-dev
 
-      - name: Build with cargo
-        run: cargo build -r --all-features
+      - name: Build
+        run: cd ui && npm install && npm run tauri build
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: prontus_x86_64.exe (Windows)
-          path: ./target/release/prontus.exe
+          name: prontus_x86_64 (Windows)
+          path: ./ui/target/release/
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
         with:
           name: prontus_x86_64 (Linux)
-          path: ./target/release/prontus
+          path: ./ui/target/release/
