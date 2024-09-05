@@ -30,7 +30,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'windows')
         with:
-          name: prontus.exe
+          name: prontus.exe (x64)
           path: "./ui/src-tauri/target/release/prontus.exe"
 
       - uses: actions/upload-artifact@v4
@@ -54,5 +54,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'macos')
         with:
-          name: prontus target (macOS)
-          path: ./ui/src-tauri/target/release/
+          name: Prontus.app (aarch64)
+          path: ./ui/src-tauri/target/release/bundle/macos/prontus.app
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'macos')
+        with:
+          name: prontus_0.1.0_x86_64.dmg
+          path: ./ui/src-tauri/target/release/bundle/dmg/prontus_0.1.0_aarch64.dmg
