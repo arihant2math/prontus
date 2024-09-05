@@ -118,7 +118,7 @@
             </ul>
         </div>
     </aside>
-    <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col ml-5">
+    <div id="content" class="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
         <div id="messages" class="overflow-y-auto bg-white dark:bg-gray-900 flex flex-col-reverse" on:scroll={messageScroll}>
             {#each messages as message}
                 <!--TODO: Get repeat working-->
