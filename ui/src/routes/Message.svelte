@@ -4,6 +4,7 @@
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
     import {deleteMessage} from "./api.js";
+    import RichText from "./messageComponents/RichText.svelte";
 
     export let message;
     export let repeat = false;
@@ -63,6 +64,7 @@
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{timestamp}</span>
                 </div>
             {/if}
+<!--            <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white"><RichText content="{message.message}"/></p>-->
             <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.message}</p>
             {#each media as mediaItem}
                 <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>

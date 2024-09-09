@@ -14,13 +14,14 @@
         getMoreMessages,
         loadMessages,
         sendMessage,
-        getCurrentUser
+        getCurrentUser, getChannelInfo
     } from "./api.js";
 
     let currentUser;
     let messages = [];
     let sidebarCategoriesInfo = {};
     let sidebarCategories = [];
+    let channelInfo = null;
 
     async function appendMessages(newMessages) {
         messages = messages.concat(newMessages);
@@ -34,6 +35,8 @@
         document.querySelector("#messageInput").value = "";
         let messagesDiv = document.querySelector("#messages");
         messagesDiv.scrollTop = 0;
+        // TODO: Below doesn't work for dms
+        channelInfo = await getChannelInfo();
     }
 
     async function handleMessageKeyDown(event) {
@@ -124,7 +127,7 @@
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-900 flex flex-col">
         <div>
-            <ChannelCard/>
+            <ChannelCard info={channelInfo}/>
         </div>
         <div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
             {#each messages as message}

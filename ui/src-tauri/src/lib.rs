@@ -8,8 +8,9 @@ use pusher::{
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
+use regex::Regex;
 use tauri::{command, Manager, State};
-
+use comrak::{markdown_to_html};
 mod error;
 pub use error::BackendError;
 mod state;
@@ -217,7 +218,7 @@ async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), Backend
     let state = state.try_inner_mut()?;
 
     // FIXME: This commented statement panics
-    // let bubble_info = state.client.get_bubble_info(id).await.unwrap();
+    // let bubble_info = state.client.get_bubble_info(id).await?;
     state.current_channel = id;
     Ok(())
 }
@@ -354,6 +355,31 @@ async fn delete_message(
     Ok(())
 }
 
+#[command]
+async fn rich(
+    state: State<'_, AppState>,
+    message: String,
+) -> Result<String, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+    // TODO: precompile regex
+    let re = Regex::new(r"<@\d*>").unwrap();
+    for (s, _) in re.captures_iter(&message).map(|c| c.extract::<0>()) {
+        let tag = s.to_string();
+        println!("Tag: {}", tag);
+        // TODO: replace
+    }
+    // TODO: precompile options
+    let mut options = comrak::Options::default();
+    options.extension.strikethrough = true;
+    options.extension.autolink = true;
+
+    options.parse.smart = true;
+    let message = markdown_to_html(&message, &options).to_string();
+    Ok(message)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -383,7 +409,8 @@ pub fn run() {
             load_messages,
             send_message,
             set_reaction_state,
-            delete_message
+            delete_message,
+            rich
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

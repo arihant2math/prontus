@@ -51,3 +51,7 @@ export async function deleteMessage(messageId) {
 export async function setReactionState(messageId, reactionId, active) {
     return await invoke("set_reaction_state", {messageId, reactionId, active});
 }
+
+export async function rich(message) {
+    return await invoke("rich", {message});
+}
