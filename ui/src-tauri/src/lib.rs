@@ -183,7 +183,7 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         "https://stanfordohs.pronto.io/api/".to_string(),
         &settings.api_key.ok_or(BackendError::NotAuthenticated)?,
     )
-    .unwrap();
+        .unwrap();
     let user_info_future = client.get_user_info();
     let channel_list_future = client.get_bubble_list();
     let (user_info, channel_list) = futures::join!(user_info_future, channel_list_future);
