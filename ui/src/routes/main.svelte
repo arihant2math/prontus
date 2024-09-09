@@ -1,8 +1,10 @@
 <script>
     import {invoke} from "@tauri-apps/api/core";
+
+    import ChannelCard from "./ChannelCard.svelte";
     import Message from "./Message.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
-    import Sidecategory from "./SideCategory.svelte"
+    import SideCategory from "./SideCategory.svelte"
     import UserCard from "./UserCard.svelte"
 
     import {
@@ -106,21 +108,24 @@
 
 <Settings/>
 
-<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900">
+<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
     <aside id="default-sidebar"
            aria-label="Sidebar"
-            class="h-full">
-        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden px-3 py-4 bg-gray-50 dark:bg-gray-800">
-<!--TODO: maybe move this to the bottom-->
+           class="h-full">
+        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-800">
+            <!--TODO: maybe move this to the bottom-->
             <UserCard user={currentUser} showSettings={showSettings}/>
-            <ul class="space-y-2 font-medium" id="sidebar-list">
+            <ul class="space-y-2 font-medium px-3" id="sidebar-list">
                 {#each Object.keys(sidebarCategories) as category}
-                    <Sidecategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                    <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
                 {/each}
             </ul>
         </div>
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-900 flex flex-col">
+        <div class="border-b border-gray-500">
+            <div class="h-[60px]"><ChannelCard/></div>
+        </div>
         <div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
             {#each messages as message}
                 <!--TODO: Get repeat working-->

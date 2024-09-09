@@ -24,6 +24,10 @@ export async function getChannelList() {
     return await invoke("get_channel_list");
 }
 
+export async function getChannelInfo() {
+    return await invoke("get_channel_info");
+}
+
 export async function getMessages() {
     return await invoke("get_messages");
 }

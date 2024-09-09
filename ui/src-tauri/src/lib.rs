@@ -243,6 +243,22 @@ async fn get_channel_list(
 }
 
 #[command]
+async fn get_channel_info(
+    state: State<'_, AppState>,
+) -> Result<Option<(Bubble, BubbleStats)>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    let id = state.current_channel;
+    let bubble = state
+        .channel_list
+        .iter()
+        .find(|(bubble, _)| bubble.id == id);
+    Ok(bubble.cloned())
+}
+
+#[command]
 async fn load_messages(state: State<'_, AppState>) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
@@ -359,6 +375,7 @@ pub fn run() {
             send_code,
             load,
             load_channel,
+            get_channel_info,
             get_current_user,
             get_channel_list,
             get_messages,
