@@ -1,5 +1,5 @@
-use client::user_login::{DeviceInfo, UserLoginRequest};
-use client::{Bubble, BubbleStats, Message, ProntoClient, ReactionType, UserInfo};
+use client::routes::user_login::{DeviceInfo, UserLoginRequest};
+use client::{Bubble, BubbleStatsInfo, Message, ProntoClient, ReactionType, UserInfo};
 use futures::future::join_all;
 use pusher::{
     PusherClient, PusherServerEvent, PusherServerEventType, PusherServerMessage,
@@ -127,7 +127,7 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
 
 #[command]
 async fn get_code(email: String) -> Result<(), BackendError> {
-    let _response = client::user_verify::post(client::user_verify::UserVerifyRequest::Email(email))
+    let _response = client::routes::user_verify::post(client::routes::user_verify::UserVerifyRequest::Email(email))
         .await
         .unwrap()
         .to_result();
@@ -137,7 +137,7 @@ async fn get_code(email: String) -> Result<(), BackendError> {
 
 #[command]
 async fn send_code(email: String, code: String) -> Result<(), BackendError> {
-    let response = client::user_login::post(UserLoginRequest {
+    let response = client::routes::user_login::post(UserLoginRequest {
         email,
         code,
         // TODO: Fix
@@ -240,7 +240,7 @@ async fn get_current_user(state: State<'_, AppState>) -> Result<UserInfo, Backen
 #[command]
 async fn get_channel_list(
     state: State<'_, AppState>,
-) -> Result<Vec<(Bubble, BubbleStats)>, BackendError> {
+) -> Result<Vec<(Bubble, BubbleStatsInfo)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
