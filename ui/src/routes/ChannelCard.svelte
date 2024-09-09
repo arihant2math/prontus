@@ -8,7 +8,7 @@
     }, 10);
 </script>
 {#if info !== null}
-    <div class="flex h-full w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row">
+    <div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row">
         <div class="flex flex-col">
             <span>{info[0].title}</span>
             <span class="text-sm text-gray-500 dark:text-gray-400">{info[0].category.title}</span>

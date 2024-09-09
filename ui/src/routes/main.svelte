@@ -123,8 +123,8 @@
         </div>
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-900 flex flex-col">
-        <div class="border-b border-gray-500">
-            <div class="h-[60px]"><ChannelCard/></div>
+        <div>
+            <ChannelCard/>
         </div>
         <div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
             {#each messages as message}
