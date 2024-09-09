@@ -1,4 +1,4 @@
-use crate::user_info::UserInfo;
+use crate::UserInfo;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]

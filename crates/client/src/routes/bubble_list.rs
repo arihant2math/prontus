@@ -1,18 +1,7 @@
-use crate::bubble::Bubble;
+use crate::models::Bubble;
+use crate::BubbleStats;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct BubbleStats {
-    pub bubble_id: u64,
-    pub mark: u32,
-    pub updated: String,
-    pub unread: u32,
-    pub unread_mentions: u32,
-    pub latest_message_id: u64,
-    pub latest_message_created_at: Option<String>,
-    pub unclaimed_task_count: u32,
-}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetBubbleListResponse {

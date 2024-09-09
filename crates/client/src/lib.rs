@@ -5,31 +5,18 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::user_login::DeviceInfo;
+use crate::bubble_history::GetBubbleHistoryResponse;
+use crate::bubble_info::GetBubbleInfoResponse;
+use crate::bubble_list::GetBubbleListResponse;
 use crate::user_token_login::TokenLoginResponse;
 pub use api_error::APIError;
-pub use bubble::{Bubble, Category};
-pub use bubble_history::{GetBubbleHistoryResponse, Message, MessageMedia};
-pub use bubble_info::GetBubbleInfoResponse;
-pub use bubble_list::{BubbleStats, GetBubbleListResponse};
-pub use user_info::UserInfo;
+pub use models::*;
+pub use routes::*;
 
 pub mod api_error;
-mod bubble;
-mod bubble_history;
-mod bubble_info;
-mod bubble_list;
-mod device_ping;
-mod message_create;
-mod message_delete;
-mod message_edit;
-mod pusher_auth;
-mod reaction_add;
-mod reaction_remove;
-mod user_info;
-pub mod user_login;
-pub mod user_token_login;
-pub mod user_verify;
+pub mod models;
+pub mod routes;
+pub mod serde_datetime;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -169,9 +156,7 @@ impl ProntoClient {
             .to_result()?)
     }
 
-    pub async fn get_bubble_list(
-        &self,
-    ) -> Result<bubble_list::GetBubbleListResponse, ResponseError> {
+    pub async fn get_bubble_list(&self) -> Result<GetBubbleListResponse, ResponseError> {
         Ok(bubble_list::get(&self.api_base_url, &self.http_client)
             .await?
             .to_result()?)
@@ -180,7 +165,7 @@ impl ProntoClient {
     pub async fn get_bubble_info(
         &self,
         bubble_id: u64,
-    ) -> Result<bubble_info::GetBubbleInfoResponse, ResponseError> {
+    ) -> Result<GetBubbleInfoResponse, ResponseError> {
         Ok(
             bubble_info::get(&self.api_base_url, &self.http_client, bubble_id)
                 .await?
@@ -279,7 +264,7 @@ impl ProntoClient {
     pub async fn user_token_login(
         &self,
         token: &str,
-        _device_info: DeviceInfo,
+        _device_info: user_token_login::DeviceInfo,
     ) -> Result<TokenLoginResponse, ResponseError> {
         // TODO: pass in device info
         Ok(user_token_login::post(

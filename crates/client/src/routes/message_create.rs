@@ -1,4 +1,4 @@
-use crate::bubble_history::Message;
+use crate::models::Message;
 use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};

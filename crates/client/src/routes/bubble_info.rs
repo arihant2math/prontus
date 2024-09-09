@@ -1,24 +1,14 @@
-use crate::bubble::Bubble;
+use crate::models::Bubble;
+use crate::BubbleStatsInfo;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct BubbleStats {
-    pub id: u64,
-    pub user_id: u64,
-    pub title: String,
-    pub isdm: bool,
-    pub voice_only: bool,
-    pub issupergroup: bool,
-    pub archived: u8,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetBubbleInfoResponse {
     pub ok: bool,
     pub bubble: Bubble,
-    pub stats: BubbleStats,
+    pub stats: BubbleStatsInfo,
 }
 
 pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;

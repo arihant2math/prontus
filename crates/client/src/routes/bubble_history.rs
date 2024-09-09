@@ -1,4 +1,4 @@
-use crate::user_info::UserInfo;
+use crate::Message;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -27,24 +27,6 @@ pub struct Reactions {
     pub id: u64,
     pub count: u64,
     pub users: Vec<u64>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Message {
-    pub id: u64,
-    pub user_id: u64,
-    pub bubble_id: u64,
-    pub message: String,
-    pub user: UserInfo,
-    pub systemevent: Option<String>,
-    #[serde(default, rename = "parentmessage_id")]
-    pub parent_message_id: Option<u64>,
-    #[serde(default, rename = "reactionsummary")]
-    pub reactions: Vec<Reactions>,
-    #[serde(default, rename = "messagemedia")]
-    pub message_media: Vec<MessageMedia>,
-    #[serde(default)]
-    pub resource: Option<MessageResource>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

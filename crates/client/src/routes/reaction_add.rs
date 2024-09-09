@@ -1,4 +1,4 @@
-use crate::message_create::MessageModifyResult;
+use crate::routes::message_create::MessageModifyResult;
 use reqwest::Client;
 use serde_json::json;
 
@@ -9,7 +9,7 @@ pub async fn post(
     reaction_type_id: u64,
 ) -> Result<MessageModifyResult, reqwest::Error> {
     let r = client
-        .post(format!("{pronto_base_url}v1/message.removereaction"))
+        .post(format!("{pronto_base_url}v1/message.addreaction"))
         .json(&json!({"message_id": message_id, "reactiontype_id": reaction_type_id}))
         .send()
         .await?;
