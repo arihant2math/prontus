@@ -1,8 +1,8 @@
 <script>
     // TODO: Get adding reactions to work
-    import Embed from "./messageComponents/embed.svelte";
-    import Media from "./messageComponents/media.svelte";
-    import Reaction from "./messageComponents/reaction.svelte";
+    import Embed from "./messageComponents/Embed.svelte";
+    import Media from "./messageComponents/Media.svelte";
+    import Reaction from "./messageComponents/Reaction.svelte";
     import {deleteMessage} from "./api.js";
 
     export let message;
