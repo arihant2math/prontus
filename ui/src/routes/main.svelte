@@ -1,9 +1,9 @@
 <script>
     import {invoke} from "@tauri-apps/api/core";
-    import Message from "./message.svelte";
-    import Settings, {showSettings} from "./settings.svelte";
-    import Sidecategory from "./sidecategory.svelte"
-    import UserCard from "./usercard.svelte"
+    import Message from "./Message.svelte";
+    import Settings, {showSettings} from "./Settings.svelte";
+    import Sidecategory from "./SideCategory.svelte"
+    import UserCard from "./UserCard.svelte"
 
     import {
         loadChannel,

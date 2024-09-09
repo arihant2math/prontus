@@ -1,8 +1,8 @@
 use client::routes::user_login::{DeviceInfo, UserLoginRequest};
-use client::{Bubble, BubbleStatsInfo, Message, ProntoClient, ReactionType, UserInfo};
+use client::{Bubble, BubbleStats, Message, ProntoClient, ReactionType, UserInfo};
 use futures::future::join_all;
 use pusher::{
-    PusherClient, PusherServerEvent, PusherServerEventType, PusherServerMessage,
+    PusherClient, PusherServerEventType, PusherServerMessage,
     PusherServerMessageWrapper,
 };
 use std::collections::HashMap;
@@ -47,7 +47,7 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
         for channel in state.channel_list.iter() {
             tasks.push(pusher_client.subscribe(format!(
                 "private-bubble.{}.{}",
-                channel.0.id, channel.0.channelcode
+                channel.0.id, channel.0.channel_code
             )))
         }
         drop(state_);
@@ -163,12 +163,6 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
     let response = client
         .user_token_login(
             token,
-            DeviceInfo {
-                browsername: "".to_string(),
-                browserversion: "".to_string(),
-                osname: "".to_string(),
-                r#type: "".to_string(),
-            },
         )
         .await?;
 
@@ -240,7 +234,7 @@ async fn get_current_user(state: State<'_, AppState>) -> Result<UserInfo, Backen
 #[command]
 async fn get_channel_list(
     state: State<'_, AppState>,
-) -> Result<Vec<(Bubble, BubbleStatsInfo)>, BackendError> {
+) -> Result<Vec<(Bubble, BubbleStats)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -337,7 +331,7 @@ async fn delete_message(
     message_id: u64,
 ) -> Result<(), BackendError> {
     let state = state.inner().inner();
-    let mut state = state.read().await;
+    let state = state.read().await;
     let state = state.try_inner()?;
 
     state.client.delete_message(message_id).await?;

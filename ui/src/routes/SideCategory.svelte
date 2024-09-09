@@ -1,5 +1,5 @@
 <script>
-    import Sideitem from "./sideitem.svelte";
+    import Sideitem from "./SideItem.svelte";
 
     export let name;
     export let items;
