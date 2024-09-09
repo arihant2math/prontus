@@ -7,15 +7,21 @@ pub struct UserInfo {
     pub firstname: String,
     pub lastname: String,
     pub username: Option<String>,
-    pub profilepicurl: String,
-    pub isverified: bool,
-    pub isonline: bool,
+    #[serde(rename = "profilepicurl")]
+    pub profile_picture_url: String,
+    #[serde(rename = "isverified")]
+    pub verified: bool,
+    #[serde(rename = "isonline")]
+    pub online: bool,
     pub role: String,
     pub mute: bool,
-    pub isbot: u8,
-    pub hasmobileapp: Option<bool>,
+    #[serde(rename = "isbot")]
+    pub is_bot: u8,
+    #[serde(rename = "hasmobileapp")]
+    pub has_mobile_app: Option<bool>,
     pub fullname: String,
-    pub hasactivity: bool,
+    #[serde(rename = "hasactivity")]
+    pub has_activity: bool,
     pub inactive: bool,
     pub language: String,
     pub organizations: Vec<Organization>,
