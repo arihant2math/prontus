@@ -24,5 +24,6 @@ pub struct UserInfo {
     pub has_activity: bool,
     pub inactive: bool,
     pub language: String,
+    #[serde(default)]
     pub organizations: Vec<Organization>,
 }

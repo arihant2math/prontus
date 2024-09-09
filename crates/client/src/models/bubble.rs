@@ -11,15 +11,15 @@ pub struct Bubble {
     pub title: String,
     #[serde(rename = "isdm")]
     pub is_dm: bool,
-    #[serde(rename = "addmember")]
+    #[serde(rename = "deleteanymessage")]
     pub delete_any_message: String,
-    #[serde(rename = "changename")]
+    #[serde(rename = "changetitle")]
     pub change_title: String,
     #[serde(rename = "changecategory")]
     pub change_category: String,
-    #[serde(rename = "addmember")]
+    #[serde(rename = "removemember")]
     pub remove_member: String,
-    #[serde(rename = "addmember")]
+    #[serde(rename = "leavegroup")]
     pub leave_group: String,
     #[serde(rename = "deletegroup")]
     pub delete_group: String,
