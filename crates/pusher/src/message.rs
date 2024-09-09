@@ -59,7 +59,7 @@ pub struct PusherServerUserPresenceEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerBubbleStatsEvent {
-    pub stats: Vec<client::BubbleStats>,
+    pub stats: Vec<client::BubbleStatsInfo>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
