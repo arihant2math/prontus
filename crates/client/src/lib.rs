@@ -265,7 +265,6 @@ impl ProntoClient {
     pub async fn user_token_login(
         &self,
         token: &str,
-        _device_info: user_token_login::DeviceInfo,
     ) -> Result<TokenLoginResponse, ResponseError> {
         // TODO: pass in device info
         Ok(user_token_login::post(
