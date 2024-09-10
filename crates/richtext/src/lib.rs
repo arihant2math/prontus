@@ -31,10 +31,14 @@ pub fn format_ipc<'a>(
 pub fn parse(markdown: &str) -> serde_json::Value {
     let arena = Arena::new();
 
+    let mut options = Options::default();
+    options.extension.strikethrough = true;
+    options.extension.autolink = true;
+
     let root = parse_document(
         &arena,
         markdown,
-        &Options::default());
+        &options);
 
     // for node in root.descendants() {
     //     if let NodeValue::Text(ref mut text) = node.data.borrow_mut().value {

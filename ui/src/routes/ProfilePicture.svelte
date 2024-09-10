@@ -6,8 +6,6 @@
     function setFlag() {
         flag = true;
     }
-
-    console.log(user);
 </script>
 {#if !flag}
     <img class="w-8 h-8 rounded-full" src="{user.profilepicurl}" alt="{user.fullname} image" on:error={setFlag}>

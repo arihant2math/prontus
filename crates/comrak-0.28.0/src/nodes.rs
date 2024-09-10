@@ -12,6 +12,7 @@ pub use crate::parser::multiline_block_quote::NodeMultilineBlockQuote;
 
 /// The core AST node enum.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "t", content = "c")]
 pub enum NodeValue {
     /// The root of every CommonMark document.  Contains **blocks**.
     Document,
