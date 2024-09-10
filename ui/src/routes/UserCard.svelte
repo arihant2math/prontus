@@ -4,7 +4,12 @@
     export let user = {
         id: 0,
         fullname: "User",
-        profilepicurl: "https://cdn.discordapp.com/embed/avatars/0.png"
+        profilepicurl: "https://cdn.discordapp.com/embed/avatars/0.png",
+        organizations: [
+            {
+                name: "Organization"
+            }
+        ]
     };
 
     export let showSettings;
@@ -17,8 +22,7 @@
     <div class="flex flex-col">
         <p class="text-sm">{user.fullname}</p>
         <p class="text-xs text-gray-500 dark:text-gray-400">
-            <!--  TODO: get actual organization (in user info) -->
-            Stanford Online High School
+            {user.organizations[0].name}
         </p>
     </div>
     <button class="ml-auto px-2 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-700" on:click={showSettings} disabled>
