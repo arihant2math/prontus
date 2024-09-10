@@ -1,128 +1,19 @@
 use client::routes::user_login::{DeviceInfo, UserLoginRequest};
 use client::{Bubble, BubbleStats, Message, ProntoClient, ReactionType, UserInfo};
-use futures::future::join_all;
-use pusher::{
-    PusherClient, PusherServerEventType, PusherServerMessage,
-    PusherServerMessageWrapper,
-};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 use tauri::{command, Manager, State};
+
 mod error;
-pub use error::BackendError;
+mod pusher_thread;
 mod state;
+
+pub use error::BackendError;
+use pusher_thread::run_pusher_thread;
 pub use state::{AppData, AppState, InnerAppState};
 
-// TODO: Should not be backend error result
-#[tokio::main]
-async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
-    loop {
-        if context.is_loaded().await {
-            break;
-        }
-    }
 
-    let pusher_client = {
-        let state = context.inner();
-        let mut state = state.write().await;
-        let state = state.try_inner_mut()?;
-        PusherClient::new(state.client.clone()).await
-    };
-    pusher_client.init().await;
-    println!("Pusher client initialized");
-    {
-        let state = context.inner();
-        let mut state_ = state.write().await;
-        let state = state_.try_inner_mut()?;
-
-        pusher_client
-            .subscribe(format!("private-organization.{}", state.user_info.organizations[0].id))
-            .await;
-        pusher_client
-            .subscribe(format!("private-user.{}", state.user_info.id))
-            .await;
-        let mut tasks = vec![];
-        for channel in state.channel_list.iter() {
-            tasks.push(pusher_client.subscribe(format!(
-                "private-bubble.{}.{}",
-                channel.0.id, channel.0.channel_code
-            )))
-        }
-        drop(state_);
-        join_all(tasks).await;
-        println!("Subscribed to pusher channels");
-    }
-    loop {
-        let message = pusher_client.server_messages().await.recv().await;
-        match message {
-            Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => {
-                match message {
-                    PusherServerMessage::Event(event) => {
-                        match event.event {
-                            PusherServerEventType::PusherServerMessageAddedEvent(event) => {
-                                // TODO: create setting or smth
-                                // TODO: Also make sure app in not in foreground
-                                // Notification::new()
-                                //     .summary("New Message")
-                                //     .body(event.message.message.clone())
-                                //     .icon("thunderbird")
-                                //     .timeout(Timeout::Milliseconds(6000))
-                                //     .show().unwrap();
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel {
-                                    state.message_list.insert(0, event.message);
-                                }
-                            }
-                            PusherServerEventType::PusherServerMessageUpdatedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel {
-                                    let message = state
-                                        .message_list
-                                        .iter_mut()
-                                        .find(|m| m.id == event.message.id);
-                                    if let Some(message) = message {
-                                        *message = event.message;
-                                    }
-                                }
-                            }
-                            PusherServerEventType::PusherServerMessageRemovedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                state.message_list.retain(|m| m.id != event.message.id);
-                            }
-                            PusherServerEventType::PusherServerBubbleStatsEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                // TODO: double for loop, ew
-                                for (bubble, stats) in state.channel_list.iter_mut() {
-                                    for stat in event.stats.iter() {
-                                        if bubble.id == stat.bubble_id {
-                                            *stats = stat.clone();
-                                        }
-                                    }
-                                }
-                            }
-                            // TODO: handle other
-                            _ => {}
-                        }
-                    }
-                    PusherServerMessage::Other(raw) => {
-                        println!("Received unknown message: {:?}", raw);
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
-        }
-    }
-}
 
 #[command]
 async fn get_code(email: String) -> Result<(), BackendError> {
@@ -374,7 +265,7 @@ pub fn run() {
             thread::spawn({
                 let context = context.clone();
                 move || {
-                    let _ = pusher_thread(context);
+                    let _ = run_pusher_thread(context);
                 }
             });
 
