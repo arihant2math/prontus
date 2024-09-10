@@ -1,6 +1,6 @@
-use std::io;
 use comrak::nodes::AstNode;
 use comrak::{parse_document, Arena, Options};
+use std::io;
 
 pub fn format_ipc<'a>(
     root: &'a AstNode<'a>,
@@ -18,11 +18,17 @@ pub fn format_ipc<'a>(
         let data = node.data.borrow().value.clone();
         let mut object = serde_json::Map::new();
         object.insert("data".to_string(), serde_json::to_value(&data)?);
-        object.insert("children".to_string(), serde_json::Value::Array(object_children.clone()));
+        object.insert(
+            "children".to_string(),
+            serde_json::Value::Array(object_children.clone()),
+        );
         children.push(serde_json::Value::Object(object));
     }
     let mut prep = serde_json::Map::new();
-    prep.insert("data".to_string(), serde_json::to_value(&root.data.borrow().value)?);
+    prep.insert(
+        "data".to_string(),
+        serde_json::to_value(&root.data.borrow().value)?,
+    );
     prep.insert("children".to_string(), serde_json::Value::Array(children));
     *output = serde_json::Value::Object(prep);
     Ok(())
@@ -35,10 +41,7 @@ pub fn parse(markdown: &str) -> serde_json::Value {
     options.extension.strikethrough = true;
     options.extension.autolink = true;
 
-    let root = parse_document(
-        &arena,
-        markdown,
-        &options);
+    let root = parse_document(&arena, markdown, &options);
 
     // for node in root.descendants() {
     //     if let NodeValue::Text(ref mut text) = node.data.borrow_mut().value {

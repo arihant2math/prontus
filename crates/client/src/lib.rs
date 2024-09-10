@@ -10,6 +10,7 @@ use crate::bubble_info::GetBubbleInfoResponse;
 use crate::bubble_list::GetBubbleListResponse;
 use crate::user_token_login::TokenLoginResponse;
 
+use crate::user_info::GetUserInfoRequest;
 pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
@@ -151,10 +152,23 @@ impl ProntoClient {
         .await?)
     }
 
-    pub async fn get_user_info(&self) -> Result<user_info::GetUserInfoResponse, ResponseError> {
-        Ok(user_info::get(&self.api_base_url, &self.http_client)
-            .await?
-            .to_result()?)
+    pub async fn get_current_user_info(
+        &self,
+    ) -> Result<user_info::GetUserInfoResponse, ResponseError> {
+        self.get_user_info(None).await
+    }
+
+    pub async fn get_user_info(
+        &self,
+        id: Option<u64>,
+    ) -> Result<user_info::GetUserInfoResponse, ResponseError> {
+        Ok(user_info::get(
+            &self.api_base_url,
+            &self.http_client,
+            GetUserInfoRequest { id },
+        )
+        .await?
+        .to_result()?)
     }
 
     pub async fn get_bubble_list(&self) -> Result<GetBubbleListResponse, ResponseError> {
@@ -262,10 +276,7 @@ impl ProntoClient {
         .to_result()?)
     }
 
-    pub async fn user_token_login(
-        &self,
-        token: &str,
-    ) -> Result<TokenLoginResponse, ResponseError> {
+    pub async fn user_token_login(&self, token: &str) -> Result<TokenLoginResponse, ResponseError> {
         // TODO: pass in device info
         Ok(user_token_login::post(
             &self.api_base_url,

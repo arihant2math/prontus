@@ -112,11 +112,11 @@
 
 <Settings/>
 
-<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
+<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
     <aside id="default-sidebar"
            aria-label="Sidebar"
            class="h-full">
-        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-800">
+        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-800 z-50">
             <!--TODO: maybe move this to the bottom-->
             <UserCard user={currentUser} showSettings={showSettings}/>
             <ul class="space-y-2 font-medium px-3" id="sidebar-list">

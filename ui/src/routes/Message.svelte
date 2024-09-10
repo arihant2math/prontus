@@ -6,6 +6,7 @@
     import ProfilePicture from "./ProfilePicture.svelte";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
+    import MessageProfilePicture from "./messageComponents/MessageProfilePicture.svelte";
 
     export let message;
     export let repeat = false;
@@ -15,7 +16,6 @@
     $: systemMessage = message.systemevent != null;
     $: user = message.user;
     $: timestamp = "";
-    $: pfp_url = message.user.profilepicurl;
     $: media = message.messagemedia;
     $: embed = message.resource;
     $: reactions = message.reactionsummary;

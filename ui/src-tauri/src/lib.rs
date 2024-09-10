@@ -74,7 +74,7 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         &settings.api_key.ok_or(BackendError::NotAuthenticated)?,
     )
         .unwrap();
-    let user_info_future = client.get_user_info();
+    let user_info_future = client.get_current_user_info();
     let channel_list_future = client.get_bubble_list();
     let (user_info, channel_list) = futures::join!(user_info_future, channel_list_future);
     let user_info = user_info?.user;
@@ -119,6 +119,25 @@ async fn get_current_user(state: State<'_, AppState>) -> Result<UserInfo, Backen
     let state = state.try_inner()?;
 
     Ok(state.user_info.clone())
+}
+
+#[command]
+async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, BackendError> {
+    let unlocked_state = state.inner().inner();
+    let unlocked_state_guard = unlocked_state.read().await;
+    let unlocked_state = unlocked_state_guard.try_inner()?;
+
+    if let Some(user) = unlocked_state.users.get(&id) {
+        return Ok(user.clone());
+    }
+    let user_info = unlocked_state.client.get_user_info(Some(id)).await?;
+    drop(unlocked_state_guard);
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.users.insert(user_info.user.id, user_info.user.clone());
+
+    Ok(user_info.user)
 }
 
 #[command]
@@ -280,6 +299,7 @@ pub fn run() {
             load_channel,
             get_channel_info,
             get_current_user,
+            get_user,
             get_channel_list,
             get_messages,
             get_more_messages,
