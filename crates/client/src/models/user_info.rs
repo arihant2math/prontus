@@ -7,6 +7,7 @@ pub struct UserInfo {
     pub firstname: String,
     pub lastname: String,
     pub username: Option<String>,
+    pub pronouns: Option<String>,
     #[serde(rename = "profilepicurl")]
     pub profile_picture_url: String,
     #[serde(rename = "isverified")]
