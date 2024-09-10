@@ -16,6 +16,7 @@
         sendMessage,
         getCurrentUser, getChannelInfo
     } from "./api.js";
+    import {positionPopovers} from "./popup.js";
 
     let currentUser;
     let messages = [];
@@ -51,6 +52,8 @@
     let updating = false;
 
     async function messageScroll(event) {
+        // TODO: Fix hack, this should be global
+        positionPopovers();
         if (event.target.scrollTop + event.target.scrollHeight < 1000) {
             if (updating) {
                 return;
@@ -93,9 +96,6 @@
 
         }
 
-        console.log(categoryInfo);
-        console.log(categories);
-
         sidebarCategoriesInfo = categoryInfo;
         sidebarCategories = categories;
     }
@@ -135,7 +135,7 @@
                 <Message message={message} repeat={false} currentUser={currentUser}/>
             {/each}
         </div>
-        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-slate-900">
+        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-slate-900 z-50">
             <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-slate-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
         </div>
     </div>

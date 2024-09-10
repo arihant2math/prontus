@@ -28,7 +28,7 @@
     <ul id="{dropdownId}" class="hidden py-2 space-y-2">
         {#each items as item}
             <!--TODO: Fix how mentions/unread count works-->
-            <li><Sideitem info={item[0]} stats={item[1]}/></li>
+            <li><Sideitem info={item[0]} stats={item[1]} buttonClick="{buttonClick}"/></li>
         {/each}
     </ul>
 </li>

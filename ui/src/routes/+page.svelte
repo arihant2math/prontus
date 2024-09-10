@@ -4,6 +4,9 @@
     import AuthCode from "./auth_code.svelte"
     import AuthEmail from "./auth_email.svelte";
     import {getCode, sendCode, load} from "./api.js";
+    import {initPopovers} from "./popup.js";
+
+    initPopovers();
 
     let pages = [Main, AuthEmail, AuthCode]
 
@@ -57,4 +60,3 @@
         onEmail={onEmail}
         onCode={onCode}
 />
-

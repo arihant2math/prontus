@@ -6,7 +6,7 @@
     export let buttonClick;
 
     function btnClick() {
-        buttonClick(bubbleId);
+        buttonClick(info.id);
     }
 </script>
 <li>
