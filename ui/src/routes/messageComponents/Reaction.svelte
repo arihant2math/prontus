@@ -1,5 +1,5 @@
 <script>
-    import {getCurrentUser, setReactionState} from "../api.js";
+    import {getCurrentUser, setReactionState} from "$lib/api.js";
 
     export let id;
     export let messageId;

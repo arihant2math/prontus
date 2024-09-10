@@ -1,5 +1,5 @@
 <script>
-    import ProfilePicture from "./ProfilePicture.svelte";
+    import ProfilePicture from "../ProfilePicture.svelte";
 
     export let user = {
         id: 0,

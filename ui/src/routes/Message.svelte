@@ -2,10 +2,10 @@
     import Embed from "./messageComponents/Embed.svelte";
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
-    import {deleteMessage, setReactionState} from "./api.js";
+    import {deleteMessage, setReactionState} from "$lib/api.js";
     import ProfilePicture from "./ProfilePicture.svelte";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
-    import {positionPopovers} from "./popup.js";
+    import {positionPopovers} from "$lib/popup.js";
 
     export let message;
     export let repeat = false;

@@ -4,8 +4,8 @@
     import ChannelCard from "./ChannelCard.svelte";
     import Message from "./Message.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
-    import SideCategory from "./SideCategory.svelte"
-    import UserCard from "./UserCard.svelte"
+    import SideCategory from "./sidebar/SideCategory.svelte"
+    import UserCard from "./sidebar/UserCard.svelte"
 
     import {
         loadChannel,
@@ -15,8 +15,9 @@
         loadMessages,
         sendMessage,
         getCurrentUser, getChannelInfo
-    } from "./api.js";
-    import {positionPopovers} from "./popup.js";
+    } from "$lib/api.js";
+    import {positionPopovers} from "$lib/popup.js";
+    import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
 
     let currentUser;
     let messages = [];
@@ -135,8 +136,8 @@
                 <Message message={message} repeat={false} currentUser={currentUser}/>
             {/each}
         </div>
-        <div class="w-full border-t border-gray-500 mt-auto bg-white dark:bg-slate-900 z-50">
-            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-white dark:bg-slate-900 outline-0 w-full border-0 h-[50px] text-base border-none px-4" on:keydown={handleMessageKeyDown}>
+        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-50 p-5">
+            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
         </div>
     </div>
 </div>

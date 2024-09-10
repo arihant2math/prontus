@@ -1,5 +1,5 @@
 <script>
-    import {rich} from "../api.js";
+    import {rich} from "$lib/api.js";
     import RichText from "./RichText.svelte";
 
     export let message;
