@@ -8,7 +8,7 @@
 
     function init() {
         rich(message).then((content) => {
-            console.log(content);
+            // console.log(content);
             richContent = content;
         });
     }

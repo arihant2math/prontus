@@ -1,5 +1,4 @@
 <script>
-    // TODO: Get adding reactions to work
     import Embed from "./messageComponents/Embed.svelte";
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
@@ -23,13 +22,10 @@
     $: ml = repeat ? "ml-10" : "ml-0";
     $: actionsId = message.id.toString() + "MessageActions";
     $: reactionsId = message.id.toString() + "MessageReactions";
-    let grace = true;
 
     function reactionsShow() {
         console.log("Showing reactions");
-        grace = true;
         let reactions = document.getElementById(reactionsId);
-        console.log(reactions);
         reactions.classList.remove("invisible");
     }
 
@@ -63,12 +59,8 @@
     document.body.addEventListener('click', function (event) {
         let reactions = document.getElementById(reactionsId);
         let actions = document.getElementById(actionsId);
-        if (reactions !== null && !reactions.classList.contains("invisible") && !reactions.contains(event.target)) {
-            if (!grace) {
-                reactionsHide();
-            } else {
-                grace = false;
-            }
+        if (reactions !== null && !reactions.classList.contains("invisible") && !reactions.contains(event.target) && !actions.contains(event.target)) {
+            reactionsHide();
         }
     });
 </script>

@@ -1,8 +1,5 @@
 <script>
     export let content;
-    if (content.data.t === "Text") {
-        console.log(content.data);
-    }
 </script>
 {#if content !== undefined}
     {#if content.data.t === "Document"}
@@ -51,6 +48,8 @@
         <a href="{content.data.c.url}">{content.data.c.title}</a>
     {:else if content.data.t === "Image"}
         Markdown Images are not currently supported
+    {:else if content.data.t === "SoftBreak"}
+        <br>
     {:else}
         <code>{content.data.t} is not supported at the moment, please file a bug</code>
     {/if}

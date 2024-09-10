@@ -6,6 +6,8 @@
     export let buttonClick;
 
     $: dropdownId = name + "SidebarDropdown";
+    $: name = name;
+    $: items = items;
 
     function handleDropdownToggle() {
         console.log("Toggling dropdown");
@@ -26,7 +28,7 @@
     <ul id="{dropdownId}" class="hidden py-2 space-y-2">
         {#each items as item}
             <!--TODO: Fix how mentions/unread count works-->
-            <li><Sideitem bubbleId={item[0].id} name={item[0].title} notifications={item[1].unread} mention={item[1].unread_mentions > 0} buttonClick={buttonClick}/></li>
+            <li><Sideitem info={item[0]} stats={item[1]}/></li>
         {/each}
     </ul>
 </li>
