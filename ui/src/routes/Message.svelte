@@ -3,7 +3,7 @@
     import Embed from "./messageComponents/Embed.svelte";
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
-    import {deleteMessage} from "./api.js";
+    import {deleteMessage, setReactionState} from "./api.js";
     import RichText from "./messageComponents/RichText.svelte";
 
     export let message;
@@ -24,15 +24,18 @@
     $: ml = repeat ? "ml-10" : "ml-0";
     $: actionsId = message.id.toString() + "MessageActions";
     $: reactionsId = message.id.toString() + "MessageReactions";
+    let grace = true;
 
     function reactionsShow() {
-        console.log("Toggling reactions");
+        console.log("Showing reactions");
+        grace = true;
         let reactions = document.getElementById(reactionsId);
+        console.log(reactions);
         reactions.classList.remove("invisible");
     }
 
     function reactionsHide() {
-        console.log("Toggling reactions");
+        console.log("Hiding reactions");
         let reactions = document.getElementById(reactionsId);
         reactions.classList.add("invisible");
     }
@@ -51,6 +54,24 @@
         console.log("Deleting message " + message.id);
         await deleteMessage(message.id);
     }
+
+    async function react(react_id) {
+        reactionsHide();
+        // TODO: Allow for unreacting too
+        await setReactionState(message.id, react_id, true);
+    }
+
+    document.body.addEventListener('click', function (event) {
+        let reactions = document.getElementById(reactionsId);
+        let actions = document.getElementById(actionsId);
+        if (reactions !== null && !reactions.classList.contains("invisible") && !reactions.contains(event.target)) {
+            if (!grace) {
+                reactionsHide();
+            } else {
+                grace = false;
+            }
+        }
+    });
 </script>
 {#if !systemMessage}
     <div class="pl-5 py-2 flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800" on:mouseenter={actionsShow} on:mouseleave={actionsHide} role="listitem">
@@ -80,32 +101,32 @@
         </div>
         <ul class="invisible fixed right-10 z-10 flex flex-row text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-lg" id="{reactionsId}">
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(1)}>
                     👍
                 </button>
             </li>
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(2)}>
                     👎
                 </button>
             </li>
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(3)}>
                     😂
                 </button>
             </li>
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(4)}>
                     💓
                 </button>
             </li>
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(5)}>
                     😢
                 </button>
             </li>
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => react(6)}>
                     😲
                 </button>
             </li>
@@ -120,7 +141,7 @@
             </li>
 <!--            TODO: Forward button -->
             <li>
-                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" disabled>
+                <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={reactionsShow}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
                     </svg>
