@@ -35,9 +35,9 @@ async fn pusher_thread(context: AppState) -> Result<(), BackendError> {
         let state = context.inner();
         let mut state_ = state.write().await;
         let state = state_.try_inner_mut()?;
-        // TODO: make this portable (don't have constant org id)
+
         pusher_client
-            .subscribe("private-organization.2245".to_string())
+            .subscribe(format!("private-organization.{}", state.user_info.organizations[0].id))
             .await;
         pusher_client
             .subscribe(format!("private-user.{}", state.user_info.id))
