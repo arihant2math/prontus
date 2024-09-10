@@ -1,2 +1,4 @@
 [workspace]
-members = ["client", "pusher", "settings"]
+members = ["client", "pusher", "richtext", "settings"]
+resolver = "2"
+exclude = ["comrak-0.28.0"]

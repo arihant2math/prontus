@@ -1,4 +1,6 @@
 <script>
+    import ProfilePicture from "./ProfilePicture.svelte";
+
     export let user = {
         id: 0,
         fullname: "User",
@@ -10,7 +12,7 @@
 
 <div class="h-[60px] flex flex-row space-x-4 px-4 py-2 w-full border-b border-gray-500">
     <div>
-        <img src="{user.profilepicurl}" class="w-8 h-8 rounded-full" alt="Profile Picture for {user.fullname}"/>
+        <ProfilePicture user={user} />
     </div>
     <div class="flex flex-col">
         <p class="text-sm">{user.fullname}</p>

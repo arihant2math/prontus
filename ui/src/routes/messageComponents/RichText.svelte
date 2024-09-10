@@ -4,7 +4,6 @@
     export let content = "";
     let richContent = "";
     rich(content).then((data) => {
-        console.log(data);
         richContent = data;
     });
 </script>

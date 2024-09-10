@@ -8,9 +8,7 @@ use pusher::{
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
-use regex::Regex;
 use tauri::{command, Manager, State};
-use comrak::{markdown_to_html};
 mod error;
 pub use error::BackendError;
 mod state;
@@ -359,24 +357,12 @@ async fn delete_message(
 async fn rich(
     state: State<'_, AppState>,
     message: String,
-) -> Result<String, BackendError> {
+) -> Result<serde_json::Value, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
-    // TODO: precompile regex
-    let re = Regex::new(r"<@\d*>").unwrap();
-    for (s, _) in re.captures_iter(&message).map(|c| c.extract::<0>()) {
-        let tag = s.to_string();
-        println!("Tag: {}", tag);
-        // TODO: replace
-    }
-    // TODO: precompile options
-    let mut options = comrak::Options::default();
-    options.extension.strikethrough = true;
-    options.extension.autolink = true;
 
-    options.parse.smart = true;
-    let message = markdown_to_html(&message, &options).to_string();
+    let message = richtext::parse(&message);
     Ok(message)
 }
 

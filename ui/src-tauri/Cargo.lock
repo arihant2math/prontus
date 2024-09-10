@@ -709,8 +709,6 @@ dependencies = [
 [[package]]
 name = "comrak"
 version = "0.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c93ab3577cca16b4a1d80a88c2e0cd8b6e969e51696f0bbb0d1dcb0157109832"
 dependencies = [
  "caseless",
  "clap",
@@ -719,6 +717,7 @@ dependencies = [
  "memchr",
  "once_cell",
  "regex",
+ "serde",
  "shell-words",
  "slug",
  "syntect",
@@ -3477,6 +3476,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "richtext"
+version = "0.1.0"
+dependencies = [
+ "comrak",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ring"
 version = "0.17.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4882,12 +4890,11 @@ name = "ui"
 version = "0.1.0"
 dependencies = [
  "client",
- "comrak",
  "futures",
  "notify-rust",
  "pusher",
- "regex",
  "reqwest",
+ "richtext",
  "serde",
  "serde_json",
  "settings",

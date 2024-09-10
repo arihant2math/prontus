@@ -1,0 +1,45 @@
+#!/bin/sh
+
+exec 1>&2
+set -e
+
+if [ "$RUN_PRECOMMIT_HOOK" != 1 ]; then
+	exit 0
+fi
+
+echo "roll me into examples/update-readme.rs"
+exit 1
+
+if [ "$(git status --porcelain README.md | cut -b2-2 | tr -d '[:space:]')" != "" ]; then
+	echo "README.md has unstaged changes, commit hook cannot run"
+	exit 1
+fi
+
+
+CARGO_TARGET_DIR=/tmp/comrak_test cargo build
+(cd vendor/cmark-gfm/test; RUST_BACKTRACE=1 python3 spec_tests.py --program=/tmp/comrak_test/debug/comrak || true) > spec_out.txt
+r=$(tail -n 1 spec_out.txt | sed -e 's/ passed, /,/' -e 's/ failed, /,/' -e 's/ errored, /,/' -e 's/ skipped//')
+passed=$(echo "$r" | cut -f1 -d,)
+failed=$(echo "$r" | cut -f2 -d,)
+errored=$(echo "$r" | cut -f3 -d,)
+skipped=$(echo "$r" | cut -f4 -d,)
+total=$(($passed + $failed + $errored))
+if [ "$errored" -gt 0 ]; then
+	color=red
+elif [ "$failed" -gt 0 ]; then
+	color=yellow
+elif [ "$skipped" -gt 0 ]; then
+	color=blue
+else
+	color=brightgreen
+fi
+
+sed -i '' \
+	-e '2s@\[.*\]@[Spec Status: '"$passed"/"$total"']@' \
+	-e '2s@(.*)@('https://img.shields.io/badge/specs-"$passed"%2F"$total"-"$color".svg')@' \
+	README.md
+
+git diff README.md
+git diff spec_out.txt | grep ^+ || true
+git add README.md
+git add spec_out.txt

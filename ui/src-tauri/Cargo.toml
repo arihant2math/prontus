@@ -16,12 +16,11 @@ tauri-build = { version = "2.0.0-rc", features = [] }
 
 [dependencies]
 client = { path = "../../crates/client" }
-comrak = "0.28"
 futures = "0.3"
 notify-rust = "4"
 pusher = { path = "../../crates/pusher" }
-regex = "1"
 reqwest = "0.12"
+richtext = { path = "../../crates/richtext" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri = { version = "2.0.0-rc", features = [] }

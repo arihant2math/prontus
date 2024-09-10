@@ -5,14 +5,13 @@
     import Reaction from "./messageComponents/Reaction.svelte";
     import {deleteMessage, setReactionState} from "./api.js";
     import RichText from "./messageComponents/RichText.svelte";
+    import ProfilePicture from "./ProfilePicture.svelte";
 
     export let message;
     export let repeat = false;
     export let currentUser;
 
-    console.log(message);
-
-    $: isCurrentUser = currentUser.id == user.id;
+    $: isCurrentUser = currentUser.id === user.id;
     $: systemMessage = message.systemevent != null;
     $: user = message.user;
     $: timestamp = "";
@@ -76,7 +75,7 @@
 {#if !systemMessage}
     <div class="pl-5 py-2 flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800" on:mouseenter={actionsShow} on:mouseleave={actionsHide} role="listitem">
         {#if !repeat}
-            <img class="w-8 h-8 rounded-full" src="{pfp_url}" alt="{user.fullname} image">
+            <ProfilePicture user={message.user}/>
         {/if}
         <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5">
             {#if !repeat}
