@@ -82,10 +82,31 @@ pub struct PusherServerMessageRemovedEvent {
     pub message: MessageId,
 }
 
-// Received other message: RawPusherMessage { event: "client-App\\Events\\UserTyping", data: String("{\"user_id\":5302428,\"thread_id\":null}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
-// Received other message: RawPusherMessage { event: "client-App\\Events\\UserStoppedTyping", data: String("{\"user_id\":5302428}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
-// Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5302428,\"mark\":88072979,\"markupdated\":\"2024-09-04 05:55:31\"}"), channel: Some("private-bubble.3738656.bsFWoVrfRArjYaqv1CcFMaSSKs5z4DIapMMyaFGk") }
-// Received other message: RawPusherMessage { event: "App\\Events\\MarkUpdated", data: String("{\"user_id\":5279855,\"mark\":88072124,\"markupdated\":\"2024-09-04 05:55:56\"}"), channel: Some("private-bubble.3742021.y25TRXwZdNfCdzZKN5FzAEIev6AWdZp8edRH99ZW") }
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerUserTypingEvent {
+    pub user_id: u64,
+    pub thread_id: Option<u64>,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerUserStoppedTypingEvent {
+    pub user_id: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherMarkUpdatedEvent {
+    pub user_id: u64,
+    pub mark: u64,
+    // TODO: is datetime (YYYY-MM-DD HH-mm-SS)
+    pub markupdated: String,
+}
+
+// Received unknown message: RawPusherMessage { event: "App\\Events\\UserUpdated", data: String("{\"user\":{\"id\":5279672,\"firstname\":\"Ally\",\"lastname\":\"Aggarwal\",\"username\":null,\"locale\":\"\",\"lastseen\":\"
+// 2024-09-10 20:36:32\",\"profilepic\":true,\"status\":0,\"created_at\":\"2023-07-28 18:15:32\",\"updated_at\":\"2024-09-10 20:36:50\",\"deactivated_at\":null,\"email_verified_at\":\"2023-11-05 04:53:50\",\"phone_verifie
+// d_at\":null,\"isverified\":false,\"dropinorder\":0,\"maxstreams\":10,\"autotranslate\":false,\"isonline\":false,\"lastpresencetime\":\"2024-09-10 00:08:35\",\"acceptedtos\":\"2023-11-05 04:53:50\",\"sentwelcomemsg\":nu
+// ll,\"role\":\"user\",\"mute\":false,\"muteuntil\":null,\"isbot\":0,\"pronouns\":null,\"fullname\":\"Ally Aggarwal\",\"hasactivity\":true,\"inactive\":false,\"language\":\"en\",\"permissions\":{\"change_name\":\"system\
+// ",\"change_email\":\"system\",\"change_phone\":\"system\",\"remove_user\":\"system\",\"change_title\":\"admin\",\"change_pronouns\":\"admin\",\"change_own_name\":false,\"change_own_email\":false,\"change_own_phone\":fa
+// lse,\"change_own_title\":true,\"change_own_pronouns\":true},\"profilepicpath\":\"\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\",\"profilepicurl\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\"}}"), channel: Some("private-user.5302428") }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
@@ -94,6 +115,9 @@ pub enum PusherServerEventType {
     PusherServerMessageUpdatedEvent(PusherServerMessageUpdatedEvent),
     PusherServerMessageAddedEvent(PusherServerMessageAddedEvent),
     PusherServerMessageRemovedEvent(PusherServerMessageRemovedEvent),
+    PusherServerUserTypingEvent(PusherServerUserTypingEvent),
+    PusherServerUserStoppedTypingEvent(PusherServerUserStoppedTypingEvent),
+    PusherMarkUpdatedEvent(PusherMarkUpdatedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -181,6 +205,30 @@ impl From<String> for PusherServerMessage {
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
                     event: PusherServerEventType::PusherServerMessageRemovedEvent(data),
+                })
+            }
+            "App\\Events\\UserTyping" => {
+                let data: PusherServerUserTypingEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerUserTypingEvent(data),
+                })
+            }
+            "App\\Events\\UserStoppedTyping" => {
+                let data: PusherServerUserStoppedTypingEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerUserStoppedTypingEvent(data),
+                })
+            }
+            "App\\Events\\MarkUpdated" => {
+                let data: PusherMarkUpdatedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherMarkUpdatedEvent(data),
                 })
             }
             _ => Self::Other(raw),
