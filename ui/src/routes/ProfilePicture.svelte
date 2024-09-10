@@ -1,11 +1,10 @@
 <script>
     export let user;
 
-    let initials = user.fullname.split(" ").map((n) => n[0]).join("");
     let flag = false;
 
     $: user = user;
-    $: initials = initials;
+    $: initials = user.fullname.split(" ").map((n) => n[0]).join("");
     $: flag = flag;
 
     function setFlag() {
