@@ -18,6 +18,7 @@
     } from "$lib/api.js";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
+    import MessageList from "./MessageList.svelte";
 
     let currentUser;
     let messages = [];
@@ -25,16 +26,16 @@
     let sidebarCategories = [];
     let channelInfo = null;
 
-    async function appendMessages(newMessages) {
-        messages = messages.concat(newMessages);
-    }
-
     async function handleSidebarClick(id) {
+        if (id === await getChannelInfo().id) {
+            return;
+        }
         await loadChannel(id);
         await loadMessages();
         messages = await getMessages();
         // clear input
         document.querySelector("#messageInput").value = "";
+        // TODO: Don't use selector
         let messagesDiv = document.querySelector("#messages");
         messagesDiv.scrollTop = 0;
         // TODO: Below doesn't work for dms
@@ -42,31 +43,11 @@
     }
 
     async function handleMessageKeyDown(event) {
-        if (event.keyCode === 13) {
+        if (event.keyCode === 13 && !event.shiftKey) {
             await sendMessage(document.querySelector("#messageInput").value).then(async (message) => {
                 document.querySelector("#messageInput").value = "";
                 // TODO: Add message, but shade it to a grey color, to indicate it has not yet been sent
             });
-        }
-    }
-
-    let updating = false;
-
-    async function messageScroll(event) {
-        // TODO: Fix hack, this should be global
-        positionPopovers();
-        if (event.target.scrollTop + event.target.scrollHeight < 1000) {
-            if (updating) {
-                return;
-            }
-            updating = true;
-            console.info("Loading more messages");
-            let messages = await getMessages();
-            let last = messages[messages.length - 1].id;
-            await getMoreMessages(last).then(async (messages) => {
-                await appendMessages(messages);
-            });
-            updating = false;
         }
     }
 
@@ -104,10 +85,6 @@
     init().then(() => {
         console.log("Main init complete");
     });
-
-    setInterval(async () => {
-        messages = await getMessages();
-    }, 10);
 </script>
 
 <Settings/>
@@ -130,12 +107,7 @@
         <div>
             <ChannelCard info={channelInfo}/>
         </div>
-        <div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
-            {#each messages as message}
-                <!--TODO: Get repeat working-->
-                <Message message={message} repeat={false} currentUser={currentUser}/>
-            {/each}
-        </div>
+        <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
             <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
         </div>
