@@ -56,6 +56,14 @@ export async function setReactionState(messageId, reactionId, active) {
     return await invoke("set_reaction_state", {messageId, reactionId, active});
 }
 
+export async function getSettings() {
+    return await invoke("get_settings");
+}
+
+export async function setSettings(settings) {
+    return await invoke("set_settings", {settings});
+}
+
 export async function rich(message) {
     return await invoke("rich", {message});
 }

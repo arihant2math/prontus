@@ -116,7 +116,7 @@
     <aside id="default-sidebar"
            aria-label="Sidebar"
            class="h-full">
-        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-800 z-50">
+        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-900 z-40">
             <!--TODO: maybe move this to the bottom-->
             <UserCard user={currentUser} showSettings={showSettings}/>
             <ul class="space-y-2 font-medium px-3" id="sidebar-list">
@@ -126,7 +126,7 @@
             </ul>
         </div>
     </aside>
-    <div id="content" class="h-full w-full bg-white dark:bg-slate-900 flex flex-col">
+    <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col">
         <div>
             <ChannelCard info={channelInfo}/>
         </div>
@@ -136,7 +136,7 @@
                 <Message message={message} repeat={false} currentUser={currentUser}/>
             {/each}
         </div>
-        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-50 p-5">
+        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
             <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
         </div>
     </div>
