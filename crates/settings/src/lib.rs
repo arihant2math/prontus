@@ -5,6 +5,18 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
 
+#[derive(Debug, thiserror::Error)]
+pub enum SettingsError {
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Bincode error: {0}")]
+    BincodeDecodeError(#[from] bincode::error::DecodeError),
+    #[error("Bincode error: {0}")]
+    BincodeEncodeError(#[from] bincode::error::EncodeError),
+}
+
+pub type Result<T> = std::result::Result<T, SettingsError>;
+
 pub const BINCODE_CONFIG: Configuration = bincode::config::standard();
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize, Encode, Decode)]
@@ -36,7 +48,8 @@ impl Settings {
             .join("settings.bnc")
     }
 
-    pub fn load() -> Result<Self, std::io::Error> {
+    #[deprecated]
+    pub fn load() -> std::result::Result<Self, std::io::Error> {
         let path = Self::path();
         if path.exists() {
             Ok(
@@ -48,10 +61,11 @@ impl Settings {
         }
     }
 
-    pub fn save(&self) -> Result<(), std::io::Error> {
+    #[deprecated]
+    pub fn save(&self) -> std::result::Result<(), std::io::Error> {
         let path = Self::path();
         std::fs::create_dir_all(path.parent().unwrap())?;
-        let data = bincode::encode_to_vec(&self, BINCODE_CONFIG)?;
+        let data = bincode::encode_to_vec(&self, BINCODE_CONFIG).unwrap();
         let mut file = std::fs::OpenOptions::new()
             .write(true)
             .create(true)
@@ -61,18 +75,18 @@ impl Settings {
         Ok(())
     }
 
-    pub async fn load_async() -> Result<Self, std::io::Error> {
+    pub async fn load_async() -> Result<Self> {
         let path = Self::path();
         if path.exists() {
             // TODO: switch to OpenOptions
             let data = tokio::fs::read(&path)?;
-            Ok(bincode::decode_from_slice(&data, BINCODE_CONFIG).unwrap().0)
+            Ok(bincode::decode_from_slice(&data, BINCODE_CONFIG)?.0)
         } else {
             Ok(Self::default())
         }
     }
 
-    pub async fn save_async(&self) -> Result<(), std::io::Error> {
+    pub async fn save_async(&self) -> Result<()> {
         let path = Self::path();
         tokio::fs::create_dir_all(path.parent().unwrap())?;
         let data = bincode::encode_to_vec(&self, BINCODE_CONFIG)?;
