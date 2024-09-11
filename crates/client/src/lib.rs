@@ -14,15 +14,12 @@ use crate::user_info::GetUserInfoRequest;
 pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
+pub use crate::bubble_membership_search::GetBubbleMembershipSearchRequest;
 
 pub mod api_error;
 pub mod models;
 pub mod routes;
 pub mod serde_datetime;
-
-
-// TODO: SHOULD BE MODEL
-pub use crate::routes::bubble_history::Reactions;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -202,6 +199,19 @@ impl ProntoClient {
             &self.http_client,
             bubble_id,
             latest_message_id,
+        )
+        .await?
+        .to_result()?)
+    }
+
+    pub async fn get_bubble_membership(
+        &self,
+        request: GetBubbleMembershipSearchRequest
+    ) -> Result<bubble_membership_search::GetBubbleMembershipSearchResponse, ResponseError> {
+        Ok(bubble_membership_search::get(
+            &self.api_base_url,
+            &self.http_client,
+            request
         )
         .await?
         .to_result()?)

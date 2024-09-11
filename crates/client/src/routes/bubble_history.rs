@@ -4,37 +4,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MessageMedia {
-    pub id: u64,
-    pub url: String,
-    pub mediatype: String,
-    pub urlmimetype: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MessageResource {
-    pub id: u64,
-    pub providerurl: String,
-    pub snippet: String,
-    pub url: String,
-    pub title: String,
-    pub thumbnailurl: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Reactions {
-    #[serde(rename = "reactiontype_id")]
-    pub id: u64,
-    pub count: u64,
-    pub users: Vec<u64>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetBubbleHistoryResponse {
     pub ok: bool,
     pub pagesize: u64,
     pub messages: Vec<Message>,
-    pub parentmessages: Vec<Message>,
+    #[serde(rename = "parentmessages")]
+    pub parent_messages: Vec<Message>,
 }
 
 pub type GetBubbleHistoryResult = crate::APIResult<GetBubbleHistoryResponse>;
