@@ -11,6 +11,7 @@ mod state;
 
 pub use error::BackendError;
 use pusher_thread::run_pusher_thread;
+use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
 
 
@@ -264,6 +265,11 @@ async fn delete_message(
 }
 
 #[command]
+fn get_settings() -> Settings {
+    Settings::load().unwrap()
+}
+
+#[command]
 async fn rich(
     state: State<'_, AppState>,
     message: String,
@@ -307,6 +313,7 @@ pub fn run() {
             send_message,
             set_reaction_state,
             delete_message,
+            get_settings,
             rich
         ])
         .run(tauri::generate_context!())
