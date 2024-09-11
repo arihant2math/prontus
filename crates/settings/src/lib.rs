@@ -79,7 +79,7 @@ impl Settings {
         let path = Self::path();
         if path.exists() {
             // TODO: switch to OpenOptions
-            let data = tokio::fs::read(&path)?;
+            let data = tokio::fs::read(&path).await?;
             Ok(bincode::decode_from_slice(&data, BINCODE_CONFIG)?.0)
         } else {
             Ok(Self::default())
@@ -88,7 +88,7 @@ impl Settings {
 
     pub async fn save_async(&self) -> Result<()> {
         let path = Self::path();
-        tokio::fs::create_dir_all(path.parent().unwrap())?;
+        tokio::fs::create_dir_all(path.parent().unwrap()).await?;
         let data = bincode::encode_to_vec(&self, BINCODE_CONFIG)?;
         let mut file = tokio::fs::OpenOptions::new()
             .write(true)
