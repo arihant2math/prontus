@@ -242,11 +242,25 @@ async fn set_reaction_state(
             .client
             .add_reaction(message_id, ReactionType::from(reaction_id as i32))
             .await?;
+        let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
+        let o = messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id);
+        if o.is_none() {
+            messages.reactions.push(client::Reactions {
+                id: reaction_id,
+                count: 1,
+                users: vec![state.user_info.id],
+            });
+        } else {
+            // TODO: can be more rustlike
+            o.unwrap().count += 1;
+        }
     } else {
         state
             .client
             .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
             .await?;
+        let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
+        messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id).unwrap().count -= 1;
     }
     Ok(())
 }
@@ -265,13 +279,14 @@ async fn delete_message(
 }
 
 #[command]
-fn get_settings() -> Settings {
-    Settings::load().unwrap()
+async fn get_settings() -> Result<Settings, BackendError> {
+    Ok(Settings::load_async().await?)
 }
 
 #[command]
-fn set_settings(settings: Settings) {
-    settings.save();
+async fn set_settings(settings: Settings) -> Result<(), BackendError> {
+    settings.save_async().await?;
+    Ok(())
 }
 
 #[command]

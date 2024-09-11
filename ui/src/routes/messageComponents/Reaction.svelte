@@ -9,14 +9,15 @@
     export let checked = users.includes(currentUser.id);
 
     $: checkBoxId = messageId + "Reaction" + id;
+    $: count = count;
 
 
     async function clicked() {
         console.log("Clicked reaction " + id + " on message " + messageId + " to " + document.getElementById(checkBoxId).checked);
         if (document.getElementById(checkBoxId).checked) {
-            count++;
+            count += 1;
         } else {
-            count--;
+            count -= 1;
         }
         await setReactionState(messageId, id, document.getElementById(checkBoxId).checked);
     }
