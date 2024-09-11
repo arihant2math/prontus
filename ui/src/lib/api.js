@@ -16,6 +16,10 @@ export async function getCurrentUser() {
     return await invoke("get_current_user");
 }
 
+export async function getUser(id) {
+    return await invoke("get_user", {id});
+}
+
 export async function loadChannel(id) {
     await invoke("load_channel", {id});
 }
