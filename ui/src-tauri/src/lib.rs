@@ -44,9 +44,9 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
         .to_result()
         .unwrap();
     let token = &response.users[0].login_token;
-    let mut settings = settings::Settings::load()?;
+    let mut settings = Settings::load_async().await?;
     settings.api_key = Some(token.clone());
-    settings.save()?;
+    settings.save_async().await?;
     // TODO: This is the part where we can switch base urls
     let client =
         ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
@@ -57,9 +57,9 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
         )
         .await?;
 
-    let mut settings = settings::Settings::load()?;
+    let mut settings = Settings::load_async().await?;
     settings.api_key = Some(response.users[0].access_token.clone());
-    settings.save()?;
+    settings.save_async().await?;
     // TODO: Error handling as usual
     Ok(())
 }
@@ -69,7 +69,7 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     if state.is_loaded().await {
         return Ok(());
     }
-    let settings = settings::Settings::load()?;
+    let settings = Settings::load_async().await?;
     let client = ProntoClient::new(
         "https://stanfordohs.pronto.io/api/".to_string(),
         &settings.api_key.ok_or(BackendError::NotAuthenticated)?,
@@ -270,6 +270,11 @@ fn get_settings() -> Settings {
 }
 
 #[command]
+fn set_settings(settings: Settings) {
+    settings.save();
+}
+
+#[command]
 async fn rich(
     state: State<'_, AppState>,
     message: String,
@@ -314,6 +319,7 @@ pub fn run() {
             set_reaction_state,
             delete_message,
             get_settings,
+            set_settings,
             rich
         ])
         .run(tauri::generate_context!())

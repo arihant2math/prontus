@@ -10,6 +10,8 @@ pub enum BackendError {
     ResponseError(#[from] client::ResponseError),
     #[error("I/O error: {0}")]
     IoError(#[from] std::io::Error),
+    #[error("Settings error: {0}")]
+    SettingsError(#[from] settings::SettingsError)
 }
 
 impl Into<InvokeError> for BackendError {
