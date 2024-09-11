@@ -20,6 +20,10 @@ pub mod models;
 pub mod routes;
 pub mod serde_datetime;
 
+
+// TODO: SHOULD BE MODEL
+pub use crate::routes::bubble_history::Reactions;
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum APIResult<T> {
