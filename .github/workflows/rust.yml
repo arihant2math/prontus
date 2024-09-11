@@ -22,7 +22,7 @@ jobs:
           submodules: 'true'
       - name: Setup dependencies
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get install build-essential libssl-dev libgtk-3-dev libsoup-3.0-common webkit2gtk-driver xapp libayatana-appindicator3-dev librsvg2-dev
+        run: sudo apt-get update && sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Build
         run: cd ui && npm install && npm run tauri build
