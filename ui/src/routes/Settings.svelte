@@ -104,7 +104,7 @@
                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
                         Options
                     </h4>
-                    <ul class="grid w-full gap-6 md:grid-cols-3 lg:grid-cols-5 max-w-xl">
+                    <ul class="grid w-full gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-xl">
                         <li>
                             <input type="checkbox" id="notifications-option" value="" class="hidden peer" disabled>
                             <OptionsLabel target="notifications-option">
