@@ -1,10 +1,11 @@
 use bincode::config::Configuration;
 use bincode::{Decode, Encode};
 use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
 
 pub const BINCODE_CONFIG: Configuration = bincode::config::standard();
 
-#[derive(Copy, Clone, Debug, PartialEq, Encode, Decode)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize, Encode, Decode)]
 pub enum Theme {
     Light,
     Dark,
@@ -17,7 +18,7 @@ impl Default for Theme {
     }
 }
 
-#[derive(Clone, Debug, Default, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
 pub struct Settings {
     pub saved_email: Option<String>,
     pub saved_phone: Option<String>,
