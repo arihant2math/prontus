@@ -14,6 +14,8 @@
         getMoreMessages,
         loadMessages,
         sendMessage,
+        getChannelUsers,
+        loadChannelUsers,
         getCurrentUser, getChannelInfo
     } from "$lib/api.js";
     import {positionPopovers} from "$lib/popup.js";
@@ -34,6 +36,10 @@
         }
         await loadChannel(id);
         await loadMessages();
+        channelUsers = [];
+        loadChannelUsers(id).then(async () => {
+            channelUsers = await getChannelUsers(id);
+        });
         messages = await getMessages();
         // clear input
         document.querySelector("#messageInput").value = "";

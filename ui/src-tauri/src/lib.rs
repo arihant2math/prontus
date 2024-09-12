@@ -333,7 +333,7 @@ async fn set_settings(settings: Settings) -> Result<(), BackendError> {
 
 #[command]
 async fn rich(
-    state: State<'_, AppState>,
+    _state: State<'_, AppState>,
     message: String,
 ) -> Result<serde_json::Value, BackendError> {
     // let state = state.inner().inner();
@@ -375,6 +375,8 @@ pub fn run() {
             send_message,
             set_reaction_state,
             delete_message,
+            get_channel_users,
+            load_channel_users,
             get_settings,
             set_settings,
             rich
