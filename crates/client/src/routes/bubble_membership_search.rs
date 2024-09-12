@@ -60,10 +60,6 @@ pub async fn get(
         .json(&request)
         .send()
         .await?;
-    // let json = r.json::<GetBubbleMembershipSearchResult>().await?;
-    let text = r.text().await?;
-    println!("{text}");
-    let json: GetBubbleMembershipSearchResponse = serde_json::from_str(&text).unwrap();
-    let json = serde_json::from_str(&text).unwrap();
+    let json = r.json::<GetBubbleMembershipSearchResult>().await?;
     Ok(json)
 }
