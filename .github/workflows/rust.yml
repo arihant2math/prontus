@@ -55,8 +55,20 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'ubuntu')
         with:
-          name: prontus_x86_64 target (Linux)
-          path: ./ui/src-tauri/target/release/
+          name: prontus_0.1.0_amd64.deb
+          path: ./ui/src-tauri/target/release/bundle/deb/prontus_0.1.0_amd64.deb
+    
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          name: prontus-0.1.0-1.x86_64.rpm
+          path: ./ui/src-tauri/target/release/bundle/rpm/prontus-0.1.0-1.x86_64.rpm
+      
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          name: prontus_0.1.0_amd64.AppImage
+          path: ./ui/src-tauri/target/release/bundle/appimage/prontus_0.1.0_amd64.AppImage
 
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'macos')
@@ -67,5 +79,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: startsWith(matrix.os, 'macos')
         with:
-          name: prontus_0.1.0_x86_64.dmg
+          name: prontus_0.1.0_aarch64.dmg
           path: ./ui/src-tauri/target/release/bundle/dmg/prontus_0.1.0_aarch64.dmg
