@@ -40,6 +40,10 @@ pub struct Message {
     pub system_event: Option<String>,
     #[serde(default, rename = "parentmessage_id")]
     pub parent_message_id: Option<u64>,
+    #[serde(default, rename = "firstchildmessage_id")]
+    pub first_child_message_id: Option<u64>,
+    #[serde(default, rename = "lastchildmessage_id")]
+    pub last_child_message_id: Option<u64>,
     #[serde(default, rename = "reactionsummary")]
     pub reactions: Vec<Reactions>,
     #[serde(default, rename = "messagemedia")]
