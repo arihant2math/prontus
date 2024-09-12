@@ -118,7 +118,7 @@
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col">
         <div>
-            <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
+            <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden">
