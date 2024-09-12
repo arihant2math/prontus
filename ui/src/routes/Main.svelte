@@ -1,11 +1,11 @@
 <script>
     import {invoke} from "@tauri-apps/api/core";
 
-    import ChannelCard from "./ChannelCard.svelte";
+    import ChannelCard from "./CurrentChannelCard.svelte";
     import Message from "./Message.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
     import SideCategory from "./sidebar/SideCategory.svelte"
-    import UserCard from "./sidebar/UserCard.svelte"
+    import UserCard from "./CurrentUserCard.svelte"
 
     import {
         loadChannel,
@@ -25,6 +25,8 @@
     let sidebarCategoriesInfo = {};
     let sidebarCategories = [];
     let channelInfo = null;
+    let channelUsers = [];
+    let showMemberList = false;
 
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
@@ -85,6 +87,8 @@
     init().then(() => {
         console.log("Main init complete");
     });
+
+    $: showMemberList = showMemberList;
 </script>
 
 <Settings/>
@@ -105,13 +109,22 @@
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col">
         <div>
-            <ChannelCard info={channelInfo}/>
+            <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
         <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
             <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
         </div>
     </div>
+    {#if showMemberList}
+        <div class="max-w-md h-full">
+            <ul class="flex flex-col">
+                {#each channelUsers as user}
+                    <UserCard user={user}/>
+                {/each}
+            </ul>
+        </div>
+    {/if}
 </div>
 
 <style>

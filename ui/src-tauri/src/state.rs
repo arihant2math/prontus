@@ -5,11 +5,18 @@ use std::ops::Deref;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+#[derive(Clone)]
+pub struct ChannelUsers {
+    pub pages: u64,
+    pub users: Vec<u64>,
+}
+
 pub struct AppData {
     pub user_info: UserInfo,
     pub users: HashMap<u64, UserInfo>,
     pub client: Arc<ProntoClient>,
     pub channel_list: Vec<(Bubble, BubbleStats)>,
+    pub channel_users: HashMap<u64, ChannelUsers>,
     pub current_channel: u64,
     pub message_list: Vec<Message>,
 }

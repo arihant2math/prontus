@@ -655,6 +655,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "serde_with",
  "thiserror",
  "url",
  "uuid",

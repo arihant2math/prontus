@@ -1,5 +1,5 @@
 <script>
-    import Sideitem from "./SideItem.svelte";
+    import Sideitem from "./ChannelCard.svelte";
 
     export let name;
     export let items;

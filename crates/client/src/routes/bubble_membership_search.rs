@@ -17,15 +17,26 @@ fn default_order_by() -> Vec<String> {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetBubbleMembershipSearchRequest {
     #[serde_as(as = "DisplayFromStr")]
-    bubble_id: u64,
+    pub bubble_id: u64,
     #[serde(default = "_true", rename = "includeself")]
-    include_self: bool,
-    page: u64,
+    pub include_self: bool,
+    pub page: u64,
     #[serde(default = "default_order_by", rename = "orderby")]
-    order_by: Vec<String>,
+    pub order_by: Vec<String>,
     // TODO:
     // search: Option<String>
     // role: Option<String>
+}
+
+impl Default for GetBubbleMembershipSearchRequest {
+    fn default() -> Self {
+        Self {
+            bubble_id: 0,
+            include_self: true,
+            page: 1,
+            order_by: vec!["firstname".to_string(), "lastname".to_string()],
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

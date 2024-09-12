@@ -1,5 +1,5 @@
 use client::routes::user_login::{DeviceInfo, UserLoginRequest};
-use client::{Bubble, BubbleStats, Message, ProntoClient, ReactionType, UserInfo};
+use client::{Bubble, BubbleStats, GetBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -13,8 +13,7 @@ pub use error::BackendError;
 use pusher_thread::run_pusher_thread;
 use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
-
-
+use crate::state::ChannelUsers;
 
 #[command]
 async fn get_code(email: String) -> Result<(), BackendError> {
@@ -95,6 +94,7 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         channel_list,
         current_channel: 0,
         message_list: vec![],
+        channel_users: HashMap::new(),
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
@@ -279,6 +279,48 @@ async fn delete_message(
 }
 
 #[command]
+async fn get_channel_users(state: State<'_, AppState>, id: u64) -> Result<Vec<UserInfo>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    let users = state.channel_users.get(&id).map(|u| {
+        let u = u.clone();
+        u.users.into_iter().map(|u| {state.users.get(&u).unwrap().clone()}).collect::<Vec<UserInfo>>()
+    }).unwrap_or(vec![]);
+
+    Ok(users)
+}
+
+#[command]
+async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+
+    let page = state.channel_users.get(&id).map(|u| u.pages).unwrap_or(0);
+    let membership = state.client.get_bubble_membership(GetBubbleMembershipSearchRequest {
+        bubble_id: id,
+        page,
+        ..Default::default()
+    }).await?;
+    let users: Vec<u64> = membership.membership.iter().map(|m| m.user_id).collect();
+    let o = state.channel_users.get_mut(&id).map(|u| u.users.extend(users.clone()));
+    if o.is_none() {
+        state.channel_users.insert(id, ChannelUsers {
+            pages: membership.page_size,
+            users,
+        });
+    }
+    for user in membership.membership {
+        if !state.users.contains_key(&user.user_id) {
+            state.users.insert(user.user_id, user.user);
+        }
+    }
+    Ok(())
+}
+
+#[command]
 async fn get_settings() -> Result<Settings, BackendError> {
     Ok(Settings::load_async().await?)
 }
@@ -294,9 +336,9 @@ async fn rich(
     state: State<'_, AppState>,
     message: String,
 ) -> Result<serde_json::Value, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
-    let state = state.try_inner()?;
+    // let state = state.inner().inner();
+    // let state = state.read().await;
+    // let state = state.try_inner()?;
 
     let message = richtext::parse(&message);
     Ok(message)
