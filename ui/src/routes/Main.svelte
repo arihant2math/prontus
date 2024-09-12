@@ -5,7 +5,8 @@
     import Message from "./Message.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
     import SideCategory from "./sidebar/SideCategory.svelte"
-    import UserCard from "./CurrentUserCard.svelte"
+    import CurrentUserCard from "./CurrentUserCard.svelte"
+    import UserCard from "./UserCard.svelte"
 
     import {
         loadChannel,
@@ -105,7 +106,7 @@
            class="h-full">
         <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-900 z-40">
             <!--TODO: maybe move this to the bottom-->
-            <UserCard user={currentUser} showSettings={showSettings}/>
+            <CurrentUserCard user={currentUser} showSettings={showSettings}/>
             <ul class="space-y-2 font-medium px-3" id="sidebar-list">
                 {#each Object.keys(sidebarCategories) as category}
                     <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
@@ -123,8 +124,8 @@
         </div>
     </div>
     {#if showMemberList}
-        <div class="max-w-md h-full">
-            <ul class="flex flex-col">
+        <div class="w-lg h-full">
+            <ul class="flex flex-col w-full">
                 {#each channelUsers as user}
                     <UserCard user={user}/>
                 {/each}

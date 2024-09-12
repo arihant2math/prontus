@@ -44,6 +44,7 @@ pub struct GetBubbleMembershipSearchResponse {
     pub ok: bool,
     #[serde(rename = "pagesize")]
     pub page_size: u64,
+    #[serde(rename = "memberships")]
     pub membership: Vec<Member>,
 }
 
@@ -55,10 +56,14 @@ pub async fn get(
     request: GetBubbleMembershipSearchRequest,
 ) -> Result<GetBubbleMembershipSearchResult, reqwest::Error> {
     let r = client
-        .get(format!("{pronto_base_url}v1/bubble.membershipsearch"))
+        .post(format!("{pronto_base_url}v1/bubble.membershipsearch"))
         .json(&request)
         .send()
         .await?;
-    let json = r.json::<GetBubbleMembershipSearchResult>().await?;
+    // let json = r.json::<GetBubbleMembershipSearchResult>().await?;
+    let text = r.text().await?;
+    println!("{text}");
+    let json: GetBubbleMembershipSearchResponse = serde_json::from_str(&text).unwrap();
+    let json = serde_json::from_str(&text).unwrap();
     Ok(json)
 }
