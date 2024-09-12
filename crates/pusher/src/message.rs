@@ -207,7 +207,7 @@ impl From<String> for PusherServerMessage {
                     event: PusherServerEventType::PusherServerMessageRemovedEvent(data),
                 })
             }
-            "App\\Events\\UserTyping" => {
+            "client-App\\Events\\UserTyping" => {
                 let data: PusherServerUserTypingEvent =
                     serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
@@ -215,7 +215,7 @@ impl From<String> for PusherServerMessage {
                     event: PusherServerEventType::PusherServerUserTypingEvent(data),
                 })
             }
-            "App\\Events\\UserStoppedTyping" => {
+            "client-App\\Events\\UserStoppedTyping" => {
                 let data: PusherServerUserStoppedTypingEvent =
                     serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {

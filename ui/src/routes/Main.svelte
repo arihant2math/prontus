@@ -50,6 +50,7 @@
         messagesDiv.scrollTop = 0;
         // TODO: Below doesn't work for dms
         channelInfo = await getChannelInfo();
+        positionPopovers();
     }
 
     async function handleMessageKeyDown(event) {
