@@ -7,6 +7,7 @@
     import SideCategory from "./sidebar/SideCategory.svelte"
     import CurrentUserCard from "./CurrentUserCard.svelte"
     import UserCard from "./UserCard.svelte"
+    import MemberList from "./MemberList.svelte";
 
     import {
         loadChannel,
@@ -43,6 +44,7 @@
             channelUsers = await getChannelUsers(id);
         });
         messages = await getMessages();
+        positionPopovers();
         // clear input
         document.querySelector("#messageInput").value = "";
         // TODO: Don't use selector
@@ -121,7 +123,7 @@
         <div>
             <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
-        <div class="flex flex-row overflow-x-hidden overflow-y-hidden">
+        <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden">
                 <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
@@ -129,13 +131,7 @@
                 </div>
             </div>
             {#if showMemberList}
-                <div class="w-fit h-full overflow-x-hidden overflow-y-scroll no-scrollbar">
-                    <ul class="flex flex-col w-fit">
-                        {#each channelUsers as user}
-                            <UserCard user={user}/>
-                        {/each}
-                    </ul>
-                </div>
+                <MemberList bind:channelUsers={channelUsers}/>
             {/if}
         </div>
     </div>
@@ -151,24 +147,6 @@
 </div>
 
 <style>
-    @media (prefers-color-scheme: dark) {
-        /* This part changes the scrollbar track (the part behind the scrollbar) */
-        ::-webkit-scrollbar-track {
-            background: #1E1E1E; /* Dark grey color, you can choose any color you like */
-        }
-
-        /* This part changes the scrollbar handle */
-        ::-webkit-scrollbar-thumb {
-            background: #555; /* Medium grey color, this is the actual scrollbar */
-        }
-
-        /* You can also change the scrollbar width and height */
-        ::-webkit-scrollbar {
-            width: 12px; /* Width of the vertical scrollbar */
-            height: 12px; /* Height of the horizontal scrollbar */
-        }
-    }
-
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }

@@ -25,6 +25,7 @@
     $: settings = settings;
 
     function loadSettings() {
+        loadTheme();
         getSettings().then((newSettings) => {
             console.log(newSettings);
             settings = newSettings;
