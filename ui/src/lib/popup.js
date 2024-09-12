@@ -8,9 +8,6 @@ export function positionPopovers() {
             target = document.getElementById(element.dataset.popoverTarget);
         } else if (element.dataset.hasOwnProperty("popoverTargetParent")) {
             target = element.parentElement
-        } else {
-            let ref = element.dataset.popoverRef;
-            target = element.parentElement.querySelector(`[data-popover-ref-target="${ref}"]`);
         }
 
         let position = element.dataset.popoverPosition || 'bottom';
@@ -41,6 +38,10 @@ export function positionPopovers() {
 
         let configure = element.dataset.hasOwnProperty("popoverConfigure");
         if (configure) {
+            if (element.dataset.hasOwnProperty("popoverRef")) {
+                let ref = element.dataset.popoverRef;
+                target = element.parentElement.querySelector(`[data-popover-ref-target="${ref}"]`);
+            }
             let startVisible = element.dataset.hasOwnProperty("popoverStartVisible");
             let showMethod = element.dataset.popoverShowMethod || "click";
 
@@ -48,10 +49,11 @@ export function positionPopovers() {
                 element.classList.add("hidden");
             }
             if (showMethod === "click") {
-                target.addEventListener("click", () => {
+                target.onclick = () => {
                     element.classList.toggle("hidden");
-                });
+                };
                 document.body.addEventListener('click', function (event) {
+                    console.log('hide');
                     if (!element.classList.contains("hidden") && !element.contains(event.target) && !target.contains(event.target)) {
                         element.classList.add("hidden");
                     }
