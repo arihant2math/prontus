@@ -23,6 +23,7 @@
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
+    import {show} from "@tauri-apps/api/app";
 
     let currentUser;
     let messages = [];
@@ -32,11 +33,30 @@
     let channelUsers = [];
     let showMemberList = false;
     let showThread = false;
+    let threadParent = null;
+    $: threadMessages = getThreadMessages();
+
+    function getThreadMessages() {
+        let msgs = [];
+        showThread = true;
+        for (let message of messages) {
+            if (message.parentmessage_id === threadParent) {
+                console.log(message.parentmessage_id === threadParent)
+                msgs.push(message);
+            } else if (message.id === threadParent) {
+                msgs.push(message);
+            }
+        }
+        return msgs;
+    }
+
 
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
             return;
         }
+        showThread = false;
+        showMemberList = true;
         await loadChannel(id);
         await loadMessages();
         channelUsers = [];
@@ -47,9 +67,6 @@
         positionPopovers();
         // clear input
         document.querySelector("#messageInput").value = "";
-        // TODO: Don't use selector
-        let messagesDiv = document.querySelector("#messages");
-        messagesDiv.scrollTop = 0;
         // TODO: Below doesn't work for dms
         channelInfo = await getChannelInfo();
         positionPopovers();
@@ -95,12 +112,13 @@
         sidebarCategories = categories;
     }
 
+    function viewThread(parentId) {
+        threadParent = parentId;
+    }
+
     init().then(() => {
         console.log("Main init complete");
     });
-
-    $: showThread = showThread;
-    $: showMemberList = showMemberList;
 </script>
 
 <Settings/>
@@ -121,29 +139,25 @@
     </aside>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col">
         <div>
-            <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
+            <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden">
-                <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
+                <MessageList id="messagesDiv" bind:messages={messages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
                 </div>
             </div>
-            {#if showMemberList}
+            {#if showMemberList && !showThread}
                 <MemberList bind:channelUsers={channelUsers}/>
+            {/if}
+            {#if showThread}
+                <div class="w-fit h-full overflow-x-hidden overflow-y-hidden">
+                    <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} viewThread={viewThread} inThread=true/>
+                </div>
             {/if}
         </div>
     </div>
-    {#if showMemberList}
-<!--        <div class="w-[350px] h-full">-->
-<!--            <ul class="flex flex-col w-full">-->
-<!--                {#each channelUsers as user}-->
-<!--                    <UserCard user={user}/>-->
-<!--                {/each}-->
-<!--            </ul>-->
-<!--        </div>-->
-    {/if}
 </div>
 
 <style>

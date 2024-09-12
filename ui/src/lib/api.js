@@ -32,6 +32,10 @@ export async function getChannelInfo() {
     return await invoke("get_channel_info");
 }
 
+export async function getMessage(id) {
+    return await invoke("get_message", {id});
+}
+
 export async function getMessages() {
     return await invoke("get_messages");
 }

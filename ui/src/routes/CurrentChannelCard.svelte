@@ -3,7 +3,6 @@
 
     export let memberListActive = false;
 
-    $: info = info;
     $: memberListFill = memberListActive ? "currentColor" : "none";
 
     function toggleMemberList() {
@@ -13,7 +12,7 @@
 {#if info !== null && info[0] !== undefined}
     <div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row">
         <div class="flex flex-col">
-            <span>{info[0].title}</span>
+            <span class="text-nowrap">{info[0].title}</span>
             {#if info[0].category !== null}
                 <span class="text-sm text-gray-500 dark:text-gray-400">{info[0].category.title}</span>
             {:else if info[0].isdm}

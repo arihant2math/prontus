@@ -3,10 +3,9 @@
 
     let flag = false;
 
-    $: user = user;
     $: initials = user.fullname.split(" ").map((n) => n[0]).join("");
-    $: flag = flag;
 
+    // TODO: use hasProfilePic flag instead
     function setFlag() {
         flag = true;
     }

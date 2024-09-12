@@ -4,7 +4,6 @@
     export let user;
     export let id;
 
-    $: user = user;
     $: targetId = id + "MessageProfilePicture";
     $: popoutId = id + "MessageUserInfo";
 

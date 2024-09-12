@@ -181,6 +181,15 @@ async fn load_messages(state: State<'_, AppState>) -> Result<(), BackendError> {
 }
 
 #[command]
+async fn get_message(state: State<'_, AppState>, id: u64) -> Result<Option<Message>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    Ok(state.message_list.iter().find(|message| message.id == id).cloned())
+}
+
+#[command]
 async fn get_messages(state: State<'_, AppState>) -> Result<Vec<Message>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
@@ -369,6 +378,7 @@ pub fn run() {
             get_current_user,
             get_user,
             get_channel_list,
+            get_message,
             get_messages,
             get_more_messages,
             load_messages,

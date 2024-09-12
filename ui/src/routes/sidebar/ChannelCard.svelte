@@ -15,9 +15,9 @@
             <div class="relative">
                 <ProfilePicture user="{info.dmpartner}"/>
                 {#if !info.dmpartner.isonline}
-                    <span class="bottom-0 left-7 absolute bg-gray-300 dark:bg-gray-600 w-3.5 h-3.5 bg-transparent border-2 border-white dark:border-gray-800 rounded-full"></span>
+                    <span class="bottom-0 left-7 absolute bg-gray-500 dark:bg-gray-600 w-3.5 h-3.5 bg-transparent border-2 border-white dark:border-gray-800 rounded-full"></span>
                 {:else}
-                    <span class="bottom-0 left-7 absolute  w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                    <span class="bottom-0 left-7 absolute w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 {/if}
             </div>
         {/if}

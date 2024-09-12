@@ -3,8 +3,6 @@
 
     export let text = "";
 
-    $: text = text;
-
     function keyDown(event) {
         text = document.getElementById("temp").innerHtml;
         console.log(text);

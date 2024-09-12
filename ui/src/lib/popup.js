@@ -1,7 +1,6 @@
 import {computePosition, offset} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.10/+esm';
 
 export function positionPopovers() {
-    console.debug('positionPopovers called');
     document.querySelectorAll('[data-popover]').forEach((element) => {
         let target;
         if (element.dataset.hasOwnProperty("popoverTarget")) {
@@ -37,41 +36,31 @@ export function positionPopovers() {
         }
 
         let configure = element.dataset.hasOwnProperty("popoverConfigure");
-        if (configure) {
+        if (configure && !element.dataset.hasOwnProperty("popoverConfigured")) {
             if (element.dataset.hasOwnProperty("popoverRef")) {
                 let ref = element.dataset.popoverRef;
                 target = element.parentElement.querySelector(`[data-popover-ref-target="${ref}"]`);
             }
-            let startVisible = element.dataset.hasOwnProperty("popoverStartVisible");
             let showMethod = element.dataset.popoverShowMethod || "click";
 
-            if (!startVisible) {
-                element.classList.add("hidden");
-            }
             if (showMethod === "click") {
                 target.onclick = () => {
                     element.classList.toggle("hidden");
                 };
                 document.body.addEventListener('click', function (event) {
-                    console.log('hide');
                     if (!element.classList.contains("hidden") && !element.contains(event.target) && !target.contains(event.target)) {
                         element.classList.add("hidden");
                     }
                 });
             } else if (showMethod === "hover") {
-                target.addEventListener("mouseenter", () => {
+                target.addEventListener("mouseover", () => {
                     element.classList.remove("hidden");
                 });
                 target.addEventListener("mouseleave", () => {
                     element.classList.add("hidden");
                 });
-                element.addEventListener("mouseenter", () => {
-                    element.classList.remove("hidden");
-                });
-                element.addEventListener("mouseleave", () => {
-                    element.classList.add("hidden");
-                });
             }
+            element.dataset.popoverConfigured = "true";
         }
     });
 }

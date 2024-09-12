@@ -6,8 +6,6 @@
     export let buttonClick;
 
     $: dropdownId = name + "SidebarDropdown";
-    $: name = name;
-    $: items = items;
 
     function handleDropdownToggle() {
         console.log("Toggling dropdown");
