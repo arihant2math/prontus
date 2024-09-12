@@ -1,9 +1,11 @@
-use std::io::Write;
+mod settings_file_v0;
+
 use bincode::config::Configuration;
 use bincode::{Decode, Encode};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
+use crate::settings_file_v0::SettingsFileV0;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SettingsError {
@@ -32,12 +34,36 @@ impl Default for Theme {
     }
 }
 
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
-pub struct Settings {
+pub struct Auth {
     pub saved_email: Option<String>,
     pub saved_phone: Option<String>,
     pub api_key: Option<String>,
-    pub theme: Theme,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+pub struct Appearance {
+    pub theme: Theme
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+pub struct Options {
+    pub rich_text: bool,
+    pub notifications: bool,
+    pub experiments: bool
+}
+
+#[derive(Clone, Debug, Encode, Decode)]
+pub enum SettingsFile {
+    V0(SettingsFileV0)
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+pub struct Settings {
+    pub auth: Auth,
+    pub appearance: Appearance,
+    pub options: Options
 }
 
 impl Settings {
@@ -47,49 +73,33 @@ impl Settings {
             .join(".prontus")
             .join("settings.bnc")
     }
-
-    #[deprecated]
-    pub fn load() -> std::result::Result<Self, std::io::Error> {
+    pub async fn delete() -> Result<()> {
         let path = Self::path();
-        if path.exists() {
-            Ok(
-                bincode::decode_from_std_read(&mut std::fs::File::open(path)?, BINCODE_CONFIG)
-                    .unwrap(),
-            )
-        } else {
-            Ok(Self::default())
-        }
-    }
-
-    #[deprecated]
-    pub fn save(&self) -> std::result::Result<(), std::io::Error> {
-        let path = Self::path();
-        std::fs::create_dir_all(path.parent().unwrap())?;
-        let data = bincode::encode_to_vec(&self, BINCODE_CONFIG).unwrap();
-        let mut file = std::fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&path)?;
-        file.write(&data)?;
+        tokio::fs::remove_file(path).await?;
         Ok(())
     }
 
-    pub async fn load_async() -> Result<Self> {
+    pub async fn load() -> Result<Self> {
         let path = Self::path();
         if path.exists() {
             // TODO: switch to OpenOptions
             let data = tokio::fs::read(&path).await?;
-            Ok(bincode::decode_from_slice(&data, BINCODE_CONFIG)?.0)
+            match bincode::decode_from_slice::<SettingsFile, Configuration>(&data, BINCODE_CONFIG) {
+                Ok((settings, _)) => Ok(settings.into()),
+                Err(_) => {
+                    Self::delete().await?;
+                    Ok(Self::default())
+                },
+            }
         } else {
             Ok(Self::default())
         }
     }
 
-    pub async fn save_async(&self) -> Result<()> {
+    pub async fn save(&self) -> Result<()> {
         let path = Self::path();
         tokio::fs::create_dir_all(path.parent().unwrap()).await?;
-        let data = bincode::encode_to_vec(&self, BINCODE_CONFIG)?;
+        let data = bincode::encode_to_vec(&SettingsFile::from(self.clone()), BINCODE_CONFIG)?;
         let mut file = tokio::fs::OpenOptions::new()
             .write(true)
             .create(true)
@@ -98,5 +108,19 @@ impl Settings {
             .await?;
         file.write(&data).await?;
         Ok(())
+    }
+}
+
+impl From<SettingsFile> for Settings {
+    fn from(settings: SettingsFile) -> Self {
+        match settings {
+            SettingsFile::V0(v0) => v0.into()
+        }
+    }
+}
+
+impl From<Settings> for SettingsFile {
+    fn from(settings: Settings) -> Self {
+        SettingsFile::V0(settings.into())
     }
 }

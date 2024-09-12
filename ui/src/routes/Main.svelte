@@ -111,7 +111,7 @@
            class="h-full">
         <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-900 z-40">
             <!--TODO: maybe move this to the bottom-->
-            <CurrentUserCard user={currentUser} showSettings={showSettings}/>
+            <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
             <ul class="space-y-2 font-medium px-3" id="sidebar-list">
                 {#each Object.keys(sidebarCategories) as category}
                     <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>

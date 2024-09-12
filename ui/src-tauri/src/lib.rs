@@ -43,9 +43,9 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
         .to_result()
         .unwrap();
     let token = &response.users[0].login_token;
-    let mut settings = Settings::load_async().await?;
-    settings.api_key = Some(token.clone());
-    settings.save_async().await?;
+    let mut settings = Settings::load().await?;
+    settings.auth.api_key = Some(token.clone());
+    settings.save().await?;
     // TODO: This is the part where we can switch base urls
     let client =
         ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
@@ -56,9 +56,9 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
         )
         .await?;
 
-    let mut settings = Settings::load_async().await?;
-    settings.api_key = Some(response.users[0].access_token.clone());
-    settings.save_async().await?;
+    let mut settings = Settings::load().await?;
+    settings.auth.api_key = Some(response.users[0].access_token.clone());
+    settings.save().await?;
     // TODO: Error handling as usual
     Ok(())
 }
@@ -68,10 +68,10 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     if state.is_loaded().await {
         return Ok(());
     }
-    let settings = Settings::load_async().await?;
+    let settings = Settings::load().await?;
     let client = ProntoClient::new(
         "https://stanfordohs.pronto.io/api/".to_string(),
-        &settings.api_key.ok_or(BackendError::NotAuthenticated)?,
+        &settings.auth.api_key.ok_or(BackendError::NotAuthenticated)?,
     )
         .unwrap();
     let user_info_future = client.get_current_user_info();
@@ -322,12 +322,12 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
 
 #[command]
 async fn get_settings() -> Result<Settings, BackendError> {
-    Ok(Settings::load_async().await?)
+    Ok(Settings::load().await?)
 }
 
 #[command]
 async fn set_settings(settings: Settings) -> Result<(), BackendError> {
-    settings.save_async().await?;
+    settings.save().await?;
     Ok(())
 }
 
