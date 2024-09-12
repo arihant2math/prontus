@@ -37,7 +37,7 @@
     }, 10);
 </script>
 
-<div id="messages" class="overflow-y-auto bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
+<div id="messages" class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse" on:scroll={messageScroll}>
     {#each messages as message}
         <!--TODO: Get repeat working-->
         <Message message={message} repeat={false} currentUser={currentUser}/>

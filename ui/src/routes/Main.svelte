@@ -30,6 +30,7 @@
     let channelInfo = null;
     let channelUsers = [];
     let showMemberList = false;
+    let showThread = false;
 
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
@@ -95,6 +96,7 @@
         console.log("Main init complete");
     });
 
+    $: showThread = showThread;
     $: showMemberList = showMemberList;
 </script>
 
@@ -118,19 +120,32 @@
         <div>
             <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
-        <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
-        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-            <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
+        <div class="flex flex-row overflow-x-hidden overflow-y-hidden">
+            <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden">
+                <MessageList bind:messages={messages} bind:currentUser={currentUser}/>
+                <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
+                    <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
+                </div>
+            </div>
+            {#if showMemberList}
+                <div class="w-fit h-full overflow-x-hidden overflow-y-scroll no-scrollbar">
+                    <ul class="flex flex-col w-fit">
+                        {#each channelUsers as user}
+                            <UserCard user={user}/>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
         </div>
     </div>
     {#if showMemberList}
-        <div class="w-lg h-full">
-            <ul class="flex flex-col w-full">
-                {#each channelUsers as user}
-                    <UserCard user={user}/>
-                {/each}
-            </ul>
-        </div>
+<!--        <div class="w-[350px] h-full">-->
+<!--            <ul class="flex flex-col w-full">-->
+<!--                {#each channelUsers as user}-->
+<!--                    <UserCard user={user}/>-->
+<!--                {/each}-->
+<!--            </ul>-->
+<!--        </div>-->
     {/if}
 </div>
 
@@ -151,5 +166,15 @@
             width: 12px; /* Width of the vertical scrollbar */
             height: 12px; /* Height of the horizontal scrollbar */
         }
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
     }
 </style>

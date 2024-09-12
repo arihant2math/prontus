@@ -15,7 +15,6 @@
     $: isCurrentUser = currentUser.id === user.id;
     $: systemMessage = message.systemevent != null;
     $: user = message.user;
-    $: timestamp = "";
     $: media = message.messagemedia;
     $: embed = message.resource;
     $: reactions = message.reactionsummary;
@@ -84,7 +83,7 @@
             {#if !repeat}
                 <div class="flex items-center space-x-2 rtl:space-x-reverse">
                     <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
-                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{timestamp}</span>
+                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
                 </div>
             {/if}
             <RichTextContainer message="{message.message}"/>
