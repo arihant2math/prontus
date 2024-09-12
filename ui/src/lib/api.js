@@ -56,6 +56,14 @@ export async function setReactionState(messageId, reactionId, active) {
     return await invoke("set_reaction_state", {messageId, reactionId, active});
 }
 
+export async function getChannelUsers(id) {
+    return await invoke("get_channel_users", {id})
+}
+
+export async function loadChannelUsers(id) {
+    return await invoke("load_channel_users", {id})
+}
+
 export async function getSettings() {
     return await invoke("get_settings");
 }
