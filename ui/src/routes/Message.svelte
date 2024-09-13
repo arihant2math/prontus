@@ -10,12 +10,13 @@
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
 
     export let message;
-    export let repeat = false;
+    export let previousMessage = null;
     export let currentUser;
-    export let lastThreadMessage = true;
     export let viewThread;
     export let inThread;
 
+    $: repeat = isRepeat();
+    $: lastThreadMessage = true;
     $: isCurrentUser = currentUser.id === message.user.id;
     $: systemMessage = message.systemevent != null;
     $: user = message.user;
@@ -23,6 +24,12 @@
     $: embed = message.resource;
     $: reactions = message.reactionsummary;
     $: ml = repeat ? "ml-10" : "ml-0";
+    $: py = repeat ? "py-1" : "py-3";
+
+    function isRepeat() {
+        // TODO check timestamps
+        return previousMessage !== null && previousMessage.user.id === message.user.id;
+    }
 
     async function remove() {
         positionPopovers();
@@ -60,7 +67,7 @@
                 {/if}
             {/if}
         {/if}
-        <div class="pl-5 py-2 flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800" role="listitem">
+        <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800" role="listitem">
             {#if !repeat}
                 <ProfilePicture user={message.user}/>
             {/if}

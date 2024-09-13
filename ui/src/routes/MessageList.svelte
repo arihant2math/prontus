@@ -45,8 +45,11 @@
 </script>
 
 <div id="{id}" class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse h-full w-full" on:scroll={messageScroll} onload="this.scrollTop=0">
-    {#each messages as message}
-        <!--TODO: Get repeat working-->
-        <Message message={message} repeat={false} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+    {#each messages as message, i}
+        {#if i < messages.length - 1}
+            <Message message={message} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+        {:else}
+            <Message message={message} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+        {/if}
     {/each}
 </div>

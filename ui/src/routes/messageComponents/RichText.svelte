@@ -7,7 +7,7 @@
             <svelte:self content={child} />
         {/each}
     {:else if content.data.t === "Paragraph"}
-        <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
+        <p class="text-sm font-normal text-gray-900 dark:text-white">
             {#each content.children as child}
                 <svelte:self content={child} />
             {/each}
