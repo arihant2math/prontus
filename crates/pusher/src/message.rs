@@ -108,6 +108,8 @@ pub struct PusherMarkUpdatedEvent {
 // ",\"change_email\":\"system\",\"change_phone\":\"system\",\"remove_user\":\"system\",\"change_title\":\"admin\",\"change_pronouns\":\"admin\",\"change_own_name\":false,\"change_own_email\":false,\"change_own_phone\":fa
 // lse,\"change_own_title\":true,\"change_own_pronouns\":true},\"profilepicpath\":\"\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\",\"profilepicurl\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\"}}"), channel: Some("private-user.5302428") }
 
+// Received unknown message: RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
     PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),

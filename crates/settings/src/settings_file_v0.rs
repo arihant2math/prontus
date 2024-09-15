@@ -66,6 +66,7 @@ impl From<AppearanceV0> for crate::Appearance {
     fn from(appearance: AppearanceV0) -> Self {
         crate::Appearance {
             theme: appearance.theme.into(),
+            sidebar: crate::Sidebar::default(),
         }
     }
 }
@@ -76,6 +77,7 @@ impl From<OptionsV0> for crate::Options {
             rich_text: options.rich_text,
             notifications: options.notifications,
             experiments: options.experiments,
+            ..Default::default()
         }
     }
 }
