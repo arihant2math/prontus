@@ -26,14 +26,26 @@
     $: media = message.messagemedia;
     $: embed = message.resource;
     $: reactions = message.reactionsummary;
-    $: messageCreatedAtDate = Date.parse(message.created_at.split(" ")[0]);
+    $: messageCreatedAtDate = parseDatetime(message.created_at.split(" ")[0]);
     $: messageCreatedAtTime = formatTime(message.created_at);
     $: ml = repeat ? "ml-10" : "ml-0";
     $: py = repeat ? "py-1" : "py-3";
     $: border = parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400";
 
+    function parseDatetime(str) {
+        // Split the date and time parts
+        const [datePart, timePart] = str.split(' ');
+
+        // Combine the date and time parts with 'T' to conform to ISO 8601 format
+        const isoString = `${datePart}T${timePart}Z`;
+
+        // Return the Date object
+        return new Date(isoString);
+    }
+
+
     function formatTime(date) {
-        let datetime = new Date(date);
+        let datetime = parseDatetime(date);
         // TODO: AM/PM (and make this configurable)
         return datetime.getMonth() + "/" + datetime.getDay() + "/" + datetime.getFullYear() + " " + (datetime.getHours() % 12) + ":" + datetime.getMinutes() + ":" + datetime.getSeconds();
     }
