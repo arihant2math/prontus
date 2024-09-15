@@ -4,8 +4,8 @@
     export let channelUsers;
 </script>
 
-<div class="w-content h-full overflow-x-hidden overflow-y-scroll no-scrollbar">
-    <ul class="flex flex-col w-fit">
+<div class="w-max h-full no-scrollbar">
+    <ul class="flex flex-col w-max">
         {#each channelUsers as user}
             <UserCard user={user}/>
         {/each}

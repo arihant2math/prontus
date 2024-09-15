@@ -14,7 +14,7 @@
 </script>
 
 <div class="flex flex-row space-x-4 px-4 py-2 w-full border-b border-gray-500 z-40">
-    <div>
+    <div class="w-max">
         <ProfilePicture user={user} />
     </div>
     <div class="flex flex-col">
