@@ -1,5 +1,9 @@
 <script>
     export let content;
+
+    if (content.data.t === "Code") {
+        console.log(content.data.c);
+    }
 </script>
 {#if content !== undefined}
     {#if content.data.t === "Document"}
@@ -50,6 +54,10 @@
         Markdown Images are not currently supported
     {:else if content.data.t === "SoftBreak"}
         <br>
+    {:else if content.data.t === "Code"}
+        <code>
+            {content.data.c.literal}
+        </code>
     {:else}
         <code>{content.data.t} is not supported at the moment, please file a bug</code>
     {/if}
