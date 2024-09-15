@@ -47,7 +47,7 @@
         if (currentDatetime.getDay() != previousDatetime.getDay()) {
             return false;
         }
-        return previousMessage.user.id === message.user.id;
+        return previousMessage.user.id === message.user.id && previousMessage.systemevent == null;
     }
 
 
