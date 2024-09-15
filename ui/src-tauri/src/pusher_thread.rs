@@ -70,7 +70,9 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
                                 if event.message.bubble_id == state.current_channel {
-                                    state.message_list.insert(0, event.message);
+                                    if !state.message_list.iter().any(|m| m.id == event.message.id) {
+                                        state.message_list.insert(0, event.message);
+                                    }
                                 }
                             }
                             PusherServerEventType::PusherServerMessageUpdatedEvent(event) => {
