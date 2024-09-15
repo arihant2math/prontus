@@ -6,8 +6,9 @@
     import ProfilePicture from "./ProfilePicture.svelte";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
-    import MessageProfilePicture from "./messageComponents/MessageProfilePicture.svelte";
+    import MessageProfilePicture from "./InteractiveProfilePicture.svelte";
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
+    import InteractiveProfilePicture from "./InteractiveProfilePicture.svelte";
 
     export let message;
     export let previousMessage = null;
@@ -127,7 +128,7 @@
         {/if}
         <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 {border}" role="listitem">
             {#if !repeat}
-                <ProfilePicture user={message.user}/>
+                <InteractiveProfilePicture user={message.user}/>
             {/if}
             <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5">
                 {#if !repeat}
