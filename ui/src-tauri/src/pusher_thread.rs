@@ -106,6 +106,16 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                     }
                                 }
                             }
+                            PusherServerEventType::PusherServerUserPresenceEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                for (id, user) in state.users.iter_mut() {
+                                    if id == &event.user_id {
+                                        user.online = event.is_online;
+                                    }
+                                }
+                            }
                             // TODO: handle other
                             _ => {}
                         }
