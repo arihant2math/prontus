@@ -158,7 +158,7 @@
                 <MemberList bind:channelUsers={channelUsers}/>
             {/if}
             {#if showThread}
-                <div class="w-fit h-full overflow-x-hidden overflow-y-hidden">
+                <div class="w-max h-full overflow-x-hidden overflow-y-hidden">
                     <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} inThread=true/>
                 </div>
             {/if}
