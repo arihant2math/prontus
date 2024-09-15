@@ -1,20 +1,18 @@
 <script>
-    import RichTextContainer from "./RichTextContainer.svelte";
     import {Schema} from 'prosemirror-model';
     import {addMentionNodes, addTagNodes, getMentionsPlugin} from '../../lib/prosemirror-mentions';
     import {keymap} from "prosemirror-keymap";
     import {history, redo, undo} from "prosemirror-history";
     import {baseKeymap} from "prosemirror-commands";
-    import {dropCursor} from "prosemirror-dropcursor"
-    import {gapCursor} from "prosemirror-gapcursor"
+    import ProsemirrorEditor from 'prosemirror-svelte';
+    import {toPlainText} from 'prosemirror-svelte/state';
+    import {EditorState, TextSelection} from "prosemirror-state";
+    import {sendMessage} from "$lib/api.js";
 
     export let text = "";
     // import the core component
-    import ProsemirrorEditor from 'prosemirror-svelte';
 
     // import helpers to work with prosemirror state
-    import {createSingleLineEditor, toPlainText} from 'prosemirror-svelte/state';
-    import {EditorState, TextSelection} from "prosemirror-state";
 
     // create the initial editor state
     const singleLineSchema = new Schema({
@@ -34,9 +32,15 @@
     ]) : undefined;
     const selection = doc ? TextSelection.atEnd(doc) : undefined;
 
+    export function send() {
+        sendMessage(toPlainText(editorState)).then(() => {
+            clear();
+        });
+    }
+
     const corePlugins = [
         history(),
-        keymap({"Mod-z": undo, "Mod-y": redo, "Mod-Shift-z": redo}),
+        keymap({"Mod-z": undo, "Mod-y": redo, "Mod-Shift-z": redo, "Enter": send}),
         keymap(baseKeymap),
     ];
 
@@ -95,8 +99,6 @@
         editorState = event.detail.editorState;
         text = toPlainText(editorState);
     }
-
-    $: console.log(toPlainText(editorState));
 
     export function clear() {
         editorState = EditorState.create({
