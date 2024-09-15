@@ -3,14 +3,12 @@
 
     export let value = [];
 
-    let unlocked = true;
-    $: pinInputType = unlocked ? "text" : "password";
 </script>
 
 <PinInput.Root
         bind:value
         class="flex items-center gap-2"
-        type={pinInputType}
+        type="text"
         placeholder="0"
 >
     <PinInput.Input
