@@ -15,7 +15,7 @@ pub struct AppData {
     pub user_info: UserInfo,
     pub users: HashMap<u64, UserInfo>,
     pub client: Arc<ProntoClient>,
-    pub channel_list: Vec<(Bubble, BubbleStats)>,
+    pub channel_list: Vec<(Bubble, Option<BubbleStats>)>,
     pub channel_users: HashMap<u64, ChannelUsers>,
     pub current_channel: u64,
     pub message_list: Vec<Message>,

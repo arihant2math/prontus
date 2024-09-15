@@ -81,17 +81,16 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     let mut users = HashMap::new();
     users.insert(user_info.id, user_info.clone());
     let channel_list = channel_list?;
-    let channel_list = channel_list
-        .bubbles
-        .clone()
-        .into_iter()
-        .zip(channel_list.stats.clone().into_iter())
-        .collect();
+    let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>)> = vec![];
+    for bubble in channel_list.bubbles.clone() {
+        let stats = channel_list.stats.iter().find(|s| s.bubble_id == bubble.id).cloned();
+        state_channel_list.push((bubble, stats));
+    }
     let data = AppData {
         user_info,
         users,
         client: Arc::new(client),
-        channel_list,
+        channel_list: state_channel_list,
         current_channel: 0,
         message_list: vec![],
         channel_users: HashMap::new(),
@@ -144,7 +143,7 @@ async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, Backe
 #[command]
 async fn get_channel_list(
     state: State<'_, AppState>,
-) -> Result<Vec<(Bubble, BubbleStats)>, BackendError> {
+) -> Result<Vec<(Bubble, Option<BubbleStats>)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -155,7 +154,7 @@ async fn get_channel_list(
 #[command]
 async fn get_channel_info(
     state: State<'_, AppState>,
-) -> Result<Option<(Bubble, BubbleStats)>, BackendError> {
+) -> Result<Option<(Bubble, Option<BubbleStats>)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;

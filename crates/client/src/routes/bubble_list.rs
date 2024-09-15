@@ -17,7 +17,7 @@ pub async fn get(
     client: &Client,
 ) -> Result<GetBubbleListResult, reqwest::Error> {
     let r = client
-        .get(format!("{pronto_base_url}v2/bubble.list"))
+        .get(format!("{pronto_base_url}v3/bubble.list"))
         .send()
         .await?;
     let json = r.json::<GetBubbleListResult>().await?;

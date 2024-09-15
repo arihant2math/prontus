@@ -103,7 +103,7 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                 for (bubble, stats) in state.channel_list.iter_mut() {
                                     for stat in event.stats.iter() {
                                         if bubble.id == stat.bubble_id {
-                                            *stats = stat.clone();
+                                            *stats = Some(stat.clone());
                                         }
                                     }
                                 }
