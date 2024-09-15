@@ -6,3 +6,5 @@
 **/package-lock.json
 **/Cargo.lock
 *.pyc
+dist/
+extracted/
