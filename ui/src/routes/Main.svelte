@@ -167,27 +167,17 @@
 </div>
 
 <style>
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .no-scrollbar {
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
-    }
-
-    .no-scrollbar {
-        overflow-y: scroll;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none;  /* Internet Explorer 10+ */
-    }
-    .no-scrollbar::-webkit-scrollbar { /* WebKit */
-        width: 0;
-        height: 0;
-    }
-
-     .dark {
+    .dark {
         color-scheme: dark;
     }
+
+    .no-scrollbar {
+      overflow-y: scroll;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none;  /* IE 10+ */
+    }
+    .no-scrollbar::-webkit-scrollbar { /* WebKit */
+      width: 0px;
+    }
+
 </style>
