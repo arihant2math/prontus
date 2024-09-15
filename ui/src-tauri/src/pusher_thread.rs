@@ -120,6 +120,9 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                             _ => {}
                         }
                     }
+                    PusherServerMessage::Error(e) => {
+                        println!("Received error: {:?}", e);
+                    }
                     PusherServerMessage::Other(raw) => {
                         println!("Received unknown message: {:?}", raw);
                     }

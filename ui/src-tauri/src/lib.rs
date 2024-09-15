@@ -221,7 +221,7 @@ async fn get_more_messages(
 async fn send_message(
     state: State<'_, AppState>,
     message: String,
-) -> Result<Message, BackendError> {
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
@@ -232,7 +232,8 @@ async fn send_message(
         .client
         .post_message(user_id, id, message, None)
         .await?;
-    Ok(response.message)
+    state.message_list.push(response.message);
+    Ok(())
 }
 
 #[command]
