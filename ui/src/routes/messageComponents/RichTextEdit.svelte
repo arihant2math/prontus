@@ -33,6 +33,7 @@
     const selection = doc ? TextSelection.atEnd(doc) : undefined;
 
     export function send() {
+        // TODO: temporarily disable editing
         sendMessage(toPlainText(editorState)).then(() => {
             clear();
         });
