@@ -1,5 +1,7 @@
 use futures::future::join_all;
+use notify_rust::{Notification, Timeout};
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
+use settings::Settings;
 use crate::{AppState, BackendError};
 
 // TODO: Should not be backend error result
@@ -41,6 +43,10 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
         join_all(tasks).await;
         println!("Subscribed to pusher channels");
     }
+
+    // TODO: this object doesn't update instantly when a user changes a setting
+    let settings = Settings::load().await?;
+
     loop {
         let message = pusher_client.server_messages().await.recv().await;
         match message {
@@ -49,14 +55,17 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                     PusherServerMessage::Event(event) => {
                         match event.event {
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
-                                // TODO: create setting or smth
+                                // TODO: check the setting
                                 // TODO: Also make sure app in not in foreground
-                                // Notification::new()
-                                //     .summary("New Message")
-                                //     .body(event.message.message.clone())
-                                //     .icon("thunderbird")
-                                //     .timeout(Timeout::Milliseconds(6000))
-                                //     .show().unwrap();
+                                if settings.options.notifications {
+                                    Notification::new()
+                                        .summary(&format!("New message from {user}",
+                                                          user = event.message.user.fullname))
+                                        .body(&event.message.message)
+                                        .icon("thunderbird")
+                                        .timeout(Timeout::Milliseconds(6000))
+                                        .show().unwrap();
+                                }
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
