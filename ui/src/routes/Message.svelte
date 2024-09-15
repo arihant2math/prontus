@@ -11,24 +11,68 @@
 
     export let message;
     export let previousMessage = null;
+    export let nextMessage = null;
     export let currentUser;
     export let viewThread;
     export let inThread;
 
-    $: repeat = isRepeat();
-    $: lastThreadMessage = true;
+    $: dateSpan = spanDate(message, previousMessage);
+    $: repeat = isRepeat(message, previousMessage);
+    $: firstThreadMessage = isFirstThreadMessage(message, previousMessage);
+    $: lastThreadMessage = isLastThreadMessage(message, nextMessage);
     $: isCurrentUser = currentUser.id === message.user.id;
     $: systemMessage = message.systemevent != null;
     $: user = message.user;
     $: media = message.messagemedia;
     $: embed = message.resource;
     $: reactions = message.reactionsummary;
+    $: messageCreatedAtDate = Date.parse(message.created_at.split(" ")[0]);
+    $: messageCreatedAtTime = formatTime(message.created_at);
     $: ml = repeat ? "ml-10" : "ml-0";
     $: py = repeat ? "py-1" : "py-3";
+    $: border = parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400";
+
+    function formatTime(date) {
+        let datetime = new Date(date);
+        // TODO: AM/PM (and make this configurable)
+        return datetime.getMonth() + "/" + datetime.getDay() + "/" + datetime.getFullYear() + " " + (datetime.getHours() % 12) + ":" + datetime.getMinutes() + ":" + datetime.getSeconds();
+    }
 
     function isRepeat() {
-        // TODO check timestamps
-        return previousMessage !== null && previousMessage.user.id === message.user.id;
+        if (previousMessage === null) {
+            return false;
+        }
+        let currentDatetime = new Date(message.created_at);
+        let previousDatetime = new Date(previousMessage.created_at);
+        if (currentDatetime.getDay() != previousDatetime.getDay()) {
+            return false;
+        }
+        return previousMessage.user.id === message.user.id;
+    }
+
+
+    function isFirstThreadMessage() {
+        if (previousMessage === null) {
+            return true;
+        }
+        return !(previousMessage.user.id === message.user.id && previousMessage.parentmessage_id === message.parentmessage_id);
+    }
+
+    function isLastThreadMessage() {
+        if (nextMessage === null) {
+            return true;
+        }
+
+        return !(nextMessage.user.id === message.user.id && nextMessage.parentmessage_id === message.parentmessage_id);
+    }
+
+    function spanDate() {
+        if (previousMessage === null) {
+            return true;
+        }
+        let currentDatetime = new Date(message.created_at);
+        let previousDatetime = new Date(previousMessage.created_at);
+        return currentDatetime.getDay() !== previousDatetime.getDay();
     }
 
     async function remove() {
@@ -36,6 +80,7 @@
         console.log("Deleting message " + message.id);
         await deleteMessage(message.id);
     }
+
     $: parentMessage = null;
 
     function getParentMessage() {
@@ -56,26 +101,27 @@
         getParentMessage();
     }, 10);
 </script>
+{#if dateSpan}
+<!--    TODO: Debug and then put a proper date span here-->
+{/if}
 {#if !systemMessage}
     <div class="flex flex-col">
-        {#if !repeat}
-            {#if !inThread && parentMessage !== undefined}
-                {#if parentMessage !== null}
-                    <p class="text-xs"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
-                {:else}
-                    <p class="text-xs"><b>Loading</b> loading</p>
-                {/if}
+        {#if !inThread && parentMessage !== undefined && firstThreadMessage}
+            {#if parentMessage !== null}
+                <p class="text-xs"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
+            {:else}
+                <p class="text-xs"><b>Loading</b> loading</p>
             {/if}
         {/if}
-        <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800" role="listitem">
+        <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 {border}" role="listitem">
             {#if !repeat}
                 <ProfilePicture user={message.user}/>
             {/if}
             <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5">
                 {#if !repeat}
                     <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
-                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white text-nowrap">{user.fullname}</span>
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400 text-nowrap">{messageCreatedAtTime}</span>
                     </div>
                 {/if}
                 <RichTextContainer message="{message.message}"/>
@@ -130,14 +176,14 @@
         </div>
         {#if lastThreadMessage && parentMessage !== undefined && !inThread}
             <button on:click={() => {viewThread(parentMessage.id)}} type="button" class="max-w-fit text-gray-900 bg-white hover:bg-gray-100 font-medium
-            rounded-lg text-xs mx-2 px-2 py-2 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600
+            rounded-lg text-xs mx-2 px-2 py-2 me-2 mb-2 dark:bg-slate-800 dark:text-white dark:border-gray-600
             dark:hover:bg-gray-700 dark:hover:border-gray-600">View Thread</button>
         {/if}
     </div>
 {:else}
     <div class="flex items-start gap-2.5">
         <div class="flex flex-row items-center p-4">
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white text-nowrap">{user.fullname}</span>
             <p class="ml-2 text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.message}</p>
         </div>
     </div>

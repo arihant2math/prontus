@@ -34,11 +34,17 @@
     let showMemberList = false;
     let showThread = false;
     let threadParent = null;
-    $: threadMessages = getThreadMessages();
+    let messageInput;
 
-    function getThreadMessages() {
-        let msgs = [];
+    const getThreadMessages = () => {
+        if (threadParent === null) {
+            showThread = false;
+            return;
+        }
+        showMemberList = false;
         showThread = true;
+
+        let msgs = [];
         for (let message of messages) {
             if (message.parentmessage_id === threadParent) {
                 console.log(message.parentmessage_id === threadParent)
@@ -50,35 +56,35 @@
         return msgs;
     }
 
+    $: threadMessages = getThreadMessages(threadParent);
 
+
+
+    // TODO: non-jank loading (bar on the top or smth and get channel card and messages load at once)
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
             return;
         }
-        showThread = false;
+        threadParent = null;
         showMemberList = true;
         await loadChannel(id);
-        await loadMessages();
-        channelUsers = [];
-        loadChannelUsers(id).then(async () => {
-            channelUsers = await getChannelUsers(id);
+        let messagesPromise = loadMessages().then(async () => {
+            messages = await getMessages();
+            positionPopovers();
         });
-        messages = await getMessages();
-        positionPopovers();
+        channelUsers = [];
+        let usersPromise = loadChannelUsers(id).then(async () => {
+            channelUsers = await getChannelUsers(id);
+            positionPopovers();
+        });
+        let channelPromise = getChannelInfo().then((info) => {
+            channelInfo = info;
+        });
+        await Promise.all([messagesPromise, usersPromise, channelPromise]);
         // clear input
-        document.querySelector("#messageInput").value = "";
+        messageInput.clear();
         // TODO: Below doesn't work for dms
-        channelInfo = await getChannelInfo();
         positionPopovers();
-    }
-
-    async function handleMessageKeyDown(event) {
-        if (event.keyCode === 13 && !event.shiftKey) {
-            await sendMessage(document.querySelector("#messageInput").value).then(async (message) => {
-                document.querySelector("#messageInput").value = "";
-                // TODO: Add message, but shade it to a grey color, to indicate it has not yet been sent
-            });
-        }
     }
 
     async function init() {
@@ -137,7 +143,7 @@
             </ul>
         </div>
     </aside>
-    <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col">
+    <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>
             <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
@@ -145,7 +151,7 @@
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                    <input id="messageInput" type="text" class="text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-700 outline-0 w-full h-[50px] text-base border-none px-4 rounded-lg" on:keydown={handleMessageKeyDown}>
+                    <RichTextEdit bind:this={messageInput}/>
                 </div>
             </div>
             {#if showMemberList && !showThread}
@@ -153,7 +159,7 @@
             {/if}
             {#if showThread}
                 <div class="w-fit h-full overflow-x-hidden overflow-y-hidden">
-                    <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} viewThread={viewThread} inThread=true/>
+                    <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} inThread=true/>
                 </div>
             {/if}
         </div>
@@ -169,5 +175,19 @@
     .no-scrollbar {
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none; /* Firefox */
+    }
+
+    .no-scrollbar {
+        overflow-y: scroll;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    }
+    .no-scrollbar::-webkit-scrollbar { /* WebKit */
+        width: 0;
+        height: 0;
+    }
+
+     .dark {
+        color-scheme: dark;
     }
 </style>
