@@ -1,8 +1,22 @@
 <script>
+    import {getUser} from "$lib/api.js";
+
     export let content;
 
-    if (content.data.t === "Code") {
-        console.log(content.data.c);
+    const re = new RegExp("<@\\d*>", 'g');
+
+    async function renderAsync(text) {
+        let matches = text.matchAll(re);
+        console.log(matches);
+        for (let match of matches) {
+            console.log(match)
+            let id = match[0].slice(2, -1);
+            console.log(id);
+            let user = await getUser(parseInt(id));
+            console.log(user);
+            text = text.replace(match[0], `<span class="text-blue-500">@${user.fullname}</span>`);
+        }
+        return text;
     }
 </script>
 {#if content !== undefined}
@@ -17,7 +31,9 @@
             {/each}
         </p>
     {:else if content.data.t === "Text"}
-        {content.data.c}
+        {#await renderAsync(content.data.c) then text}
+            {@html text}
+        {/await}
     {:else if content.data.t === "Emph"}
         <em>
             {#each content.children as child}
