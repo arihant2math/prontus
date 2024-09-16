@@ -231,7 +231,7 @@ async fn send_message(
         .client
         .post_message(user_id, id, message, None)
         .await?;
-    state.message_list.push(response.message);
+    state.message_list.insert(0, response.message);
     Ok(())
 }
 
