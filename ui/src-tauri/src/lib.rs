@@ -123,15 +123,17 @@ async fn get_current_user(state: State<'_, AppState>) -> Result<UserInfo, Backen
 
 #[command]
 async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, BackendError> {
-    let unlocked_state = state.inner().inner();
-    let unlocked_state_guard = unlocked_state.read().await;
-    let unlocked_state = unlocked_state_guard.try_inner()?;
+    let user_info = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
 
-    if let Some(user) = unlocked_state.users.get(&id) {
-        return Ok(user.clone());
-    }
-    let user_info = unlocked_state.client.get_user_info(Some(id)).await?;
-    drop(unlocked_state_guard);
+        if let Some(user) = state.users.get(&id) {
+            return Ok(user.clone());
+        }
+        state.client.get_user_info(Some(id)).await?
+    };
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
@@ -202,18 +204,44 @@ async fn get_more_messages(
     state: State<'_, AppState>,
     last_message_id: u64,
 ) -> Result<Vec<Message>, BackendError> {
+    let messages = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        let id = state.current_channel;
+        state
+            .client
+            .get_bubble_history(id, Some(last_message_id))
+            .await?
+    };
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
-
-    let id = state.current_channel;
-    let messages = state
-        .client
-        .get_bubble_history(id, Some(last_message_id))
-        .await?;
     let messages = messages.messages;
     state.message_list.extend_from_slice(&mut messages.clone());
     Ok(messages)
+}
+
+#[command]
+async fn edit_message(
+    state: State<'_, AppState>,
+    message_id: u64,
+    message: String,
+) -> Result<(), BackendError> {
+    let message = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.edit_message(message_id, message).await?
+    };
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    *state.message_list.iter_mut().find(|m| m.id == message_id).unwrap() = message.message;
+
+    Ok(())
 }
 
 #[command]
@@ -221,16 +249,21 @@ async fn send_message(
     state: State<'_, AppState>,
     message: String,
 ) -> Result<(), BackendError> {
+    let response = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        let user_id = state.user_info.id;
+        let id = state.current_channel;
+        state.client.post_message(user_id, id, message, None).await?
+    };
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
-
-    let user_id = state.user_info.id;
-    let id = state.current_channel;
-    let response = state
-        .client
-        .post_message(user_id, id, message, None)
-        .await?;
+    if state.message_list.iter().find(|m| m.id == response.message.id).is_some() {
+        return Ok(());
+    }
     state.message_list.insert(0, response.message);
     Ok(())
 }
@@ -260,7 +293,7 @@ async fn set_reaction_state(
                 users: vec![state.user_info.id],
             });
         } else {
-            // TODO: can be more rustlike
+            // TODO: can be more rust like (no unwrap)
             o.unwrap().count += 1;
         }
     } else {
@@ -279,11 +312,16 @@ async fn delete_message(
     state: State<'_, AppState>,
     message_id: u64,
 ) -> Result<(), BackendError> {
+    {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.delete_message(message_id).await?;
+    }
     let state = state.inner().inner();
-    let state = state.read().await;
-    let state = state.try_inner()?;
-
-    state.client.delete_message(message_id).await?;
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.message_list.retain(|message| message.id != message_id);
     Ok(())
 }
 
@@ -295,7 +333,7 @@ async fn get_channel_users(state: State<'_, AppState>, id: u64) -> Result<Vec<Us
 
     let users = state.channel_users.get(&id).map(|u| {
         let u = u.clone();
-        u.users.into_iter().map(|u| {state.users.get(&u).unwrap().clone()}).collect::<Vec<UserInfo>>()
+        u.users.into_iter().map(|u| { state.users.get(&u).unwrap().clone() }).collect::<Vec<UserInfo>>()
     }).unwrap_or(vec![]);
 
     Ok(users)
@@ -382,6 +420,7 @@ pub fn run() {
             get_messages,
             get_more_messages,
             load_messages,
+            edit_message,
             send_message,
             set_reaction_state,
             delete_message,
