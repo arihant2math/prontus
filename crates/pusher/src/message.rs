@@ -110,6 +110,13 @@ pub struct PusherMarkUpdatedEvent {
 
 // Received unknown message: RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
 
+// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":6056679,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionRemoved", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":3,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionRemoved", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":3,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
+
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
     PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),
