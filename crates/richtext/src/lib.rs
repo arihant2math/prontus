@@ -1,4 +1,4 @@
-use comrak::nodes::AstNode;
+use comrak::nodes::{AstNode, NodeValue};
 use comrak::{parse_document, Arena, Options};
 use std::io;
 
@@ -45,7 +45,9 @@ pub fn parse(markdown: &str) -> serde_json::Value {
 
     // for node in root.descendants() {
     //     if let NodeValue::Text(ref mut text) = node.data.borrow_mut().value {
-    //         *text = text.replace("my", "your");
+    //         let s = text.to_string();
+    //         let re = regex::Regex::new(r"<@\d*>").unwrap();
+    //         *text = text.replace("", "");
     //     }
     // }
 
