@@ -3,18 +3,21 @@
 
     export let content;
 
-    const re = new RegExp("<@\\d*>", 'g');
+    const re = new RegExp("<@\\S*>", 'g');
 
     async function renderAsync(text) {
         let matches = text.matchAll(re);
-        console.log(matches);
         for (let match of matches) {
             console.log(match)
             let id = match[0].slice(2, -1);
             console.log(id);
-            let user = await getUser(parseInt(id));
-            console.log(user);
-            text = text.replace(match[0], `<span class="text-blue-500">@${user.fullname}</span>`);
+            if (id !== "everyone") {
+                let user = await getUser(parseInt(id));
+                console.log(user);
+                text = text.replace(match[0], `<span class="text-blue-500">@${user.fullname}</span>`);
+            } else {
+                text = text.replace(match[0], `<span class="text-blue-500">@everyone</span>`);
+            }
         }
         return text;
     }
