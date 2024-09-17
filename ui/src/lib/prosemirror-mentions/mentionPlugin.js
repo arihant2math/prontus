@@ -297,12 +297,11 @@ export function getMentionsPlugin(opts) {
                 }
 
                 // if any of the below keys, override with custom handlers.
-                var down, up, enter, esc;
+                let down, up, enter, esc;
                 enter = e.key === "Enter";
-                down = e.keyCode === 40;
-                up = e.keyCode === 38;
-                esc = e.keyCode === 27;
-                console.log(e.keyCode);
+                down = e.key === "ArrowDown";
+                up = e.key === "ArrowUp";
+                esc = e.key === "Escape";
 
                 if (down) {
                     goNext(view, state, opts);
