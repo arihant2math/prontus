@@ -248,6 +248,7 @@ async fn edit_message(
 async fn send_message(
     state: State<'_, AppState>,
     message: String,
+    thread: Option<u64>
 ) -> Result<(), BackendError> {
     let response = {
         let state = state.clone().inner().inner();
@@ -255,7 +256,7 @@ async fn send_message(
         let state = state.try_inner()?;
         let user_id = state.user_info.id;
         let id = state.current_channel;
-        state.client.post_message(user_id, id, message, None).await?
+        state.client.post_message(user_id, id, message, thread).await?
     };
 
     let state = state.inner().inner();

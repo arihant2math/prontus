@@ -151,20 +151,25 @@
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                    <RichTextEdit bind:this={messageInput} sendMessage={sendMessage}/>
+                    <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, null)}}/>
                 </div>
             </div>
             {#if showMemberList && !showThread}
                 <MemberList bind:channelUsers={channelUsers}/>
             {/if}
             {#if showThread}
-                <button class="fixed top-12 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1" on:click={() => {showThread = false}}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
-                </button>
                 <div class="w-max h-full overflow-x-hidden overflow-y-hidden">
-                    <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} inThread=true/>
+                    <button class="fixed top-4 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg" on:click={() => {showThread = false}}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
+                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} inThread={true}/>
+                        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
+                            <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, threadParent)}}/>
+                        </div>
+                    </div>
                 </div>
             {/if}
         </div>

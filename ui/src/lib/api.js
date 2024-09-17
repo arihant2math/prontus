@@ -48,8 +48,8 @@ export async function loadMessages() {
     return await invoke("load_messages");
 }
 
-export async function sendMessage(message) {
-    return await invoke("send_message", {message});
+export async function sendMessage(message, thread) {
+    return await invoke("send_message", {message, thread});
 }
 
 export async function deleteMessage(messageId) {
