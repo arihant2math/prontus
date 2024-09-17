@@ -79,3 +79,7 @@ export async function setSettings(settings) {
 export async function rich(message) {
     return await invoke("rich", {message});
 }
+
+export async function getCurrentChannelId() {
+    return await invoke("get_current_channel_id");
+}

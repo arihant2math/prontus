@@ -326,6 +326,15 @@ async fn delete_message(
 }
 
 #[command]
+async fn get_current_channel_id(state: State<'_, AppState>) -> Result<u64, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    Ok(state.current_channel)
+}
+
+#[command]
 async fn get_channel_users(state: State<'_, AppState>, id: u64) -> Result<Vec<UserInfo>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
@@ -415,6 +424,7 @@ pub fn run() {
             get_channel_info,
             get_current_user,
             get_user,
+            get_current_channel_id,
             get_channel_list,
             get_message,
             get_messages,
