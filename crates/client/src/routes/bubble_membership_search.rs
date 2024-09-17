@@ -50,7 +50,7 @@ pub struct GetBubbleMembershipSearchResponse {
 
 pub type GetBubbleMembershipSearchResult = crate::APIResult<GetBubbleMembershipSearchResponse>;
 
-pub async fn get(
+pub async fn post(
     pronto_base_url: &str,
     client: &Client,
     request: GetBubbleMembershipSearchRequest,
