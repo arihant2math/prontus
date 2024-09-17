@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use crate::UserInfo;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Membership {
     pub id: i64,
     pub user_id: i64,
