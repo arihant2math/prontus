@@ -14,6 +14,7 @@ use crate::user_info::GetUserInfoRequest;
 pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
+use crate::bubble_mark::PostBubbleMarkRequest;
 pub use crate::bubble_membership_search::GetBubbleMembershipSearchRequest;
 
 pub mod api_error;
@@ -200,8 +201,23 @@ impl ProntoClient {
             bubble_id,
             latest_message_id,
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
+    }
+
+    pub async fn update_bubble_mark(
+        &self,
+        bubble_id: u64,
+        message_id: u64,
+    ) -> Result<bubble_mark::PostBubbleMarkResult, ResponseError> {
+        Ok(bubble_mark::post(
+            &self.api_base_url,
+            &self.http_client,
+            PostBubbleMarkRequest {
+                bubble_id,
+                message_id,
+            },
+        ))
     }
 
     pub async fn get_bubble_membership(
