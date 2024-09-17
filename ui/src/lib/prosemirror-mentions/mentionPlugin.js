@@ -9,12 +9,12 @@ import {Decoration, DecorationSet} from "prosemirror-view";
  * @returns {Object}
  */
 export function getRegexp(mentionTrigger, hashtagTrigger, allowSpace) {
-    var mention = allowSpace
+    let mention = allowSpace
         ? new RegExp("(^|\\s)" + mentionTrigger + "([\\w-\\+]+\\s?[\\w-\\+]*)$")
         : new RegExp("(^|\\s)" + mentionTrigger + "([\\w-\\+]+)$");
 
     // hashtags should never allow spaces. I mean, what's the point of allowing spaces in hashtags?
-    var tag = new RegExp("(^|\\s)" + hashtagTrigger + "([\\w-]+)$");
+    let tag = new RegExp("(^|\\s)" + hashtagTrigger + "([\\w-]+)$");
 
     return {
         mention: mention,
@@ -26,33 +26,30 @@ export function getRegexp(mentionTrigger, hashtagTrigger, allowSpace) {
  *
  * @param {ResolvedPosition} $position https://prosemirror.net/docs/ref/#model.Resolved_Positions
  * @param {JSONObject} opts
- * @returns {JSONObject}
+ * @returns {?JSONObject}
  */
 export function getMatch($position, opts) {
     // take current para text content upto cursor start.
     // this makes the regex simpler and parsing the matches easier.
-    let parastart = null;
-    try {
-        parastart = $position.before();
-    } catch (e) {
-        return;
-    }
+    let parastart = $position.start();
     const text = $position.doc.textBetween(parastart, $position.pos, "\n", "\0");
 
-    var regex = getRegexp(
+    console.log(text);
+
+    let regex = getRegexp(
         opts.mentionTrigger,
         opts.hashtagTrigger,
         opts.allowSpace
     );
 
     // only one of the below matches will be true.
-    var mentionMatch = text.match(regex.mention);
-    var tagMatch = text.match(regex.tag);
+    let mentionMatch = text.match(regex.mention);
+    let tagMatch = text.match(regex.tag);
 
-    var match = mentionMatch || tagMatch;
+    let match = mentionMatch || tagMatch;
 
     // set type of match
-    var type;
+    let type;
     if (mentionMatch) {
         type = "mention";
     } else if (tagMatch) {
@@ -189,7 +186,7 @@ export function getMentionsPlugin(opts) {
         el.style.position = "fixed";
         el.style.left = offset.left + "px";
 
-        var top = textDOM.offsetHeight + offset.top;
+        let top = textDOM.offsetHeight + offset.top - 100;
         el.style.top = top + "px";
         el.style.display = "block";
         el.style.zIndex = "999999";

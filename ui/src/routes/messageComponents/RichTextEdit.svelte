@@ -7,6 +7,7 @@
     import ProsemirrorEditor from 'prosemirror-svelte';
     import {toPlainText} from 'prosemirror-svelte/state';
     import {EditorState, TextSelection} from "prosemirror-state";
+    import {getChannelUsers} from "$lib/api.js";
 
     export let text = "";
     export let sendMessage;
@@ -60,10 +61,9 @@
 
     let mentionPlugin = getMentionsPlugin({
         getSuggestions: (type, text, done) => {
-            console.log("ent")
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (type === 'mention') {
-                    // pass dummy mention suggestions
+                    // TODO: get real suggestions
                     done([{name: 'John Doe', id: '101', email: 'joe@gmail.com'}, {
                         name: 'Joe Lewis',
                         id: '102',
@@ -71,12 +71,11 @@
                     }])
                 } else {
                     // pass dummy tag suggestions
-                    done([{tag: 'WikiLeaks'}, {tag: 'NetNeutrality'}])
+                    done([{tag: 'SOHS'}, {tag: 'Stanford Online High School'}, {tag: 'Stanford'}])
                 }
             }, 0);
         },
         getSuggestionsHTML: (items, type) => {
-            console.log("h ent")
             if (type === 'mention') {
                 return getMentionSuggestionsHTML(items)
             } else if (type === 'tag') {
