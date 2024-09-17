@@ -18,7 +18,7 @@ pub struct PostBubbleMarkResponse {
     pub ok: bool
 }
 
-pub type PostBubbleMarkResult = crate::APIResult<crate::bubble_info::GetBubbleInfoResponse>;
+pub type PostBubbleMarkResult = crate::APIResult<PostBubbleMarkResponse>;
 
 pub async fn post(
     pronto_base_url: &str,
