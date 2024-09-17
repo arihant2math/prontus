@@ -14,9 +14,9 @@
             if (id !== "everyone") {
                 let user = await getUser(parseInt(id));
                 console.log(user);
-                text = text.replace(match[0], `<span class="text-blue-500">@${user.fullname}</span>`);
+                text = text.replace(match[0], `<span class="text-blue-500 dark:text-blue-400">@${user.fullname}</span>`);
             } else {
-                text = text.replace(match[0], `<span class="text-blue-500">@everyone</span>`);
+                text = text.replace(match[0], `<span class="text-blue-500 dark:text-blue-400">@everyone</span>`);
             }
         }
         return text;
