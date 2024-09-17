@@ -1,12 +1,6 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use crate::{Bubble, BubbleStatsInfo};
 
-// TODO: Mark update
-// POST https://stanfordohs.pronto.io/api/v1/bubble.mark
-// Request Payload = {"bubble_id":3738656,"message_id":89171261}
-// Response = {"ok":true}
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct PostBubbleMarkRequest {
     pub bubble_id: u64,
