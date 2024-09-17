@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use comrak::nodes::{AstNode, NodeValue};
 use comrak::{parse_document, Arena, Options};
 use std::io;
