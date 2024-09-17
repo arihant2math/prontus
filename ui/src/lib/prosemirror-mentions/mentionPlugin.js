@@ -33,9 +33,6 @@ export function getMatch($position, opts) {
     // this makes the regex simpler and parsing the matches easier.
     let parastart = $position.start();
     const text = $position.doc.textBetween(parastart, $position.pos, "\n", "\0");
-
-    console.log(text);
-
     let regex = getRegexp(
         opts.mentionTrigger,
         opts.hashtagTrigger,
@@ -301,10 +298,11 @@ export function getMentionsPlugin(opts) {
 
                 // if any of the below keys, override with custom handlers.
                 var down, up, enter, esc;
-                enter = e.keyCode === 13;
+                enter = e.key === "Enter";
                 down = e.keyCode === 40;
                 up = e.keyCode === 38;
                 esc = e.keyCode === 27;
+                console.log(e.keyCode);
 
                 if (down) {
                     goNext(view, state, opts);
