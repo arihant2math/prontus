@@ -147,7 +147,7 @@
         <div>
             <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
-        <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full">
+        <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
