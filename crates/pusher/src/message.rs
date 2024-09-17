@@ -94,11 +94,34 @@ pub struct PusherServerUserStoppedTypingEvent {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PusherMarkUpdatedEvent {
+pub struct PusherServerMarkUpdatedEvent {
     pub user_id: u64,
     pub mark: u64,
     // TODO: is datetime (YYYY-MM-DD HH-mm-SS)
     pub markupdated: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerReactionAddedEvent {
+    pub message_id: u64,
+    pub reactiontype_id: u64,
+    pub user_id: u64,
+    pub count: u64,
+    pub emoji: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerReactionRemovedEvent {
+    pub message_id: u64,
+    pub reactiontype_id: u64,
+    pub user_id: u64,
+    pub count: u64,
+    pub emoji: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerUserUpdatedEvent {
+    pub user: client::UserInfo,
 }
 
 // Received unknown message: RawPusherMessage { event: "App\\Events\\UserUpdated", data: String("{\"user\":{\"id\":5279672,\"firstname\":\"Ally\",\"lastname\":\"Aggarwal\",\"username\":null,\"locale\":\"\",\"lastseen\":\"
@@ -126,7 +149,10 @@ pub enum PusherServerEventType {
     PusherServerMessageRemovedEvent(PusherServerMessageRemovedEvent),
     PusherServerUserTypingEvent(PusherServerUserTypingEvent),
     PusherServerUserStoppedTypingEvent(PusherServerUserStoppedTypingEvent),
-    PusherMarkUpdatedEvent(PusherMarkUpdatedEvent),
+    PusherMarkUpdatedEvent(PusherServerMarkUpdatedEvent),
+    PusherServerReactionAddedEvent(PusherServerReactionAddedEvent),
+    PusherServerReactionRemovedEvent(PusherServerReactionRemovedEvent),
+    PusherServerUserUpdatedEvent(PusherServerUserUpdatedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -233,11 +259,35 @@ impl From<String> for PusherServerMessage {
                 })
             }
             "App\\Events\\MarkUpdated" => {
-                let data: PusherMarkUpdatedEvent =
+                let data: PusherServerMarkUpdatedEvent =
                     serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
                 Self::Event(PusherServerEvent {
                     channel: raw.channel.unwrap(),
                     event: PusherServerEventType::PusherMarkUpdatedEvent(data),
+                })
+            }
+            "App\\Events\\ReactionAdded" => {
+                let data: PusherServerReactionAddedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerReactionAddedEvent(data),
+                })
+            }
+            "App\\Events\\ReactionRemoved" => {
+                let data: PusherServerReactionRemovedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerReactionRemovedEvent(data),
+                })
+            }
+            "App\\Events\\UserUpdated" => {
+                let data: PusherServerUserUpdatedEvent =
+                    serde_json::from_str(raw.data.as_str().unwrap()).unwrap();
+                Self::Event(PusherServerEvent {
+                    channel: raw.channel.unwrap(),
+                    event: PusherServerEventType::PusherServerUserUpdatedEvent(data),
                 })
             }
             _ => Self::Other(raw),
