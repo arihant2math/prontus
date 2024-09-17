@@ -7,9 +7,10 @@
     import ProsemirrorEditor from 'prosemirror-svelte';
     import {toPlainText} from 'prosemirror-svelte/state';
     import {EditorState, TextSelection} from "prosemirror-state";
-    import {sendMessage} from "$lib/api.js";
 
     export let text = "";
+    export let sendMessage;
+
     // import the core component
 
     // import helpers to work with prosemirror state
