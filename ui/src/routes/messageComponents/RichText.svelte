@@ -1,5 +1,6 @@
 <script>
     import {getUser} from "$lib/api.js";
+    import Math from "./Math.svelte";
 
     export let content;
 
@@ -77,6 +78,8 @@
         <code>
             {content.data.c.literal}
         </code>
+    {:else if content.data.t === "Math"}
+        <Math latex={content.data.c.literal}/>
     {:else}
         <code>{content.data.t} is not supported at the moment, please file a bug</code>
     {/if}
