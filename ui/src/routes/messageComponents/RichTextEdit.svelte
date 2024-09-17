@@ -7,7 +7,7 @@
     import ProsemirrorEditor from 'prosemirror-svelte';
     import {toPlainText} from 'prosemirror-svelte/state';
     import {EditorState, TextSelection} from "prosemirror-state";
-    import {getChannelUsers} from "$lib/api.js";
+    import {getChannelUsers, getCurrentChannelId} from "$lib/api.js";
 
     export let text = "";
     export let sendMessage;
@@ -64,13 +64,15 @@
             setTimeout(async () => {
                 if (type === 'mention') {
                     // TODO: get real suggestions
-                    done([{name: 'John Doe', id: '101', email: 'joe@gmail.com'}, {
-                        name: 'Joe Lewis',
-                        id: '102',
-                        email: 'lewis@gmail.com'
-                    }])
+                    let users = await getChannelUsers(await getCurrentChannelId());
+                    console.log(users);
+                    let results = [];
+                    for (let user of users) {
+                        results.push({name: user.fullname, id: user.id, email: ""});
+                    }
+                    done(results);
                 } else {
-                    // pass dummy tag suggestions
+                    // TODO: remove
                     done([{tag: 'SOHS'}, {tag: 'Stanford Online High School'}, {tag: 'Stanford'}])
                 }
             }, 0);
