@@ -124,7 +124,7 @@ export function getMentionsPlugin(opts) {
             cb([]);
         },
         getSuggestionsHTML: items =>
-            '<div class="suggestion-item-list">' +
+            '<div class="text-black bg-white dark:text-white dark:bg-slate-800 suggestion-item-list">' +
             items
                 .map(i => '<div class="suggestion-item">' + i.name + "</div>")
                 .join("") +

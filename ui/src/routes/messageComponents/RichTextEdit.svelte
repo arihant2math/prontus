@@ -8,6 +8,7 @@
     import {toPlainText} from 'prosemirror-svelte/state';
     import {EditorState, TextSelection} from "prosemirror-state";
     import {getChannelUsers, getCurrentChannelId} from "$lib/api.js";
+    import Fuse from 'fuse.js'
 
     export let text = "";
     export let sendMessage;
@@ -63,12 +64,20 @@
         getSuggestions: (type, text, done) => {
             setTimeout(async () => {
                 if (type === 'mention') {
-                    // TODO: get real suggestions
                     let users = await getChannelUsers(await getCurrentChannelId());
-                    console.log(users);
+                    const fuse = new Fuse(users, {
+                        keys: ['fullname', 'username']
+                    });
+                    let filteredUsers = fuse.search(text);
                     let results = [];
-                    for (let user of users) {
-                        results.push({name: user.fullname, id: user.id, email: ""});
+                    console.log(filteredUsers);
+                    let maxResults = 5;
+                    for (let user of filteredUsers) {
+                        results.push({name: user.item.fullname, id: user.item.id, email: user.item.email});
+                        maxResults--;
+                        if (maxResults === 0) {
+                            break;
+                        }
                     }
                     done(results);
                 } else {
