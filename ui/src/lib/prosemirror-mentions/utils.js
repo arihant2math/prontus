@@ -1,4 +1,4 @@
-import { tagNode, mentionNode } from "./nodes";
+import {tagNode, mentionNode} from "./nodes";
 
 /**
  *
@@ -6,9 +6,9 @@ import { tagNode, mentionNode } from "./nodes";
  * @returns {OrderedMap}
  */
 export function addMentionNodes(nodes) {
-  return nodes.append({
-    mention: mentionNode
-  });
+    return nodes.append({
+        mention: mentionNode
+    });
 }
 
 /**
@@ -17,7 +17,7 @@ export function addMentionNodes(nodes) {
  * @returns {OrderedMap}
  */
 export function addTagNodes(nodes) {
-  return nodes.append({
-    tag: tagNode
-  });
+    return nodes.append({
+        tag: tagNode
+    });
 }
