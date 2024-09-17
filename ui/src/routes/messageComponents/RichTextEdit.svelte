@@ -70,7 +70,6 @@
                     });
                     let filteredUsers = fuse.search(text);
                     let results = [];
-                    console.log(filteredUsers);
                     let maxResults = 5;
                     for (let user of filteredUsers) {
                         results.push({name: user.item.fullname, id: user.item.id, email: ""});
@@ -106,7 +105,6 @@
     });
 
     function handleChange(event) {
-        console.log(event);
         // get the new editor state from event.detail
         editorState = event.detail.editorState;
         text = toPlainText(editorState);

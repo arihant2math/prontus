@@ -240,12 +240,12 @@ export function getMentionsPlugin(opts) {
                 tag: item.tag
             };
         }
-        var node = view.state.schema.nodes[state.type].create(attrs);
-        var tr = view.state.tr.replaceWith(state.range.from, state.range.to, node);
+        let node = view.state.schema.nodes[state.type].create(attrs);
+        let tr = view.state.tr.replaceWith(state.range.from, state.range.to, node);
 
-        //var newState = view.state.apply(tr);
-        //view.updateState(newState);
-        view.dispatch(tr)
+        // var newState = view.state.apply(tr);
+        // view.updateState(newState);
+        view.dispatch(tr);
     };
 
     /**
