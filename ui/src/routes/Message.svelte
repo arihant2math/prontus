@@ -120,7 +120,7 @@
 {#if !systemMessage}
     <div class="flex flex-col">
         {#if !inThread && parentMessage !== undefined && firstThreadMessage}
-            <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-4 rounded-xl bg-gray-50 dark:bg-slate-700">
+            <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-2 rounded-xl bg-gray-50 dark:bg-slate-700 w-max">
                 {#if parentMessage !== null}
                     <p class="text-xs line-clamp-1"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
                 {:else}
