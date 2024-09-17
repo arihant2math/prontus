@@ -4,6 +4,7 @@ pub mod bubble_list;
 pub mod bubble_mark;
 pub mod bubble_membership_search;
 pub mod device_ping;
+pub mod dm_create;
 pub mod membership_update;
 pub mod message_create;
 pub mod message_delete;
