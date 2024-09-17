@@ -73,7 +73,7 @@
                     console.log(filteredUsers);
                     let maxResults = 5;
                     for (let user of filteredUsers) {
-                        results.push({name: user.item.fullname, id: user.item.id, email: user.item.email});
+                        results.push({name: user.item.fullname, id: user.item.id, email: ""});
                         maxResults--;
                         if (maxResults === 0) {
                             break;
