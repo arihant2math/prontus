@@ -40,6 +40,13 @@ pub fn parse(markdown: &str) -> serde_json::Value {
     let mut options = Options::default();
     options.extension.strikethrough = true;
     options.extension.autolink = true;
+    options.extension.math_code = true;
+    options.extension.table = true;
+    options.extension.math_dollars = true;
+    options.extension.footnotes = false;
+    options.extension.tasklist = true;
+    options.extension.superscript = true;
+    options.extension.underline = true;
 
     let root = parse_document(&arena, markdown, &options);
 
