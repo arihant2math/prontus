@@ -68,7 +68,7 @@
         if (previousMessage === null) {
             return true;
         }
-        return !(previousMessage.user.id === message.user.id && previousMessage.parentmessage_id === message.parentmessage_id);
+        return !(previousMessage.parentmessage_id === message.parentmessage_id);
     }
 
     function isLastThreadMessage() {
