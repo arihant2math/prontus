@@ -120,11 +120,13 @@
 {#if !systemMessage}
     <div class="flex flex-col">
         {#if !inThread && parentMessage !== undefined && firstThreadMessage}
-            {#if parentMessage !== null}
-                <p class="text-xs"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
-            {:else}
-                <p class="text-xs"><b>Loading</b> loading</p>
-            {/if}
+            <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-4 rounded-xl bg-gray-50 dark:bg-slate-700">
+                {#if parentMessage !== null}
+                    <p class="text-xs line-clamp-1"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
+                {:else}
+                    <p class="text-xs"><b>Loading</b> loading</p>
+                {/if}
+            </button>
         {/if}
         <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 {border}" role="listitem">
             {#if !repeat}
