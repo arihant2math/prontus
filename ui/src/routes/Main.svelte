@@ -87,10 +87,8 @@
         positionPopovers();
     }
 
-    async function init() {
-        currentUser = await getCurrentUser();
+    async function updateChannelList() {
         let channels = await getChannelList();
-        console.debug(channels);
         let categories = {};
         let categoryInfo = {};
         for (let channel of channels) {
@@ -118,6 +116,11 @@
         sidebarCategories = categories;
     }
 
+    async function init() {
+        currentUser = await getCurrentUser();
+        await updateChannelList();
+    }
+
     function viewThread(parentId) {
         threadParent = parentId;
     }
@@ -125,6 +128,10 @@
     init().then(() => {
         console.log("Main init complete");
     });
+
+    setInterval(async () => {
+        await updateChannelList();
+    }, 50);
 </script>
 
 <Settings/>
