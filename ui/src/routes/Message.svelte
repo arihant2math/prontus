@@ -140,7 +140,6 @@
                     </div>
                 {/if}
                 <RichTextContainer message="{message.message}"/>
-    <!--            <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{message.message}</p>-->
                 {#each media as mediaItem}
                     <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>
                 {/each}
