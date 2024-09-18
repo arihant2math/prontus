@@ -77,7 +77,7 @@
                             Photos & Videos
                         </div>
                     </DropdownMenu.Item>
-                    {if !info[0].isdm}
+                    {#if !info[0].isdm}
                         <DropdownMenu.Item
                                 class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium !ring-0 !ring-transparent data-[highlighted]:bg-muted"
                         >
