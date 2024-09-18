@@ -55,8 +55,7 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                     PusherServerMessage::Event(event) => {
                         match event.event {
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
-                                // TODO: check the setting
-                                // TODO: Also make sure app in not in foreground
+                                // TODO: Make sure app in not in foreground
                                 if settings.options.notifications {
                                     Notification::new()
                                         .summary(&format!("New message from {user}",
@@ -116,6 +115,17 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                     if id == &event.user_id {
                                         user.online = event.is_online;
                                     }
+                                }
+                            }
+                            PusherServerEventType::PusherServerUserUpdatedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let user = state.users.get_mut(&event.user.id);
+                                if let Some(user) = user {
+                                    *user = event.user;
+                                } else {
+                                    state.users.insert(event.user.id, event.user);
                                 }
                             }
                             // TODO: handle other
