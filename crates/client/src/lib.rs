@@ -223,7 +223,7 @@ impl ProntoClient {
         &self,
         bubble_id: u64,
         message_id: u64,
-    ) -> Result<bubble_mark::PostBubbleMarkResult, ResponseError> {
+    ) -> Result<bubble_mark::PostBubbleMarkResponse, ResponseError> {
         Ok(bubble_mark::post(
             &self.api_base_url,
             &self.http_client,
@@ -231,7 +231,8 @@ impl ProntoClient {
                 bubble_id,
                 message_id,
             },
-        ))
+        ).await?
+            .to_result()?)
     }
 
     pub async fn get_bubble_membership(

@@ -24,7 +24,7 @@ pub async fn post(
         .json(&request)
         .send()
         .await?;
-    let json = r.json::<crate::bubble_info::GetBubbleInfoResult>().await?;
+    let json = r.json().await?;
     Ok(json)
 }
 
