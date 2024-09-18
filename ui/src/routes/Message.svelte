@@ -132,7 +132,7 @@
             {#if !repeat}
                 <InteractiveProfilePicture user={message.user}/>
             {/if}
-            <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5">
+            <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5 space-y-2">
                 {#if !repeat}
                     <div class="flex items-center space-x-2 rtl:space-x-reverse">
                         <span class="text-sm font-semibold text-gray-900 dark:text-white text-nowrap">{user.fullname}</span>
