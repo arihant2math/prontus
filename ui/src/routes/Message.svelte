@@ -6,7 +6,7 @@
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
-    import InteractiveProfilePicture from "./InteractiveProfilePicture.svelte";
+    import InteractiveProfilePicture from "./user/InteractiveProfilePicture.svelte";
 
     export let message;
     export let previousMessage = null;

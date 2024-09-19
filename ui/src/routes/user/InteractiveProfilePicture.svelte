@@ -1,7 +1,7 @@
 <script>
-    import ProfilePicture from "./user/ProfilePicture.svelte";
+    import ProfilePicture from "./ProfilePicture.svelte";
     import { Popover, Separator, Toggle } from "bits-ui";
-    import UserInfo from "./user/UserInfo.svelte";
+    import UserInfo from "./UserInfo.svelte";
 
     export let user;
     export let id;
