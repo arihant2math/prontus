@@ -1,29 +1,18 @@
-mod settings_file_v0;
-mod settings_file_v1;
-
-use bincode::config::Configuration;
-use bincode::{Decode, Encode};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
-use crate::settings_file_v0::SettingsFileV0;
-use crate::settings_file_v1::SettingsFileV1;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SettingsError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    #[error("Bincode error: {0}")]
-    BincodeDecodeError(#[from] bincode::error::DecodeError),
-    #[error("Bincode error: {0}")]
-    BincodeEncodeError(#[from] bincode::error::EncodeError),
+    #[error("SIMD JSON error: {0}")]
+    SimdJSON(#[from] simd_json::Error)
 }
 
 pub type Result<T> = std::result::Result<T, SettingsError>;
 
-pub const BINCODE_CONFIG: Configuration = bincode::config::standard();
-
-#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize, Encode, Decode)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Theme {
     Light,
     Dark,
@@ -36,27 +25,27 @@ impl Default for Theme {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Sidebar {
     pub show_dm_profile_pictures: bool,
     pub hide_categories: bool,
     pub hide_recents_categories: bool,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Auth {
     pub saved_email: Option<String>,
     pub saved_phone: Option<String>,
     pub api_key: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Appearance {
     pub theme: Theme,
     pub sidebar: Sidebar,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Options {
     pub rich_text: bool,
     pub notifications: bool,
@@ -65,13 +54,7 @@ pub struct Options {
     pub analytics: bool,
 }
 
-#[derive(Clone, Debug, Encode, Decode)]
-pub enum SettingsFile {
-    V0(SettingsFileV0),
-    V1(SettingsFileV1)
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Encode, Decode)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Settings {
     pub auth: Auth,
     pub appearance: Appearance,
@@ -80,11 +63,20 @@ pub struct Settings {
 
 impl Settings {
     pub fn path() -> PathBuf {
+        // TODO: remove this in the far far future
+        let old_settings = home::home_dir()
+            .unwrap()
+            .join(".prontus")
+            .join("settings.json");
+        if old_settings.exists() {
+            std::fs::remove_file(old_settings).unwrap();
+        }
         home::home_dir()
             .unwrap()
             .join(".prontus")
-            .join("settings.bnc")
+            .join("settings.json")
     }
+
     pub async fn delete() -> Result<()> {
         let path = Self::path();
         tokio::fs::remove_file(path).await?;
@@ -95,13 +87,9 @@ impl Settings {
         let path = Self::path();
         if path.exists() {
             // TODO: switch to OpenOptions
-            let data = tokio::fs::read(&path).await?;
-            match bincode::decode_from_slice::<SettingsFile, Configuration>(&data, BINCODE_CONFIG) {
-                Ok((settings, _)) => Ok(settings.into()),
-                Err(_) => {
-                    Self::delete().await?;
-                    Ok(Self::default())
-                },
+            let mut data = tokio::fs::read_to_string(&path).await?;
+            unsafe {
+                Ok(simd_json::from_str(&mut data)?)
             }
         } else {
             Ok(Self::default())
@@ -111,29 +99,14 @@ impl Settings {
     pub async fn save(&self) -> Result<()> {
         let path = Self::path();
         tokio::fs::create_dir_all(path.parent().unwrap()).await?;
-        let data = bincode::encode_to_vec(&SettingsFile::from(self.clone()), BINCODE_CONFIG)?;
+        let data = simd_json::to_string(&self)?;
         let mut file = tokio::fs::OpenOptions::new()
             .write(true)
             .create(true)
             .truncate(true)
             .open(&path)
             .await?;
-        file.write(&data).await?;
+        file.write(data.as_bytes()).await?;
         Ok(())
-    }
-}
-
-impl From<SettingsFile> for Settings {
-    fn from(settings: SettingsFile) -> Self {
-        match settings {
-            SettingsFile::V0(v0) => v0.into(),
-            SettingsFile::V1(v1) => v1.into(),
-        }
-    }
-}
-
-impl From<Settings> for SettingsFile {
-    fn from(settings: Settings) -> Self {
-        SettingsFile::V1(settings.into())
     }
 }
