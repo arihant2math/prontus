@@ -46,7 +46,6 @@
 
     export function send() {
         // TODO: temporarily disable editing
-        editorState.
         sendMessage(defaultMarkdownSerializer.serialize(editorState.doc)).then(() => {
             clear();
         });

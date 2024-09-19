@@ -16,6 +16,7 @@
     export let inThread;
     export let messages;
 
+    $: unsent = message.hasOwnProperty("unsent");
     $: dateSpan = spanDate(message, previousMessage);
     $: repeat = isRepeat(message, previousMessage);
     $: firstThreadMessage = isFirstThreadMessage(message, previousMessage);

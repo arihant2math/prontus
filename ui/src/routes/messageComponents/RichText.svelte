@@ -1,6 +1,4 @@
 <script>
-    import Math from "./Math.svelte";
-
     export let content;
 </script>
 <div>

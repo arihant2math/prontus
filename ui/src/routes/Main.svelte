@@ -1,30 +1,26 @@
 <script>
     import ChannelCard from "./CurrentChannelCard.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
-    import SideCategory from "./sidebar/SideCategory.svelte"
-    import CurrentUserCard from "./CurrentUserCard.svelte"
     import MemberList from "./MemberList.svelte";
 
     import {
         loadChannel,
-        getChannelList,
         getMessages,
         loadMessages,
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages
+        getCurrentUser, getChannelInfo, getParentMessages, getCurrentChannelId
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
     import {listen} from "@tauri-apps/api/event";
+    import Sidebar from "./Sidebar.svelte";
 
     let currentUser;
     let messages = [];
     let parentMessages = [];
-    let sidebarCategoriesInfo = {};
-    let sidebarCategories = [];
     let channelInfo = null;
     let channelUsers = [];
     let showMemberList = false;
@@ -56,7 +52,7 @@
 
 
 
-    // TODO: non-jank loading (bar on the top or smth and get channel card and messages load at once)
+    // TODO: progress bar on the top or smth
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
             return;
@@ -84,42 +80,17 @@
         positionPopovers();
     }
 
-    async function updateChannelList() {
-        let channels = await getChannelList();
-        let categories = {};
-        let categoryInfo = {};
-        for (let channel of channels) {
-            let category = channel[0].category;
-            if (category == null && channel[0].isdm) {
-                category = {
-                    "id": -2,
-                    "title": "Direct Messages",
-                };
-            } else if (category == null) {
-                category = {
-                    "id": -1,
-                    "title": "Uncategorized",
-                };
-            }
-            if (categories[category.id] == null) {
-                categories[category.id] = [];
-                categoryInfo[category.id] = category;
-            }
-            categories[category.id].push(channel);
-
-        }
-
-        sidebarCategoriesInfo = categoryInfo;
-        sidebarCategories = categories;
-    }
-
     async function init() {
         currentUser = await getCurrentUser();
-        await updateChannelList();
     }
 
     function viewThread(parentId) {
         threadParent = parentId;
+    }
+
+    async function queuedSendMessage(message, threadId) {
+        sendMessage(message, threadId).then();
+        // TODO: implement
     }
 
     init().then(() => {
@@ -130,28 +101,12 @@
         messages = await getMessages();
         parentMessages = await getParentMessages();
     });
-
-    listen('channelListUpdate', async (_event) => {
-        await updateChannelList();
-    });
 </script>
 
 <Settings/>
 
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    <aside id="default-sidebar"
-           aria-label="Sidebar"
-           class="h-full">
-        <div class="w-[375px] h-full bg-gray-50 dark:bg-gray-900 z-40">
-            <!--TODO: maybe move this to the bottom-->
-            <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
-            <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
-                {#each Object.keys(sidebarCategories) as category}
-                    <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
-                {/each}
-            </ul>
-        </div>
-    </aside>
+    <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>
             <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
@@ -160,7 +115,7 @@
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                    <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, null)}}/>
+                    <RichTextEdit bind:this={messageInput} sendMessage={async (text) => {queuedSendMessage(text, null)}}/>
                 </div>
             </div>
             {#if showMemberList && !showThread}
@@ -176,7 +131,7 @@
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
                         <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                            <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, threadParent)}}/>
+                            <RichTextEdit sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
                         </div>
                     </div>
                 </div>

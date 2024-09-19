@@ -28,7 +28,6 @@
             .use(rehypeStringify);
         let parseTree = processor.parse(message);
         processor.run(parseTree).then((content) => {
-            console.log(content);
             removePosition(content, {force: true})
             richContent = content;
         });
