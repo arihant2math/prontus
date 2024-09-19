@@ -2,7 +2,7 @@
     import Embed from "./messageComponents/Embed.svelte";
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
-    import {getMessage, deleteMessage} from "$lib/api.js";
+    import {getMessage, deleteMessage} from "$lib/api.ts";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";

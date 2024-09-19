@@ -10,7 +10,7 @@
  */
 
 import {findAndReplace} from "mdast-util-find-and-replace";
-import {getUser} from "$lib/api.js";
+import {getUser} from "$lib/api.ts";
 
 const userGroup = "[\\da-z][-\\da-z_]{0,38}";
 const mentionRegex = new RegExp(

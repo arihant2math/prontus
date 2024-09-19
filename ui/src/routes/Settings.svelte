@@ -15,7 +15,7 @@
 <script>
     import ThemeLabel from "./settingsComponents/theme/ThemeLabel.svelte";
     import OptionsLabel from "./settingsComponents/options/OptionsLabel.svelte";
-    import {getSettings, setSettings} from "$lib/api.js";
+    import {getSettings, setSettings} from "$lib/api.ts";
 
     let settings = {
         appearance: {

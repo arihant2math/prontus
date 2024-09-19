@@ -9,13 +9,15 @@
     import remarkRehype from 'remark-rehype'
     import remarkMath from 'remark-math'
     import rehypeKatex from 'rehype-katex'
+    import {removePosition} from 'unist-util-remove-position'
+    import RichText from "./RichText.svelte";
 
     export let message;
     let richContent;
     $: message, init();
 
     function init() {
-        let rich = unified()
+        let processor = unified()
             .use(remarkGfm)
             .use(remarkMentions)
             .use(remarkParse)
@@ -23,10 +25,11 @@
             .use(remarkRehype)
             .use(rehypeSanitize)
             .use(rehypeKatex)
-            .use(rehypeStringify)
-            .process(message);
-        rich.then((content) => {
-            // console.log(content);
+            .use(rehypeStringify);
+        let parseTree = processor.parse(message);
+        processor.run(parseTree).then((content) => {
+            console.log(content);
+            removePosition(content, {force: true})
             richContent = content;
         });
     }
@@ -36,5 +39,5 @@
 {#if richContent === undefined}
     <p>Loading...</p>
 {:else}
-    {@html richContent}
+    <RichText content="{richContent}"/>
 {/if}

@@ -3,7 +3,7 @@
     import Main from "./Main.svelte";
     import AuthCode from "./auth/AuthCode.svelte"
     import AuthEmail from "./auth/AuthEmail.svelte";
-    import {getCode, sendCode, load} from "$lib/api.js";
+    import {getCode, sendCode, load} from "$lib/api.ts";
     import {initPopovers} from "$lib/popup.js";
 
     initPopovers();

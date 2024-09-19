@@ -1,5 +1,5 @@
 <script>
-    import {setReactionState} from "$lib/api.js";
+    import {setReactionState} from "$lib/api.ts";
 
     export let message_id;
 

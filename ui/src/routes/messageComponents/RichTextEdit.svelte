@@ -3,12 +3,23 @@
     import {addMentionNodes, addTagNodes, getMentionsPlugin} from '../../lib/prosemirror-mentions';
     import {keymap} from "prosemirror-keymap";
     import {history, redo, undo} from "prosemirror-history";
-    import {baseKeymap} from "prosemirror-commands";
+    import {
+        baseKeymap,
+        chainCommands, createParagraphNear,
+        joinDown,
+        joinUp,
+        lift, liftEmptyBlock, newlineInCode,
+        selectParentNode, splitBlock,
+        toggleMark
+    } from "prosemirror-commands";
     import ProsemirrorEditor from 'prosemirror-svelte';
     import {toPlainText} from 'prosemirror-svelte/state';
+    import {schema} from 'prosemirror-schema-basic';
     import {EditorState, TextSelection} from "prosemirror-state";
-    import {getChannelUsers, getCurrentChannelId} from "$lib/api.js";
+    import {undoInputRule} from "prosemirror-inputrules"
+    import {getChannelUsers, getCurrentChannelId} from "$lib/api.ts";
     import Fuse from 'fuse.js'
+    import {defaultMarkdownSerializer} from "prosemirror-markdown";
 
     export let text = "";
     export let sendMessage;
@@ -19,32 +30,64 @@
 
     // create the initial editor state
     const singleLineSchema = new Schema({
-        nodes: {
-            doc: {content: "text*"},
-            text: {inline: true}
-        }
+        nodes: schema.spec.nodes,
+        marks: schema.spec.marks
     });
 
-    let schema = new Schema({
+    let customSchema = new Schema({
         nodes: addTagNodes(addMentionNodes(singleLineSchema.spec.nodes)),
         marks: singleLineSchema.spec.marks
     });
 
-    const doc = "" ? schema.node("doc", null, [
-        schema.text("")
+    const doc = "" ? customSchema.node("doc", null, [
+        customSchema.text("")
     ]) : undefined;
     const selection = doc ? TextSelection.atEnd(doc) : undefined;
 
     export function send() {
         // TODO: temporarily disable editing
-        sendMessage(toPlainText(editorState)).then(() => {
+        editorState.
+        sendMessage(defaultMarkdownSerializer.serialize(editorState.doc)).then(() => {
             clear();
         });
     }
 
+    function buildKeymap() {
+        let keys = {}, type
+
+        function bind(key, cmd) {
+            keys[key] = cmd;
+        }
+
+        bind("Mod-z", undo)
+        bind("Shift-Mod-z", redo)
+        bind("Backspace", undoInputRule)
+        // if (!mac) bind("Mod-y", redo)
+
+        bind("Alt-ArrowUp", joinUp)
+        bind("Alt-ArrowDown", joinDown)
+        bind("Mod-BracketLeft", lift)
+        bind("Escape", selectParentNode)
+        bind("Enter", send)
+        bind("Shift-Enter", chainCommands(newlineInCode, createParagraphNear, liftEmptyBlock, splitBlock));
+
+        if (type = schema.marks.strong) {
+            bind("Mod-b", toggleMark(type))
+            bind("Mod-B", toggleMark(type))
+        }
+        if (type = schema.marks.em) {
+            bind("Mod-i", toggleMark(type))
+            bind("Mod-I", toggleMark(type))
+        }
+        if (type = schema.marks.code)
+            bind("Mod-`", toggleMark(type))
+
+        return keys;
+    }
+
     const corePlugins = [
         history(),
-        keymap({"Mod-z": undo, "Mod-y": redo, "Mod-Shift-z": redo, "Enter": send}),
+        keymap(buildKeymap()),
         keymap(baseKeymap),
     ];
 
@@ -95,7 +138,7 @@
     });
 
     let editorState = EditorState.create({
-        schema: schema,
+        schema: customSchema,
         doc,
         selection,
         plugins: [
@@ -112,9 +155,9 @@
 
     export function clear() {
         editorState = EditorState.create({
-            schema: schema,
-            doc: "" ? schema.node("doc", null, [
-                schema.text("")
+            schema: customSchema,
+            doc: "" ? customSchema.node("doc", null, [
+                customSchema.text("")
             ]) : undefined,
             selection: undefined,
             plugins: [

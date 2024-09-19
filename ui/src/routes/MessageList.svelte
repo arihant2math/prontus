@@ -1,7 +1,7 @@
 <script>
     import Message from "./Message.svelte";
     import {positionPopovers} from "$lib/popup.js";
-    import {getMessages, getMoreMessages} from "$lib/api.js";
+    import {getMessages, getMoreMessages} from "$lib/api.ts";
 
     export let messages;
     export let parentMessages;

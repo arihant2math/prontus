@@ -14,7 +14,7 @@
         getChannelUsers,
         loadChannelUsers,
         getCurrentUser, getChannelInfo, getParentMessages
-    } from "$lib/api.js";
+    } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
