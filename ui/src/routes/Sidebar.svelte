@@ -1,5 +1,5 @@
 <script>
-    import CurrentUserCard from "./CurrentUserCard.svelte";
+    import CurrentUserCard from "./user/CurrentUserCard.svelte";
     import SideCategory from "./sidebar/SideCategory.svelte";
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";

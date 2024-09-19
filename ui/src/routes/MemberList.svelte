@@ -1,5 +1,5 @@
 <script>
-    import UserCard from "./UserCard.svelte";
+    import UserCard from "./user/UserCard.svelte";
 
     export let channelUsers;
 </script>

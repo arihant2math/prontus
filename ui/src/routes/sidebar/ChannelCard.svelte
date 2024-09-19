@@ -1,5 +1,5 @@
 <script>
-    import ProfilePicture from "../ProfilePicture.svelte";
+    import ProfilePicture from "../user/ProfilePicture.svelte";
     import {ContextMenu} from "bits-ui";
 
     export let info;
