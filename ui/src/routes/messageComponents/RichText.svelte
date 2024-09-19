@@ -69,7 +69,13 @@
             {/each}
         </sub>
     {:else if content.data.t === "Link"}
-        <a href="{content.data.c.url}">{content.data.c.title}</a>
+        <a class="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-500" href="{content.data.c.url}">
+            {#if content.data.c.title !== ""}
+                {content.data.c.title}
+            {:else}
+                {content.data.c.url}
+            {/if}
+        </a>
     {:else if content.data.t === "Image"}
         Markdown Images are not currently supported
     {:else if content.data.t === "SoftBreak"}
