@@ -163,8 +163,7 @@ pub struct PusherServerEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PusherServerError {
-    // TODO: check spec
-    pub code: Option<()>,
+    pub code: Option<i64>,
     pub message: String,
 }
 
