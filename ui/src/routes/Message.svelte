@@ -14,6 +14,7 @@
     export let currentUser;
     export let viewThread;
     export let inThread;
+    export let messages;
 
     $: dateSpan = spanDate(message, previousMessage);
     $: repeat = isRepeat(message, previousMessage);
@@ -74,7 +75,7 @@
             return true;
         }
 
-        return !(nextMessage.user.id === message.user.id && nextMessage.parentmessage_id === message.parentmessage_id);
+        return !(nextMessage.parentmessage_id === message.parentmessage_id);
     }
 
     function spanDate() {
@@ -92,25 +93,19 @@
         await deleteMessage(message.id);
     }
 
-    $: parentMessage = null;
+    $: parentMessage = getParentMessage(message, messages);
 
-    function getParentMessage() {
-        if (message.parentmessage_id !== null && message.parentmessage_id !== undefined) {
-            if (parentMessage === undefined) {
-                parentMessage = null;
-            }
-            getMessage(message.parentmessage_id).then((parent) => {
-                parentMessage = parent;
-            });
-        } else {
-            parentMessage = undefined;
+    function getParentMessage(message, messages) {
+        if (message.parentmessage_id === null) {
+            return undefined;
         }
+        for (let i = 0; i < messages.length; i++) {
+            if (messages[i].id === message.parentmessage_id) {
+                return messages[i];
+            }
+        }
+        return null;
     }
-
-    // TODO: techdebt
-    setInterval(() => {
-        getParentMessage();
-    }, 10);
 </script>
 {#if dateSpan}
 <!--    TODO: Debug and then put a proper date span here-->

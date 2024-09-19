@@ -44,6 +44,10 @@ export async function getMoreMessages(lastMessageId) {
     return await invoke("get_more_messages", {lastMessageId});
 }
 
+export async function getParentMessages() {
+    return await invoke("get_parent_messages");
+}
+
 export async function loadMessages() {
     return await invoke("load_messages");
 }

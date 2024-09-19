@@ -1,12 +1,13 @@
 use futures::future::join_all;
 use notify_rust::{Notification, Timeout};
+use tauri::{AppHandle, Emitter};
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
 use settings::Settings;
 use crate::{AppState, BackendError};
 
 // TODO: Should not be backend error result
 #[tokio::main]
-pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
+pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(), BackendError> {
     loop {
         if context.is_loaded().await {
             break;
@@ -73,6 +74,7 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                         state.message_list.insert(0, event.message);
                                     }
                                 }
+                                let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerMessageUpdatedEvent(event) => {
                                 let state = context.inner();
@@ -86,6 +88,8 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                     if let Some(message) = message {
                                         *message = event.message;
                                     }
+
+                                    let _ = handle.emit("messageListUpdate", ());
                                 }
                             }
                             PusherServerEventType::PusherServerMessageRemovedEvent(event) => {
@@ -93,6 +97,8 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
                                 state.message_list.retain(|m| m.id != event.message.id);
+
+                                let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerBubbleStatsEvent(event) => {
                                 let state = context.inner();
@@ -106,6 +112,8 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                         }
                                     }
                                 }
+
+                                let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserPresenceEvent(event) => {
                                 let state = context.inner();
@@ -116,6 +124,9 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                         user.online = event.is_online;
                                     }
                                 }
+
+                                let _ = handle.emit("messageListUpdate", ());
+                                let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserUpdatedEvent(event) => {
                                 let state = context.inner();
@@ -127,6 +138,9 @@ pub async fn run_pusher_thread(context: AppState) -> Result<(), BackendError> {
                                 } else {
                                     state.users.insert(event.user.id, event.user);
                                 }
+
+                                let _ = handle.emit("messageListUpdate", ());
+                                let _ = handle.emit("channelListUpdate", ());
                             }
                             // TODO: handle other
                             _ => {}

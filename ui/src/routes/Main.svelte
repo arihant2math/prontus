@@ -13,14 +13,16 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo
+        getCurrentUser, getChannelInfo, getParentMessages
     } from "$lib/api.js";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
+    import {listen} from "@tauri-apps/api/event";
 
     let currentUser;
     let messages = [];
+    let parentMessages = [];
     let sidebarCategoriesInfo = {};
     let sidebarCategories = [];
     let channelInfo = null;
@@ -64,6 +66,7 @@
         await loadChannel(id);
         let messagesPromise = loadMessages().then(async () => {
             messages = await getMessages();
+            parentMessages = await getParentMessages();
             positionPopovers();
         });
         channelUsers = [];
@@ -123,13 +126,14 @@
         console.log("Main init complete");
     });
 
-    setInterval(async () => {
-        await updateChannelList();
-    }, 50);
-
-    setInterval(async () => {
+    listen('messageListUpdate', async (_event) => {
         messages = await getMessages();
-    }, 25);
+        parentMessages = await getParentMessages();
+    });
+
+    listen('channelListUpdate', async (_event) => {
+        await updateChannelList();
+    });
 </script>
 
 <Settings/>
@@ -154,7 +158,7 @@
         </div>
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
-                <MessageList id="messagesDiv" bind:messages={messages} bind:currentUser={currentUser} viewThread={viewThread}/>
+                <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages} bind:currentUser={currentUser} viewThread={viewThread}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, null)}}/>
                 </div>
@@ -170,7 +174,7 @@
                         </svg>
                     </button>
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:currentUser={currentUser} inThread={true}/>
+                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                             <RichTextEdit bind:this={messageInput} sendMessage={(text) => {sendMessage(text, threadParent)}}/>
                         </div>

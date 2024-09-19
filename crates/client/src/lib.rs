@@ -261,7 +261,7 @@ impl ProntoClient {
             .to_result()?)
     }
 
-    pub async fn hide_bubble(&self, bubble_id: u64, state: bool) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
+    pub async fn hide_bubble(&self, bubble_id: u64) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
         Ok(membership_update::post(
             &self.api_base_url,
             &self.http_client,

@@ -93,13 +93,13 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         channel_list: state_channel_list,
         current_channel: 0,
         message_list: vec![],
+        parent_messages: vec![],
         channel_users: HashMap::new(),
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[command]
 async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
     let state = state.inner().inner();
@@ -131,6 +131,7 @@ async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, Backe
         if let Some(user) = state.users.get(&id) {
             return Ok(user.clone());
         }
+        println!("{:?}", state.users.keys());
         state.client.get_user_info(Some(id)).await?
     };
 
@@ -171,13 +172,26 @@ async fn get_channel_info(
 
 #[command]
 async fn load_messages(state: State<'_, AppState>) -> Result<(), BackendError> {
+    let messages = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        let id = state.current_channel;
+        state.client.get_bubble_history(id, None).await?
+    };
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    let id = state.current_channel;
-    let messages = state.client.get_bubble_history(id, None).await?;
+    for message in messages.messages.iter() {
+        if !state.users.contains_key(&message.user.id) {
+            state.users.insert(message.user.id, message.user.clone());
+        }
+    }
+
     state.message_list = messages.messages;
+    state.parent_messages = messages.parent_messages;
     Ok(())
 }
 
@@ -200,11 +214,20 @@ async fn get_messages(state: State<'_, AppState>) -> Result<Vec<Message>, Backen
 }
 
 #[command]
+async fn get_parent_messages(state: State<'_, AppState>) -> Result<Vec<Message>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    Ok(state.message_list.clone())
+}
+
+#[command]
 async fn get_more_messages(
     state: State<'_, AppState>,
     last_message_id: u64,
 ) -> Result<Vec<Message>, BackendError> {
-    let messages = {
+    let mut messages = {
         let state = state.clone().inner().inner();
         let state = state.read().await;
         let state = state.try_inner()?;
@@ -219,9 +242,14 @@ async fn get_more_messages(
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
-    let messages = messages.messages;
-    state.message_list.extend_from_slice(&mut messages.clone());
-    Ok(messages)
+    for message in messages.messages.iter() {
+        if !state.users.contains_key(&message.user.id) {
+            state.users.insert(message.user.id, message.user.clone());
+        }
+    }
+    state.message_list.extend_from_slice(&mut messages.messages.clone());
+    state.parent_messages.extend_from_slice(&mut messages.parent_messages);
+    Ok(messages.messages)
 }
 
 #[command]
@@ -351,22 +379,33 @@ async fn get_channel_users(state: State<'_, AppState>, id: u64) -> Result<Vec<Us
 
 #[command]
 async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
+    let membership = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        let page = state.channel_users.get(&id).map(|u| u.pages).unwrap_or(0);
+        state.client.get_bubble_membership(GetBubbleMembershipSearchRequest {
+            bubble_id: id,
+            page,
+            ..Default::default()
+        }).await?
+    };
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    let page = state.channel_users.get(&id).map(|u| u.pages).unwrap_or(0);
-    let membership = state.client.get_bubble_membership(GetBubbleMembershipSearchRequest {
-        bubble_id: id,
-        page,
-        ..Default::default()
-    }).await?;
+
     let users: Vec<u64> = membership.membership.iter().map(|m| m.user_id).collect();
-    let o = state.channel_users.get_mut(&id).map(|u| u.users.extend(users.clone()));
+    let o = state.channel_users.get_mut(&id).map(|u| {
+        u.users.extend(users.clone());
+        u.page += 1;
+    });
     if o.is_none() {
         state.channel_users.insert(id, ChannelUsers {
             pages: membership.page_size,
             users,
+            page: 1,
         });
     }
     for user in membership.membership {
@@ -388,28 +427,16 @@ async fn set_settings(settings: Settings) -> Result<(), BackendError> {
     Ok(())
 }
 
-#[command]
-async fn rich(
-    _state: State<'_, AppState>,
-    message: String,
-) -> Result<serde_json::Value, BackendError> {
-    // let state = state.inner().inner();
-    // let state = state.read().await;
-    // let state = state.try_inner()?;
-
-    let message = richtext::parse(&message);
-    Ok(message)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let context = AppState::unloaded();
+            let thread_handle = app.handle().clone();
             thread::spawn({
                 let context = context.clone();
                 move || {
-                    let _ = run_pusher_thread(context);
+                    let _ = run_pusher_thread(thread_handle, context);
                 }
             });
 
@@ -430,6 +457,7 @@ pub fn run() {
             get_message,
             get_messages,
             get_more_messages,
+            get_parent_messages,
             load_messages,
             edit_message,
             send_message,
@@ -438,8 +466,7 @@ pub fn run() {
             get_channel_users,
             load_channel_users,
             get_settings,
-            set_settings,
-            rich
+            set_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -7,6 +7,7 @@ use tokio::sync::RwLock;
 
 #[derive(Clone)]
 pub struct ChannelUsers {
+    pub page: u64,
     pub pages: u64,
     pub users: Vec<u64>,
 }
@@ -19,6 +20,7 @@ pub struct AppData {
     pub channel_users: HashMap<u64, ChannelUsers>,
     pub current_channel: u64,
     pub message_list: Vec<Message>,
+    pub parent_messages: Vec<Message>
 }
 
 pub enum InnerAppState {

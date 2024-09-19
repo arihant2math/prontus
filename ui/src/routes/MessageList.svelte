@@ -4,6 +4,7 @@
     import {getMessages, getMoreMessages} from "$lib/api.js";
 
     export let messages;
+    export let parentMessages;
     export let viewThread;
     export let currentUser;
     export let inThread = false;
@@ -42,13 +43,13 @@
 <div id="{id}" class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse h-full w-full" on:scroll={messageScroll} onload="this.scrollTop=0">
     {#each messages as message, i}
         {#if i < messages.length - 1 && i > 0}
-            <Message message={message} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+            <Message message={message} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages}/>
         {:else if i < message.length - 1}
-            <Message message={message} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+            <Message message={message} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages}/>
         {:else if i > 0}
-            <Message message={message} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+            <Message message={message} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages}/>
         {:else}
-            <Message message={message} currentUser={currentUser} viewThread={viewThread} inThread={inThread}/>
+            <Message message={message} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages}/>
         {/if}
     {/each}
 </div>
