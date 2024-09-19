@@ -1,19 +1,14 @@
 <script>
-    import {invoke} from "@tauri-apps/api/core";
-
     import ChannelCard from "./CurrentChannelCard.svelte";
-    import Message from "./Message.svelte";
     import Settings, {showSettings} from "./Settings.svelte";
     import SideCategory from "./sidebar/SideCategory.svelte"
     import CurrentUserCard from "./CurrentUserCard.svelte"
-    import UserCard from "./UserCard.svelte"
     import MemberList from "./MemberList.svelte";
 
     import {
         loadChannel,
         getChannelList,
         getMessages,
-        getMoreMessages,
         loadMessages,
         sendMessage,
         getChannelUsers,
@@ -23,7 +18,6 @@
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
-    import {show} from "@tauri-apps/api/app";
 
     let currentUser;
     let messages = [];
@@ -132,6 +126,10 @@
     setInterval(async () => {
         await updateChannelList();
     }, 50);
+
+    setInterval(async () => {
+        messages = await getMessages();
+    }, 25);
 </script>
 
 <Settings/>
@@ -140,10 +138,10 @@
     <aside id="default-sidebar"
            aria-label="Sidebar"
            class="h-full">
-        <div class="w-[375px] h-full overflow-y-auto overflow-x-hidden pb-4 bg-gray-50 dark:bg-gray-900 z-40">
+        <div class="w-[375px] h-full bg-gray-50 dark:bg-gray-900 z-40">
             <!--TODO: maybe move this to the bottom-->
             <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
-            <ul class="space-y-2 font-medium px-3" id="sidebar-list">
+            <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
                 {#each Object.keys(sidebarCategories) as category}
                     <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
                 {/each}
@@ -189,12 +187,16 @@
     }
 
     .no-scrollbar {
-      overflow-y: scroll;
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none;  /* IE 10+ */
-    }
-    .no-scrollbar::-webkit-scrollbar { /* WebKit */
-      width: 0px;
+        overflow-y: scroll;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE 10+ */
     }
 
+    .no-scrollbar::-webkit-scrollbar { /* WebKit */
+        width: 0px;
+    }
+
+    .no-scrollbar {
+        scrollbar-color: transparent transparent;
+    }
 </style>

@@ -80,6 +80,8 @@
         </code>
     {:else if content.data.t === "Math"}
         <Math latex={content.data.c.literal}/>
+    {:else if content.data.t === "HtmlBlock"}
+        {content.data.c.literal}
     {:else}
         <code>{content.data.t} is not supported at the moment, please file a bug</code>
     {/if}

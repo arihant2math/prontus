@@ -8,7 +8,7 @@
 </script>
 
 <Popover.Root>
-    <Popover.Trigger>
+    <Popover.Trigger class="w-8 h-8">
         <ProfilePicture user="{user}"/>
     </Popover.Trigger>
 <!--    For popover content-->

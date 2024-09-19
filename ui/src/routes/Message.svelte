@@ -3,10 +3,8 @@
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
     import {getMessage, deleteMessage} from "$lib/api.js";
-    import ProfilePicture from "./ProfilePicture.svelte";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
-    import MessageProfilePicture from "./InteractiveProfilePicture.svelte";
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
     import InteractiveProfilePicture from "./InteractiveProfilePicture.svelte";
 

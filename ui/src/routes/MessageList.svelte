@@ -36,11 +36,6 @@
         }
     }
 
-    if (!inThread) {
-        setInterval(async () => {
-            messages = await getMessages();
-        }, 10);
-    }
     positionPopovers();
 </script>
 
