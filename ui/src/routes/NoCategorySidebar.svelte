@@ -1,0 +1,36 @@
+<script>
+    import CurrentUserCard from "./user/CurrentUserCard.svelte";
+    import SideCategory from "./sidebar/SideCategory.svelte";
+    import {listen} from "@tauri-apps/api/event";
+    import {getChannelList} from "$lib/api.ts";
+    import Sideitem from "./sidebar/ChannelCard.svelte";
+
+    export let currentUser;
+    export let showSettings;
+    export let handleSidebarClick;
+    export let settings;
+    let channels = [];
+
+    async function updateChannelList() {
+        channels = await getChannelList();
+    }
+
+    updateChannelList();
+
+    listen('channelListUpdate', async (_event) => {
+        await updateChannelList();
+    });
+</script>
+<aside id="default-sidebar"
+       aria-label="Sidebar"
+       class="h-full">
+    <div class="w-[375px] h-full bg-gray-50 dark:bg-gray-900 z-40">
+        <!--TODO: maybe move this to the bottom-->
+        <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
+        <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
+            {#each channels as item}
+                <li><Sideitem info={item[0]} stats={item[1]} buttonClick="{handleSidebarClick}"/></li>
+            {/each}
+        </ul>
+    </div>
+</aside>

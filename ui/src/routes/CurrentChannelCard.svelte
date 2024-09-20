@@ -1,5 +1,5 @@
 <script>
-    import {Avatar, DropdownMenu} from "bits-ui";
+    import {DropdownMenu} from "bits-ui";
 
     export let info = null;
 

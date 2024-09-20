@@ -18,6 +18,7 @@
     import {listen} from "@tauri-apps/api/event";
     import Sidebar from "./Sidebar.svelte";
     import {loadTheme} from "$lib/helpers.ts";
+    import NoCategorySidebar from "./NoCategorySidebar.svelte";
 
     let currentUser;
     let messages = [];
@@ -83,9 +84,11 @@
     }
 
     async function init() {
-        settings = await getSettings();
+        getSettings().then((result) => {
+            settings = result;
+            loadTheme(settings);
+        });
         currentUser = await getCurrentUser();
-        loadTheme(settings);
     }
 
     function viewThread(parentId) {
@@ -111,10 +114,14 @@
 {/if}
 
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
+    {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
+        <NoCategorySidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
+    {:else}
+        <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
+    {/if}
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>
-            <ChannelCard info={channelInfo} bind:memberListActive={showMemberList}/>
+            <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
         </div>
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
