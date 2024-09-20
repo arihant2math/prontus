@@ -25,49 +25,105 @@ impl Default for Theme {
     }
 }
 
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub enum CategoryDisplayLevel {
+    All,
+    NonSingleton,
+    None
+}
+
+impl Default for CategoryDisplayLevel {
+    fn default() -> Self {
+        Self::All
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct Sidebar {
-    pub show_dm_profile_pictures: bool,
-    pub hide_categories: bool,
-    pub hide_recents_categories: bool,
+pub struct SidebarAppearance {
+    #[serde(default)]
+    pub category_display_level: CategoryDisplayLevel,
+    #[serde(default)]
+    pub show_unread_channels_on_collapse: bool,
+    #[serde(default)]
+    pub hide_dm_profile_pictures: bool,
+    /// Hide aggregation categories like "Recents"
+    #[serde(default)]
+    pub hide_super_categories: bool,
+}
+
+const fn _true() -> bool {
+    true
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MessageAppearance {
+    #[serde(default)]
+    pub compact: bool,
+    #[serde(default)]
+    pub hide_embeds: bool,
+    #[serde(default = "_true")]
+    pub rich_text: bool,
+}
+
+impl Default for MessageAppearance {
+    fn default() -> Self {
+        MessageAppearance {
+            compact: false,
+            hide_embeds: false,
+            rich_text: true
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Auth {
+    #[serde(default)]
     pub saved_email: Option<String>,
+    #[serde(default)]
     pub saved_phone: Option<String>,
+    #[serde(default)]
     pub api_key: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Appearance {
+    #[serde(default)]
     pub theme: Theme,
-    pub sidebar: Sidebar,
+    #[serde(default)]
+    pub sidebar: SidebarAppearance,
+    #[serde(default)]
+    pub messages: MessageAppearance,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Options {
-    pub rich_text: bool,
+    #[serde(default)]
     pub notifications: bool,
+    #[serde(default)]
     pub experiments: bool,
+    #[serde(default)]
     pub error_reporting: bool,
+    #[serde(default)]
     pub analytics: bool,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Settings {
+    #[serde(default)]
     pub auth: Auth,
+    #[serde(default)]
     pub appearance: Appearance,
+    #[serde(default)]
     pub options: Options
 }
 
 impl Settings {
     pub fn path() -> PathBuf {
-        // TODO: remove this in the far far future
+        // TODO: remove this deletion in the far far future
         let old_settings = home::home_dir()
             .unwrap()
             .join(".prontus")
-            .join("settings.json");
+            .join("settings.bnc");
         if old_settings.exists() {
             std::fs::remove_file(old_settings).unwrap();
         }
@@ -108,5 +164,15 @@ impl Settings {
             .await?;
         file.write(data.as_bytes()).await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Settings;
+
+    #[tokio::test]
+    async fn load() {
+        Settings::load().await.unwrap();
     }
 }

@@ -10,13 +10,14 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages, getCurrentChannelId
+        getCurrentUser, getChannelInfo, getParentMessages, getCurrentChannelId, getSettings
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
     import {listen} from "@tauri-apps/api/event";
     import Sidebar from "./Sidebar.svelte";
+    import {loadTheme} from "$lib/helpers.ts";
 
     let currentUser;
     let messages = [];
@@ -27,6 +28,7 @@
     let showThread = false;
     let threadParent = null;
     let messageInput;
+    let settings = null;
 
     const getThreadMessages = () => {
         if (threadParent === null) {
@@ -81,7 +83,9 @@
     }
 
     async function init() {
+        settings = await getSettings();
         currentUser = await getCurrentUser();
+        loadTheme(settings);
     }
 
     function viewThread(parentId) {
@@ -102,8 +106,9 @@
         parentMessages = await getParentMessages();
     });
 </script>
-
-<Settings/>
+{#if settings !== null}
+    <Settings bind:settings={settings}/>
+{/if}
 
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
     <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>

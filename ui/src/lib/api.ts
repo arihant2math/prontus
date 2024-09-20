@@ -1,14 +1,14 @@
 import {invoke} from "@tauri-apps/api/core";
 
-export async function getCode(email: string) {
+export async function getCode(email: string): Promise<void> {
     return await invoke("get_code", {email});
 }
 
-export async function sendCode(email: string, code) {
+export async function sendCode(email: string, code: string): Promise<void> {
     return await invoke("send_code", {email, code})
 }
 
-export async function load() {
+export async function load(): Promise<void> {
     return await invoke("load");
 }
 
@@ -20,7 +20,7 @@ export async function getUser(id: number) {
     return await invoke("get_user", {id});
 }
 
-export async function loadChannel(id: number) {
+export async function loadChannel(id: number): Promise<void> {
     await invoke("load_channel", {id});
 }
 
@@ -36,19 +36,19 @@ export async function getMessage(id: number) {
     return await invoke("get_message", {id});
 }
 
-export async function getMessages(): Promise<object[]> {
+export async function getMessages(): Promise<any[]> {
     return await invoke("get_messages");
 }
 
-export async function getMoreMessages(lastMessageId: number): Promise<object[]> {
+export async function getMoreMessages(lastMessageId: number): Promise<any[]> {
     return await invoke("get_more_messages", {lastMessageId});
 }
 
-export async function getParentMessages() {
+export async function getParentMessages(): Promise<any[]> {
     return await invoke("get_parent_messages");
 }
 
-export async function loadMessages() {
+export async function loadMessages(): Promise<void> {
     return await invoke("load_messages");
 }
 
@@ -64,11 +64,11 @@ export async function setReactionState(messageId: number, reactionId: number, ac
     return await invoke("set_reaction_state", {messageId, reactionId, active});
 }
 
-export async function getChannelUsers(id: number) {
+export async function getChannelUsers(id: number): Promise<any> {
     return await invoke("get_channel_users", {id})
 }
 
-export async function loadChannelUsers(id: number) {
+export async function loadChannelUsers(id: number): Promise<void> {
     return await invoke("load_channel_users", {id})
 }
 
@@ -76,7 +76,7 @@ export async function getSettings() {
     return await invoke("get_settings");
 }
 
-export async function setSettings(settings) {
+export async function setSettings(settings): Promise<void> {
     return await invoke("set_settings", {settings});
 }
 

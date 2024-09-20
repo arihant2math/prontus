@@ -16,20 +16,12 @@
     import ThemeLabel from "./settingsComponents/theme/ThemeLabel.svelte";
     import OptionsLabel from "./settingsComponents/options/OptionsLabel.svelte";
     import {getSettings, setSettings} from "$lib/api.ts";
+    import {loadTheme} from "$lib/helpers.ts";
 
-    let settings = {
-        appearance: {
-            "theme": "Auto"
-        },
-        options: {
-            "richText": false,
-            "experiments": false,
-            "notifications": false
-        }
-    };
+    export let settings;
 
     function loadSettings() {
-        loadTheme();
+        loadTheme(settings);
         getSettings().then((newSettings) => {
             console.log(newSettings);
             settings = newSettings;
@@ -38,15 +30,7 @@
 
     function saveSettings() {
         setSettings(settings);
-        loadTheme();
-    }
-
-    function loadTheme() {
-        if (settings.appearance.theme === 'Dark' || (settings.appearance.theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
+        loadTheme(settings);
     }
 
     function logout() {
@@ -54,9 +38,7 @@
         saveSettings();
     }
 
-    loadTheme();
-
-    loadSettings();
+    loadTheme(settings);
 </script>
 
 <div id="settings-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-1/2 right-1/2 z-50 justify-center items-center w-full md:inset-0 h-full">

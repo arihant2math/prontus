@@ -46,10 +46,17 @@
             return;
         }
         onCodeLock = true;
-        await sendCode(savedEmail, code);
-        await load();
-        page = 0;
-        onCodeLock = false;
+        try {
+            await sendCode(savedEmail, code);
+            await load();
+            page = 0;
+            onCodeLock = false;
+        } catch (e) {
+            // TODO: Successful login errors out with reqwest json decode error
+            console.error(e);
+            page = 1;
+            onCodeLock = false;
+        }
     }
 
     init();

@@ -7,6 +7,7 @@
     export let currentUser;
     export let showSettings;
     export let handleSidebarClick;
+    export let settings;
 
     let sidebarCategoriesInfo = {};
     let sidebarCategories = {}

@@ -56,6 +56,8 @@ async fn send_code(email: String, code: String) -> Result<(), BackendError> {
         )
         .await?;
 
+    println!("Login successful");
+
     let mut settings = Settings::load().await?;
     settings.auth.api_key = Some(response.users[0].access_token.clone());
     settings.save().await?;
