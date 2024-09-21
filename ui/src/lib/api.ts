@@ -76,7 +76,7 @@ export async function getSettings() {
     return await invoke("get_settings");
 }
 
-export async function setSettings(settings): Promise<void> {
+export async function setSettings(settings: any): Promise<void> {
     return await invoke("set_settings", {settings});
 }
 
