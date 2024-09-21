@@ -63,6 +63,12 @@
                         <svelte:self content={child} />
                     {/each}
                 </b>
+            {:else if content.tagName === "a"}
+                <a class="text-blue-600 dark:text-blue-400 hover:text-blue-500" href="{content.properties.href}" target="_blank">
+                    {#each content.children as child}
+                        <svelte:self content={child} />
+                    {/each}
+                </a>
             {:else if content.tagName === "del"}
                 <del>
                     {#each content.children as child}
