@@ -3,6 +3,7 @@
     import SideCategory from "./sidebar/SideCategory.svelte";
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";
+    import {parseDatetime} from "$lib/helpers.ts";
     import Sideitem from "./sidebar/ChannelCard.svelte";
 
     export let currentUser;
@@ -12,7 +13,16 @@
     let channels = [];
 
     async function updateChannelList() {
-        channels = await getChannelList();
+        let unsortedChannels = await getChannelList();
+        unsortedChannels.sort((a, b) => {
+            if (a[1].latest_message_created_at === null) {
+                return false;
+            } else if (b[1].latest_message_created_at === null) {
+                return true;
+            }
+            return parseDatetime(a[1].latest_message_created_at) < parseDatetime(b[1].latest_message_created_at)
+        });
+        channels = unsortedChannels.toReversed();
     }
 
     updateChannelList();

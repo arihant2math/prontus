@@ -10,7 +10,7 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages, getCurrentChannelId, getSettings
+        getCurrentUser, getChannelInfo, getParentMessages, getSettings
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";

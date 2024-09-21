@@ -5,6 +5,7 @@
     import {getMessage, deleteMessage} from "$lib/api.ts";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
+    import {parseDatetime} from "$lib/helpers.ts";
     import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
     import InteractiveProfilePicture from "./user/InteractiveProfilePicture.svelte";
 
@@ -32,17 +33,6 @@
     $: ml = repeat ? "ml-10" : "ml-0";
     $: py = repeat ? "py-1" : "py-3";
     $: border = parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400";
-
-    function parseDatetime(str) {
-        // Split the date and time parts
-        const [datePart, timePart] = str.split(' ');
-
-        // Combine the date and time parts with 'T' to conform to ISO 8601 format
-        const isoString = `${datePart}T${timePart}Z`;
-
-        // Return the Date object
-        return new Date(isoString);
-    }
 
 
     function formatTime(date) {
