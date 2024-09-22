@@ -61,7 +61,7 @@ async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), Backend
     let state = state.try_inner_mut()?;
 
     // FIXME: This commented statement panics
-    // let bubble_info = state.client.get_bubble_info(id).await?;
+    // let bubble_info = state.client.get_bubble_info(id).await.unwrap();
     state.current_channel = id;
     Ok(())
 }
@@ -365,7 +365,7 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
         let state = state.inner().inner();
         let state = state.read().await;
         let state = state.try_inner()?;
-        let page = state.channel_users.get(&id).map(|u| u.pages).unwrap_or(0);
+        let page = state.channel_users.get(&id).map(|u| u.page).unwrap_or(1);
         state.client.get_bubble_membership(GetBubbleMembershipSearchRequest {
             bubble_id: id,
             page,
@@ -387,7 +387,7 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
         state.channel_users.insert(id, ChannelUsers {
             pages: membership.page_size,
             users,
-            page: 1,
+            page: 2,
         });
     }
     for user in membership.membership {
