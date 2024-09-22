@@ -1,5 +1,5 @@
 use crate::models::Bubble;
-use crate::BubbleStatsInfo;
+use crate::BubbleStats;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -8,7 +8,8 @@ use serde_json::json;
 pub struct GetBubbleInfoResponse {
     pub ok: bool,
     pub bubble: Bubble,
-    pub stats: BubbleStatsInfo,
+    // This line is wrong and causes the whole thing to fail
+    // pub stats: BubbleStats,
 }
 
 pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;
@@ -23,6 +24,9 @@ pub async fn get(
         .query(&json!({ "bubble_id": bubble_id }))
         .send()
         .await?;
-    let json = r.json::<GetBubbleInfoResult>().await?;
+    // let json = r.json::<GetBubbleInfoResult>().await?;
+    let text = r.text().await?;
+    let json: GetBubbleInfoResponse = serde_json::from_str(&text).unwrap();
+    let json = serde_json::from_str(&text).unwrap();
     Ok(json)
 }
