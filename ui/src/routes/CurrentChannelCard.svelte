@@ -1,5 +1,6 @@
 <script>
     import {DropdownMenu} from "bits-ui";
+    import { Popover } from "bits-ui";
 
     export let info = null;
 
@@ -24,13 +25,67 @@
             {/if}
         </div>
         <div class="ml-auto">
-            <button class="hover:bg-gray-300 dark:hover:bg-slate-700 px-1 py-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                     stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
-                </svg>
-            </button>
+            <Popover.Root>
+                <Popover.Trigger>
+                    <button class="hover:bg-gray-300 dark:hover:bg-slate-700 px-1 py-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+                        </svg>
+                    </button>
+                </Popover.Trigger>
+                <Popover.Content
+                        class="z-30 w-full max-w-[328px] rounded-lg bg-white dark:bg-slate-800 p-4 shadow-lg flex-col"
+                        sideOffset={8}>
+                    <label class="inline-flex items-center cursor-pointer p-3">
+                        <input type="checkbox" value="" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Mute Channel</span>
+                    </label>
+                    <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
+                        <li>
+                            <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <div class="flex items-center h-5">
+                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                </div>
+                                <div class="ms-2 text-sm">
+                                    <label for="helper-radio-4" class="font-medium text-gray-900 dark:text-gray-300">
+                                        <div>All Messages</div>
+<!--                                        <p id="helper-radio-text-4" class="text-xs font-normal text-gray-500 dark:text-gray-300">Some helpful instruction goes over here.</p>-->
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <div class="flex items-center h-5">
+                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                </div>
+                                <div class="ms-2 text-sm">
+                                    <label for="helper-radio-5" class="font-medium text-gray-900 dark:text-gray-300">
+                                        <div>Only mentions</div>
+                                        <p id="helper-radio-text-5" class="text-xs font-normal text-gray-500 dark:text-gray-300">Including @everyone and @here.</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <div class="flex items-center h-5">
+                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                </div>
+                                <div class="ms-2 text-sm">
+                                    <label for="helper-radio-6" class="font-medium text-gray-900 dark:text-gray-300">
+                                        <div>Nothing</div>
+<!--                                        <p id="helper-radio-text-6" class="text-xs font-normal text-gray-500 dark:text-gray-300">Some helpful instruction goes over here.</p>-->
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </Popover.Content>
+            </Popover.Root>
             <button class="hover:bg-gray-300 dark:hover:bg-slate-700 px-1 py-2 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="{memberListFill}" viewBox="0 0 24 24" stroke-width="1.5"
                      stroke="currentColor" class="size-6" on:click={toggleMemberList}>
