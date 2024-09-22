@@ -12,7 +12,7 @@
     }
 </script>
 {#if info !== null && info[0] !== undefined}
-    <div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row">
+    <div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
         <div class="flex flex-col">
             <span class="text-nowrap">{info[0].title}</span>
             {#if info[0].category !== null}
