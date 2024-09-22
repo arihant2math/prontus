@@ -62,10 +62,10 @@ export function getMatch($position, opts) {
             : match[0];
 
         // The absolute position of the match in the document
-        var from = $position.start() + match.index;
-        var to = from + match[0].length;
+        let from = $position.start() + match.index;
+        let to = from + match[0].length;
 
-        var queryText = match[2];
+        let queryText = match[2];
 
         return {
             range: {from: from, to: to},
@@ -81,7 +81,7 @@ export function getMatch($position, opts) {
  * >>> debounce(function(){}, 1000, this)
  */
 export const debounce = (function () {
-    var timeoutId = null;
+    let timeoutId = null;
     return function (func, timeout, context) {
         context = context || this;
         clearTimeout(timeoutId);
@@ -93,7 +93,7 @@ export const debounce = (function () {
     };
 })();
 
-var getNewState = function () {
+let getNewState = function () {
     return {
         active: false,
         range: {
@@ -135,17 +135,17 @@ export function getMentionsPlugin(opts) {
     var opts = Object.assign({}, defaultOpts, opts);
 
     // timeoutId for clearing debounced calls
-    var showListTimeoutId = null;
+    let showListTimeoutId = null;
 
     // dropdown element
-    var el = document.createElement("div");
+    let el = document.createElement("div");
 
     // current Idx
-    var index = 0;
+    let index = 0;
 
     // ----- methods operating on above properties -----
 
-    var showList = function (view, state, suggestions, opts) {
+    let showList = function (view, state, suggestions, opts) {
         el.innerHTML = opts.getSuggestionsHTML(suggestions, state.type);
 
         // attach new item event handlers
@@ -170,12 +170,12 @@ export function getMentionsPlugin(opts) {
         // get current @mention span left and top.
         // TODO: knock off domAtPos usage. It's not documented and is not officially a public API.
         // It's used currently, only to optimize the the query for textDOM
-        var node = view.domAtPos(view.state.selection.$from.pos);
-        var paraDOM = node.node;
-        var textDOM = paraDOM.querySelector("." + opts.suggestionTextClass);
+        let node = view.domAtPos(view.state.selection.$from.pos);
+        let paraDOM = node.node;
+        let textDOM = paraDOM.querySelector("." + opts.suggestionTextClass);
 
         // TODO: should add null check case for textDOM
-        var offset = textDOM.getBoundingClientRect();
+        let offset = textDOM.getBoundingClientRect();
 
         // TODO: think about outsourcing this positioning logic as options
         document.body.appendChild(el);
@@ -189,36 +189,36 @@ export function getMentionsPlugin(opts) {
         el.style.zIndex = "999999";
     };
 
-    var hideList = function () {
+    let hideList = function () {
         el.style.display = "none";
     };
 
-    var removeClassAtIndex = function (index, className) {
-        var itemList = el.querySelector(".suggestion-item-list").childNodes;
-        var prevItem = itemList[index];
+    let removeClassAtIndex = function (index, className) {
+        let itemList = el.querySelector(".suggestion-item-list").childNodes;
+        let prevItem = itemList[index];
         prevItem.classList.remove(className);
     };
 
-    var addClassAtIndex = function (index, className) {
-        var itemList = el.querySelector(".suggestion-item-list").childNodes;
-        var prevItem = itemList[index];
+    let addClassAtIndex = function (index, className) {
+        let itemList = el.querySelector(".suggestion-item-list").childNodes;
+        let prevItem = itemList[index];
         prevItem.classList.add(className);
     };
 
-    var setIndex = function (index, state, opts) {
+    let setIndex = function (index, state, opts) {
         removeClassAtIndex(state.index, opts.activeClass);
         state.index = index;
         addClassAtIndex(state.index, opts.activeClass);
     };
 
-    var goNext = function (view, state, opts) {
+    let goNext = function (view, state, opts) {
         removeClassAtIndex(state.index, opts.activeClass);
         state.index++;
         state.index = state.index === state.suggestions.length ? 0 : state.index;
         addClassAtIndex(state.index, opts.activeClass);
     };
 
-    var goPrev = function (view, state, opts) {
+    let goPrev = function (view, state, opts) {
         removeClassAtIndex(state.index, opts.activeClass);
         state.index--;
         state.index =
@@ -226,9 +226,9 @@ export function getMentionsPlugin(opts) {
         addClassAtIndex(state.index, opts.activeClass);
     };
 
-    var select = function (view, state, opts) {
-        var item = state.suggestions[state.index];
-        var attrs;
+    let select = function (view, state, opts) {
+        let item = state.suggestions[state.index];
+        let attrs;
         if (state.type === "mention") {
             attrs = {
                 name: item.name,

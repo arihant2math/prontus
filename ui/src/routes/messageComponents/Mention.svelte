@@ -19,9 +19,9 @@
     loading
 {:then user}
     {#if user === null}
-        <span class="bg-blue-200 dark:bg-blue-700">@everyone</span>
+        <span class="bg-blue-200 dark:bg-purple-800">@everyone</span>
     {:else}
-        <span>{user.fullname}</span>
+        <span class="bg-blue-200 dark:bg-purple-800 hover:underline">@{user.fullname}</span>
     {/if}
 {/await}
 </span>
