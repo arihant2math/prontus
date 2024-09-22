@@ -1,9 +1,11 @@
-use client::routes::user_login::{DeviceInfo, UserLoginRequest};
 use client::{Bubble, BubbleStats, GetBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 use tauri::{command, Manager, State};
+
+mod handler;
+pub use handler::{get_code, send_code, get_settings, set_settings};
 
 mod error;
 mod pusher_thread;
@@ -14,56 +16,6 @@ use pusher_thread::run_pusher_thread;
 use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
 use crate::state::ChannelUsers;
-
-#[command]
-async fn get_code(email: String) -> Result<(), BackendError> {
-    let _response = client::routes::user_verify::post(client::routes::user_verify::UserVerifyRequest::Email(email))
-        .await
-        .unwrap()
-        .to_result();
-    // TODO: Error handling
-    Ok(())
-}
-
-#[command]
-async fn send_code(email: String, code: String) -> Result<(), BackendError> {
-    let response = client::routes::user_login::post(UserLoginRequest {
-        email,
-        code,
-        // TODO: Fix
-        device: DeviceInfo {
-            browsername: "".to_string(),
-            browserversion: "".to_string(),
-            osname: "".to_string(),
-            r#type: "".to_string(),
-        },
-    })
-        .await
-        .unwrap()
-        .to_result()
-        .unwrap();
-    let token = &response.users[0].login_token;
-    let mut settings = Settings::load().await?;
-    settings.auth.api_key = Some(token.clone());
-    settings.save().await?;
-    // TODO: This is the part where we can switch base urls
-    let client =
-        ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
-    // TODO: Standardize device info
-    let response = client
-        .user_token_login(
-            token,
-        )
-        .await?;
-
-    println!("Login successful");
-
-    let mut settings = Settings::load().await?;
-    settings.auth.api_key = Some(response.users[0].access_token.clone());
-    settings.save().await?;
-    // TODO: Error handling as usual
-    Ok(())
-}
 
 #[command]
 async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
@@ -443,17 +395,6 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
             state.users.insert(user.user_id, user.user);
         }
     }
-    Ok(())
-}
-
-#[command]
-async fn get_settings() -> Result<Settings, BackendError> {
-    Ok(Settings::load().await?)
-}
-
-#[command]
-async fn set_settings(settings: Settings) -> Result<(), BackendError> {
-    settings.save().await?;
     Ok(())
 }
 
