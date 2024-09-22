@@ -1,3 +1,4 @@
+mod announcement;
 mod bubble;
 mod bubble_stats;
 mod bubble_stats_info;
@@ -8,6 +9,7 @@ mod message;
 mod organization;
 mod user_info;
 
+pub use announcement::Announcement;
 pub use bubble::Bubble;
 pub use bubble_stats::BubbleStats;
 pub use bubble_stats_info::BubbleStatsInfo;
