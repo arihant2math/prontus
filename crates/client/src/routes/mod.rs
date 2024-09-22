@@ -1,3 +1,4 @@
+pub mod announcement_list;
 pub mod bubble_history;
 pub mod bubble_info;
 pub mod bubble_list;
