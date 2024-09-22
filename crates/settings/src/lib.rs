@@ -105,6 +105,8 @@ pub struct Options {
     pub error_reporting: bool,
     #[serde(default)]
     pub analytics: bool,
+    #[serde(default)]
+    pub read_messages: bool,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

@@ -203,6 +203,17 @@
                                     <p slot="body">Gather analytics to help improve Prontus.</p>
                                 </OptionsLabel>
                             </li>
+                            <li>
+                                <input type="checkbox" id="read-messages-option" value="" class="hidden peer" bind:checked={settings.options.read_messages} on:change={saveSettings}>
+                                <OptionsLabel target="read-messages-option">
+                                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-2 w-7 h-7 text-green-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                                    </svg>
+
+                                    <p slot="title">Read Messages</p>
+                                    <p slot="body">When channels are opened, mark them as read.</p>
+                                </OptionsLabel>
+                            </li>
                         </ul>
                     </div>
                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white">

@@ -152,23 +152,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .dark {
-        color-scheme: dark;
-    }
-
-    .no-scrollbar {
-        overflow-y: scroll;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none;  /* IE 10+ */
-    }
-
-    .no-scrollbar::-webkit-scrollbar { /* WebKit */
-        width: 0px;
-    }
-
-    .no-scrollbar {
-        scrollbar-color: transparent transparent;
-    }
-</style>
