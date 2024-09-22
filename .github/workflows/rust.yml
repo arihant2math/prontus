@@ -15,7 +15,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+        os: [ "ubuntu-latest", "windows-latest", "macos-13", "macos-latest" ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,13 +71,19 @@ jobs:
           path: ./ui/src-tauri/target/release/bundle/appimage/prontus_0.1.0_amd64.AppImage
 
       - uses: actions/upload-artifact@v4
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos-13')
+        with:
+          name: Prontus.app (x86_64)
+          path: ./ui/src-tauri/target/release/bundle/macos/prontus.app
+
+      - uses: actions/upload-artifact@v4
+        if: startsWith(matrix.os, 'macos-latest')
         with:
           name: Prontus.app (aarch64)
           path: ./ui/src-tauri/target/release/bundle/macos/prontus.app
 
       - uses: actions/upload-artifact@v4
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos-latest')
         with:
           name: prontus_0.1.0_aarch64.dmg
           path: ./ui/src-tauri/target/release/bundle/dmg/prontus_0.1.0_aarch64.dmg
