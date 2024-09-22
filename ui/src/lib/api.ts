@@ -52,6 +52,10 @@ export async function loadMessages(): Promise<void> {
     return await invoke("load_messages");
 }
 
+export async function editMessage(messageId: number, message: String) {
+    return await invoke("editMessage", {messageId, message});
+}
+
 export async function sendMessage(message: string, thread?: number) {
     return await invoke("send_message", {message, thread});
 }

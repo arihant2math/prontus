@@ -2,7 +2,7 @@
     import Embed from "./messageComponents/Embed.svelte";
     import Media from "./messageComponents/Media.svelte";
     import Reaction from "./messageComponents/Reaction.svelte";
-    import {getMessage, deleteMessage} from "$lib/api.ts";
+    import {getMessage, deleteMessage, editMessage} from "$lib/api.ts";
     import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import {parseDatetime} from "$lib/helpers.ts";
@@ -88,6 +88,10 @@
         editing = true;
     }
 
+    async function sendEditMessage(newMessage) {
+        editMessage(message.id, newMessage)
+    }
+
     async function remove() {
         positionPopovers();
         console.log("Deleting message " + message.id);
@@ -109,7 +113,7 @@
     }
 </script>
 {#if editing}
-    <RichTextEdit/>
+    <RichTextEdit bind:text={message.message} sendMessage={sendEditMessage}/>
 {:else}
     {#if dateSpan}
     <!--    TODO: Debug and then put a proper date span here-->
@@ -186,7 +190,7 @@
                 </ul>
             </div>
             {#if lastThreadMessage && parentMessage !== undefined && !inThread}
-                <ViewTheadFooter on:click={() => {viewThread(parentMessage.id)}}/>
+                <ViewTheadFooter onClick={() => {viewThread(parentMessage.id)}}/>
             {/if}
         </div>
     {:else}
