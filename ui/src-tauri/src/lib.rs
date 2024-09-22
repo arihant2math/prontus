@@ -306,35 +306,63 @@ async fn set_reaction_state(
     reaction_id: u64,
     active: bool,
 ) -> Result<(), BackendError> {
+    async fn send_state_change(state: State<'_, AppState>, message_id: u64, reaction_type: ReactionType, active: bool) -> Result<Message, BackendError> {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        let message = if active {
+            state
+                .client
+                .add_reaction(message_id, reaction_type)
+                .await?
+        } else {
+            state
+                .client
+                .remove_reaction(message_id, reaction_type)
+                .await?
+        };
+        Ok(message.message)
+    }
+    let message = send_state_change(state.clone(), message_id, ReactionType::from(reaction_id as i32), active);
+    {
+        let state = state.inner().inner();
+        let mut state = state.write().await;
+        let state = state.try_inner_mut()?;
+
+        if active {
+            state
+                .client
+                .add_reaction(message_id, ReactionType::from(reaction_id as i32))
+                .await?;
+            let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
+            let o = messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id);
+            if let Some(o) = o {
+                o.count += 1;
+            } else {
+                messages.reactions.push(client::Reactions {
+                    id: reaction_id,
+                    count: 1,
+                    users: vec![state.user_info.id],
+                });
+            }
+        } else {
+            state
+                .client
+                .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
+                .await?;
+            let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
+            messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id).unwrap().count -= 1;
+        }
+    }
+    let message = message.await?;
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    if active {
-        state
-            .client
-            .add_reaction(message_id, ReactionType::from(reaction_id as i32))
-            .await?;
-        let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
-        let o = messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id);
-        if o.is_none() {
-            messages.reactions.push(client::Reactions {
-                id: reaction_id,
-                count: 1,
-                users: vec![state.user_info.id],
-            });
-        } else {
-            // TODO: can be more rust like (no unwrap)
-            o.unwrap().count += 1;
-        }
-    } else {
-        state
-            .client
-            .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
-            .await?;
-        let messages = state.message_list.iter_mut().find(|message| message.id == message_id).unwrap();
-        messages.reactions.iter_mut().find(|reaction| reaction.id == reaction_id).unwrap().count -= 1;
-    }
+    *state.message_list.iter_mut().find(|m| m.id == message_id).unwrap() = message;
+
     Ok(())
 }
 
