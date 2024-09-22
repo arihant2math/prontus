@@ -17,6 +17,7 @@ pub use routes::*;
 use crate::bubble_mark::PostBubbleMarkRequest;
 pub use crate::bubble_membership_search::GetBubbleMembershipSearchRequest;
 use crate::membership_update::{MembershipUpdateModification, PostMembershipUpdateRequest};
+pub use crate::message_create::MessageModifyResponse;
 
 pub mod api_error;
 pub mod models;
@@ -347,7 +348,7 @@ impl ProntoClient {
         &self,
         message_id: u64,
         reaction_type: ReactionType,
-    ) -> Result<message_create::MessageModifyResponse, ResponseError> {
+    ) -> Result<MessageModifyResponse, ResponseError> {
         Ok(reaction_add::post(
             &self.api_base_url,
             &self.http_client,
@@ -362,7 +363,7 @@ impl ProntoClient {
         &self,
         message_id: u64,
         reaction_type: ReactionType,
-    ) -> Result<message_create::MessageModifyResponse, ResponseError> {
+    ) -> Result<MessageModifyResponse, ResponseError> {
         Ok(reaction_remove::post(
             &self.api_base_url,
             &self.http_client,
