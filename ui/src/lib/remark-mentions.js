@@ -35,35 +35,44 @@ export default function remarkMentions(
      * @param {string} value
      * @param {string} text
      */
-    async function replaceMention(value, text) {
+    function replaceMention(value, text) {
         /** @type {PhrasingContent[]} */
+        console.log(value, text);
         let whitespace = [];
 
         let id = text.substring(2, text.length - 1);
         let user;
         if (id !== "everyone") {
-            user = await getUser(parseInt(id));
+            user = {
+                "id": id,
+                "fullname": "unknown"
+            };
         } else {
             user = {
+                "id": 0,
                 "fullname": "everyone"
             }
         }
 
         // Separate leading white space
-        if (value.indexOf("@") > 0) {
+        // TODO: this is broken atm due to bad regex
+        if (value.indexOf("<") > 0) {
             whitespace.push({
                 type: "text",
-                value: value.substring(0, value.indexOf("@")),
+                value: value.substring(0, value.indexOf("<")),
             });
         }
+
+        console.log(user);
 
         return [
             ...whitespace,
             {
                 type: "link",
-                url: "#",
+                url: "MENTION_" + user.id,
+                user: user,
                 children: [
-                    {type: "strong", children: [{type: "text", value: user.fullname}]},
+                    {type: "strong", children: [{type: "text", value: "@" + user.fullname}]},
                 ],
             },
         ];
