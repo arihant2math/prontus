@@ -1,13 +1,16 @@
+use serde::{Deserialize, Serialize};
 use crate::{MessageMedia, UserInfo};
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Targets {
-    pub organization_id: Option<i64>,
-    pub bubble_ids: Option<Vec<i64>>,
+    pub organization_id: Option<u64>,
+    pub bubble_ids: Option<Vec<u64>>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Announcement {
     pub id: i64,
-    pub organization_id: i64,
+    pub organization_id: u64,
     pub senderuser_id: i64,
     pub targets: Targets,
     pub announcement: String,
