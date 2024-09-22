@@ -5,7 +5,7 @@ pub struct Targets {
     pub bubble_ids: Option<Vec<i64>>,
 }
 
-struct Announcement {
+pub struct Announcement {
     pub id: i64,
     pub organization_id: i64,
     pub senderuser_id: i64,
