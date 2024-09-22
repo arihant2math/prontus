@@ -24,9 +24,6 @@ pub async fn get(
         .query(&json!({ "bubble_id": bubble_id }))
         .send()
         .await?;
-    // let json = r.json::<GetBubbleInfoResult>().await?;
-    let text = r.text().await?;
-    let json: GetBubbleInfoResponse = serde_json::from_str(&text).unwrap();
-    let json = serde_json::from_str(&text).unwrap();
+    let json = r.json::<GetBubbleInfoResult>().await?;
     Ok(json)
 }
