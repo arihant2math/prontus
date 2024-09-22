@@ -20,12 +20,22 @@ pub struct GetAnnouncementListResponse {
 
 pub type GetAnnouncementListResult = crate::APIResult<GetAnnouncementListResponse>;
 
+#[derive(Serialize, Deserialize)]
+pub struct GetAnnouncementListRequest {
+    /// UNREAD, or RECEIVED
+    pub query: String,
+    /// 20 should work
+    #[serde(rename = "perPage")]
+    pub per_page: u64,
+}
 pub async fn get(
     pronto_base_url: &str,
     client: &Client,
+    request: GetAnnouncementListRequest,
 ) -> Result<GetAnnouncementListResult, reqwest::Error> {
     let r = client
         .get(format!("{pronto_base_url}v2/announcement.list"))
+        .json(&request)
         .send()
         .await?;
     let json = r.json::<GetAnnouncementListResult>().await?;
