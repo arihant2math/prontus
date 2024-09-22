@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@floating-ui/core": "^1.6.8",
     "@sentry/sveltekit": "^8.30.0",
     "@tauri-apps/api": ">=2.0.0-rc.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
