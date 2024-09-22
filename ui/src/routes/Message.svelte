@@ -84,11 +84,11 @@
     }
 
     async function edit() {
-        console.log("editing");
         editing = true;
     }
 
     async function sendEditMessage(newMessage) {
+        editing = false;
         editMessage(message.id, newMessage)
     }
 

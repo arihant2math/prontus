@@ -2,6 +2,7 @@
     import {keymap} from "prosemirror-keymap";
     import {history} from "prosemirror-history";
     import {baseKeymap} from "prosemirror-commands";
+    import {defaultMarkdownParser} from 'prosemirror-markdown';
     import ProsemirrorEditor from 'prosemirror-svelte';
     import {EditorState, TextSelection} from "prosemirror-state";
     import customSchema from "$lib/prosemirror-setup/schema.ts"
@@ -13,9 +14,7 @@
     export let sendMessage;
 
 
-    const doc = "" ? customSchema.node("doc", null, [
-        customSchema.text("")
-    ]) : undefined;
+    const doc = defaultMarkdownParser.parse(text);
     const selection = doc ? TextSelection.atEnd(doc) : undefined;
 
     export function send() {
