@@ -1,5 +1,4 @@
 use crate::models::Bubble;
-use crate::BubbleStats;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
