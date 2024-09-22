@@ -97,7 +97,10 @@
     }
 
     async function queuedSendMessage(message, threadId) {
-        sendMessage(message, threadId).then();
+        sendMessage(message, threadId).then(async () => {
+            messages = await getMessages();
+            parentMessages = await getParentMessages();
+        });
         // TODO: implement
     }
 
