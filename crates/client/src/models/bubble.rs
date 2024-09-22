@@ -1,6 +1,14 @@
 use crate::Category;
 use crate::UserInfo;
 use serde::{Deserialize, Serialize};
+use crate::{Membership, MembershipInfo};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum BubbleMembershipItem {
+    Membership(Membership),
+    MembershipInfo(MembershipInfo),
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Bubble {
@@ -36,4 +44,5 @@ pub struct Bubble {
     #[serde(rename = "dmpartner")]
     pub dm_partner: Option<UserInfo>,
     pub category: Option<Category>,
+    pub memberships: Vec<BubbleMembershipItem>,
 }
