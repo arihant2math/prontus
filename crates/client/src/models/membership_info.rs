@@ -22,6 +22,6 @@ pub struct MembershipInfo {
     pub is_pinned: bool,
     pub supergroup_alert_seen: bool,
     pub role: String,
-    pub snooze: Option<None>,
+    // pub snooze: Option<()>,
     pub user: UserInfo,
 }
