@@ -32,7 +32,7 @@
                 <span class="text-sm text-left ms-3 flex-1 whitespace-nowrap text-truncate {fontWeight}">{info.title}</span>
                 { #if stats.unread > 0 }
                     {#if stats.unread_mentions > 0}
-                        <span class="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>
+                        <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>
                     {:else}
                         <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-600 dark:text-gray-300 w-fit">{unreadString}</span>
                     {/if}

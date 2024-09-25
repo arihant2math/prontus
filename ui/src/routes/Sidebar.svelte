@@ -37,6 +37,24 @@
 
         }
 
+        while (settings === null) {
+            await new Promise(r => setTimeout(r, 10));
+        }
+
+        if (settings.appearance.sidebar.category_display_level === "All") {
+            let recents = [];
+            for (let channel of channels) {
+                if (channel[1].unread > 0) {
+                    recents.push(channel);
+                }
+            }
+            categories[-3] = recents;
+            categoryInfo[-3] = {
+                "id": -3,
+                "title": "Recents",
+            };
+        }
+
         sidebarCategoriesInfo = categoryInfo;
         sidebarCategories = categories;
     }
@@ -54,8 +72,13 @@
         <!--TODO: maybe move this to the bottom-->
         <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
+            {#if sidebarCategories.hasOwnProperty(-3)}
+                <SideCategory name="Recents" items={sidebarCategories[-3]} buttonClick={handleSidebarClick}/>
+            {/if}
             {#each Object.keys(sidebarCategories) as category}
-                <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                {#if sidebarCategoriesInfo[category].id !== -3}
+                    <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                {/if}
             {/each}
         </ul>
     </div>

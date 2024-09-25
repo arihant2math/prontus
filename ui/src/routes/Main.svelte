@@ -55,7 +55,6 @@
     $: threadMessages = getThreadMessages(threadParent);
 
 
-
     // TODO: progress bar on the top or smth
     async function handleSidebarClick(id) {
         if (id === await getChannelInfo().id) {
@@ -121,7 +120,7 @@
     {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
         <NoCategorySidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
     {:else}
-        <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}/>
+        <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick} bind:settings={settings}/>
     {/if}
     <div id="content" class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>
