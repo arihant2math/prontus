@@ -23,7 +23,7 @@ const mentionPlugin = getMentionsPlugin({
     getSuggestions: (type, text, done) => {
         setTimeout(async () => {
             if (type === 'mention') {
-                let users = await getChannelUsers(await getCurrentChannelId());
+                let users = await getChannelUsers((await getCurrentChannelId()).id);
                 users.push({
                     id: 0,
                     fullname: "everyone"

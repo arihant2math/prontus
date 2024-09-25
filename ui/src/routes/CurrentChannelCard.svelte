@@ -1,8 +1,30 @@
 <script>
     import {DropdownMenu} from "bits-ui";
     import { Popover } from "bits-ui";
+    import {getCurrentChannelId, getCurrentUser} from "$lib/api.ts";
 
     export let info = null;
+    export let bubble = null;
+    export let currentUserMembership = null;
+    $: info, updateBubble();
+    $: bubble, getCurrentUserMembership(bubble);
+
+    async function updateBubble() {
+        bubble = await getCurrentChannelId();
+    }
+
+    async function getCurrentUserMembership(bubble) {
+        let currentUser = await getCurrentUser();
+        if (bubble !== null) {
+            for (let membership of bubble.memberships) {
+                if (membership.user.id === currentUser.id) {
+                    currentUserMembership = membership;
+                    break;
+                }
+            }
+        }
+        console.log(currentUserMembership);
+    }
 
     export let memberListActive = false;
 

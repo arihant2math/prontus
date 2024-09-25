@@ -10,6 +10,8 @@ pub use handler::{get_code, send_code, get_settings, set_settings};
 mod error;
 mod pusher_thread;
 mod state;
+#[cfg(desktop)]
+mod tray;
 
 pub use error::BackendError;
 use pusher_thread::run_pusher_thread;
@@ -44,8 +46,8 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         user_info,
         users,
         client: Arc::new(client),
+        current_channel: state_channel_list[0].clone().0,
         channel_list: state_channel_list,
-        current_channel: 0,
         message_list: vec![],
         parent_messages: vec![],
         channel_users: HashMap::new(),
@@ -60,9 +62,8 @@ async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), Backend
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    // FIXME: This commented statement panics
-    // let bubble_info = state.client.get_bubble_info(id).await.unwrap();
-    state.current_channel = id;
+    let bubble_info = state.client.get_bubble_info(id).await.unwrap();
+    state.current_channel = bubble_info.bubble;
     Ok(())
 }
 
@@ -116,7 +117,7 @@ async fn get_channel_info(
     let state = state.read().await;
     let state = state.try_inner()?;
 
-    let id = state.current_channel;
+    let id = state.current_channel.id;
     let bubble = state
         .channel_list
         .iter()
@@ -131,7 +132,7 @@ async fn load_messages(state: State<'_, AppState>) -> Result<(), BackendError> {
         let state = state.read().await;
         let state = state.try_inner()?;
 
-        let id = state.current_channel;
+        let id = state.current_channel.id;
         state.client.get_bubble_history(id, None).await?
     };
     let state = state.inner().inner();
@@ -186,7 +187,7 @@ async fn get_more_messages(
         let state = state.read().await;
         let state = state.try_inner()?;
 
-        let id = state.current_channel;
+        let id = state.current_channel.id;
         state
             .client
             .get_bubble_history(id, Some(last_message_id))
@@ -237,7 +238,7 @@ async fn send_message(
         let state = state.read().await;
         let state = state.try_inner()?;
         let user_id = state.user_info.id;
-        let id = state.current_channel;
+        let id = state.current_channel.id;
         state.client.post_message(user_id, id, message, thread).await?
     };
 
@@ -337,12 +338,12 @@ async fn delete_message(
 }
 
 #[command]
-async fn get_current_channel_id(state: State<'_, AppState>) -> Result<u64, BackendError> {
+async fn get_current_channel_id(state: State<'_, AppState>) -> Result<Bubble, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
 
-    Ok(state.current_channel)
+    Ok(state.current_channel.clone())
 }
 
 #[command]
@@ -412,6 +413,13 @@ pub fn run() {
             });
 
             app.manage(context);
+
+            #[cfg(all(desktop))]
+            {
+                let handle = app.handle();
+                tray::create_tray(handle)?;
+            }
+
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())

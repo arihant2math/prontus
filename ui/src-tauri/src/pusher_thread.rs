@@ -69,7 +69,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel {
+                                if event.message.bubble_id == state.current_channel.id {
                                     if !state.message_list.iter().any(|m| m.id == event.message.id) {
                                         state.message_list.insert(0, event.message);
                                     }
@@ -80,7 +80,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel {
+                                if event.message.bubble_id == state.current_channel.id {
                                     let message = state
                                         .message_list
                                         .iter_mut()
