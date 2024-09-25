@@ -11,7 +11,7 @@ pub struct BubbleStats {
     pub unread: u64,
     pub unread_mentions: u64,
     pub latest_message_id: u64,
-    pub latest_message_created_at: String,
+    pub latest_message_created_at: Option<String>,
     pub unclaimed_task_count: u64,
 }
 
@@ -19,7 +19,7 @@ pub struct BubbleStats {
 pub struct GetBubbleInfoResponse {
     pub ok: bool,
     pub bubble: Bubble,
-    pub stats: BubbleStats,
+    pub stats: Vec<BubbleStats>,
 }
 
 pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;

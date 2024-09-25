@@ -44,5 +44,5 @@ pub struct Bubble {
     #[serde(rename = "dmpartner")]
     pub dm_partner: Option<UserInfo>,
     pub category: Option<Category>,
-    pub memberships: Vec<BubbleMembershipItem>,
+    pub memberships: Option<Vec<BubbleMembershipItem>>,
 }

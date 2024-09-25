@@ -10,8 +10,8 @@ pub struct MembershipInfo {
     pub friends: bool,
     pub system: bool,
     pub mute: bool,
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
     pub markupdated: String,
     pub isdropin: bool,
     pub banned: bool,
@@ -22,6 +22,5 @@ pub struct MembershipInfo {
     pub is_pinned: bool,
     pub supergroup_alert_seen: bool,
     pub role: String,
-    // pub snooze: Option<()>,
     pub user: UserInfo,
 }
