@@ -1,4 +1,5 @@
 use futures::future::join_all;
+use log::info;
 use notify_rust::{Notification, Timeout};
 use tauri::{AppHandle, Emitter};
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
@@ -96,6 +97,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
+                                info!("Removing message with id: {}. Contents: {}", event.message.id, event.message.message);
                                 state.message_list.retain(|m| m.id != event.message.id);
 
                                 let _ = handle.emit("messageListUpdate", ());
