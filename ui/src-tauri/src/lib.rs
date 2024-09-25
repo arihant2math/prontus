@@ -450,7 +450,7 @@ pub fn run() {
             get_settings,
             set_settings
         ])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
     app.run(|_app_handle, event| match event {
