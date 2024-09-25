@@ -414,6 +414,9 @@ pub fn run() {
 
             app.manage(context);
 
+            let main_window = app.get_window("main").unwrap();
+            main_window.set_title("Prontus")?;
+
             #[cfg(all(desktop))]
             {
                 let handle = app.handle();
