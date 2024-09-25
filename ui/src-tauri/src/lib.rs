@@ -401,7 +401,7 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .setup(|app| {
             let context = AppState::unloaded();
             let thread_handle = app.handle().clone();
@@ -452,4 +452,11 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+
+    app.run(|_app_handle, event| match event {
+        tauri::RunEvent::ExitRequested { api, .. } => {
+            api.prevent_exit();
+        }
+        _ => {}
+    });
 }
