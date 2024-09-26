@@ -1,4 +1,5 @@
 use futures::future::join_all;
+use log::{info, warn, error};
 use notify_rust::{Notification, Timeout};
 use tauri::{AppHandle, Emitter};
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
@@ -21,7 +22,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
         PusherClient::new(state.client.clone()).await
     };
     pusher_client.init().await;
-    println!("Pusher client initialized");
+    info!("Pusher client initialized");
     {
         let state = context.inner();
         let mut state_ = state.write().await;
@@ -42,7 +43,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
         }
         drop(state_);
         join_all(tasks).await;
-        println!("Subscribed to pusher channels");
+        info!("Subscribed to pusher channels");
     }
 
     // TODO: this object doesn't update instantly when a user changes a setting
@@ -148,10 +149,10 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                         }
                     }
                     PusherServerMessage::Error(e) => {
-                        println!("Received error: {:?}", e);
+                        error!("Received error: {:?}", e);
                     }
                     PusherServerMessage::Other(raw) => {
-                        println!("Received unknown message: {:?}", raw);
+                        warn!("Received unknown message: {:?}", raw);
                     }
                     _ => {}
                 }

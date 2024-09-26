@@ -2,6 +2,7 @@ use client::{Bubble, BubbleStats, GetBubbleMembershipSearchRequest, Message, Pro
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
+use log::debug;
 use tauri::{command, Manager, State};
 
 mod handler;
@@ -86,7 +87,7 @@ async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, Backe
         if let Some(user) = state.users.get(&id) {
             return Ok(user.clone());
         }
-        println!("{:?}", state.users.keys());
+        debug!("{:?}", state.users.keys());
         state.client.get_user_info(Some(id)).await?
     };
 
