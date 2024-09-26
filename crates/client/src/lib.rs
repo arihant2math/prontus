@@ -15,14 +15,17 @@ pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
 use crate::bubble_mark::PostBubbleMarkRequest;
-pub use crate::bubble_membership_search::GetBubbleMembershipSearchRequest;
+pub use crate::bubble_membership_search::PostBubbleMembershipSearchRequest;
 use crate::membership_update::{MembershipUpdateModification, PostMembershipUpdateRequest};
 pub use crate::message_create::MessageModifyResponse;
+use crate::message_edit::MessageEditRequest;
+use crate::pusher_auth::PusherAuthRequest;
+use crate::reaction_add::ReactionModifyRequest;
 
 pub mod api_error;
 pub mod models;
 pub mod routes;
-pub mod serde_datetime;
+pub(crate) mod serde_datetime;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -101,6 +104,8 @@ pub enum NewClientError {
 pub enum ResponseError {
     #[error("Reqwuest error: {0}")]
     ReqwestError(#[from] reqwest::Error),
+    #[error("Serde JSON error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
     #[error("API error: {0}")]
     ApiError(String),
 }
@@ -150,8 +155,10 @@ impl ProntoClient {
         Ok(pusher_auth::post(
             &self.api_base_url,
             &self.http_client,
-            socket_id,
-            channel_name,
+            PusherAuthRequest{
+                socket_id: socket_id.to_string(),
+                channel_name: channel_name.to_string(),
+            },
         )
         .await?)
     }
@@ -199,7 +206,7 @@ impl ProntoClient {
         bubble_id: u64,
     ) -> Result<GetBubbleInfoResponse, ResponseError> {
         Ok(
-            bubble_info::get(&self.api_base_url, &self.http_client, bubble_id)
+            bubble_info::get(&self.api_base_url, &self.http_client, bubble_info::GetBubbleInfoRequest { bubble_id: bubble_id })
                 .await?
                 .to_result()?,
         )
@@ -238,8 +245,8 @@ impl ProntoClient {
 
     pub async fn get_bubble_membership(
         &self,
-        request: GetBubbleMembershipSearchRequest
-    ) -> Result<bubble_membership_search::GetBubbleMembershipSearchResponse, ResponseError> {
+        request: PostBubbleMembershipSearchRequest
+    ) -> Result<bubble_membership_search::PostBubbleMembershipSearchResponse, ResponseError> {
         Ok(bubble_membership_search::post(
             &self.api_base_url,
             &self.http_client,
@@ -325,9 +332,12 @@ impl ProntoClient {
         &self,
         message_id: u64,
         message: String,
-    ) -> Result<message_create::MessageModifyResponse, ResponseError> {
+    ) -> Result<MessageModifyResponse, ResponseError> {
         Ok(
-            message_edit::post(&self.api_base_url, &self.http_client, message_id, message)
+            message_edit::post(&self.api_base_url, &self.http_client, MessageEditRequest {
+                message_id,
+                message
+            })
                 .await?
                 .to_result()?,
         )
@@ -352,8 +362,10 @@ impl ProntoClient {
         Ok(reaction_add::post(
             &self.api_base_url,
             &self.http_client,
-            message_id,
-            reaction_type as i32 as u64,
+            ReactionModifyRequest {
+                message_id,
+                reaction_type_id: reaction_type as i32 as u64
+            },
         )
         .await?
         .to_result()?)
@@ -367,8 +379,10 @@ impl ProntoClient {
         Ok(reaction_remove::post(
             &self.api_base_url,
             &self.http_client,
-            message_id,
-            reaction_type as i32 as u64,
+            ReactionModifyRequest {
+                message_id,
+                reaction_type_id: reaction_type as i32 as u64
+            }
         )
         .await?
         .to_result()?)
@@ -398,8 +412,14 @@ impl ProntoClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Once;
+
+    static INIT: Once = Once::new();
 
     async fn get_client() -> ProntoClient {
+        INIT.call_once(|| {
+            simple_logger::init_with_level(log::Level::Debug).unwrap();
+        });
         let settings = settings::Settings::load().await.unwrap();
         let client = ProntoClient::new(
             "https://stanfordohs.pronto.io/api/".to_string(), &settings.auth.api_key.unwrap());

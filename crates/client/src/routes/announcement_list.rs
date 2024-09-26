@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 pub use crate::Announcement;
 
@@ -28,16 +27,5 @@ pub struct GetAnnouncementListRequest {
     #[serde(rename = "perPage")]
     pub per_page: u64,
 }
-pub async fn get(
-    pronto_base_url: &str,
-    client: &Client,
-    request: GetAnnouncementListRequest,
-) -> Result<GetAnnouncementListResult, reqwest::Error> {
-    let r = client
-        .get(format!("{pronto_base_url}v2/announcement.list"))
-        .json(&request)
-        .send()
-        .await?;
-    let json = r.json::<GetAnnouncementListResult>().await?;
-    Ok(json)
-}
+
+client_macros::api!(get, "v2/announcement.list", GetAnnouncementListResult, GetAnnouncementListRequest);

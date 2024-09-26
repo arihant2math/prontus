@@ -1,4 +1,4 @@
-use client::{Bubble, BubbleStats, GetBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo};
+use client::{Bubble, BubbleStats, PostBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -368,7 +368,7 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
         let state = state.read().await;
         let state = state.try_inner()?;
         let page = state.channel_users.get(&id).map(|u| u.page).unwrap_or(1);
-        state.client.get_bubble_membership(GetBubbleMembershipSearchRequest {
+        state.client.get_bubble_membership(PostBubbleMembershipSearchRequest {
             bubble_id: id,
             page,
             ..Default::default()

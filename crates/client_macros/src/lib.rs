@@ -70,14 +70,23 @@ pub fn api(input: TokenStream) -> TokenStream {
                 pronto_base_url: &str,
                 client: &reqwest::Client,
                 request: #request,
-            ) -> Result<#response, reqwest::Error> {
+            ) -> Result<#response, crate::ResponseError> {
                 let r = client
                     .#method(format!("{pronto_base_url}{}", #url))
                     .json(&request)
                     .send()
                     .await?;
-                let json = r.json::<#response>().await?;
-                Ok(json)
+                let text = r.text().await?;
+                let json = serde_json::from_str(&text);
+                match json {
+                    Ok(json) => {
+                        return Ok(json);
+                    }
+                    Err(e) => {
+                        log::error!("Error parsing JSON response: {:?}", e);
+                        return Err(crate::ResponseError::from(e));
+                    }
+                }
             }
         }
     } else {
@@ -86,13 +95,23 @@ pub fn api(input: TokenStream) -> TokenStream {
             pub async fn #method(
                 pronto_base_url: &str,
                 client: &reqwest::Client,
-            ) -> Result<#response, reqwest::Error> {
+            ) -> Result<#response, crate::ResponseError> {
                 let r = client
                     .#method(format!("{pronto_base_url}{}", #url))
                     .send()
                     .await?;
-                let json = r.json::<#response>().await?;
-                Ok(json)
+                let text = r.text().await?;
+                let json = serde_json::from_str(&text);
+                match json {
+                    Ok(json) => {
+                        return Ok(json);
+                    }
+                    Err(e) => {
+                        log::error!("Error parsing JSON response: {:?}.", e);
+                        log::error!("Response: {:?}", text);
+                        return Err(crate::ResponseError::from(e));
+                    }
+                }
             }
         }
     };

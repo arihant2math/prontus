@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
@@ -14,17 +13,4 @@ pub struct PostBubbleMarkResponse {
 
 pub type PostBubbleMarkResult = crate::APIResult<PostBubbleMarkResponse>;
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    request: PostBubbleMarkRequest
-) -> Result<PostBubbleMarkResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/bubble.mark"))
-        .json(&request)
-        .send()
-        .await?;
-    let json = r.json().await?;
-    Ok(json)
-}
-
+client_macros::api!(post, "v1/bubble.mark", PostBubbleMarkResult, PostBubbleMarkRequest);

@@ -1,5 +1,4 @@
 use crate::Member;
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 use serde_with::serde_as;
@@ -15,7 +14,7 @@ fn default_order_by() -> Vec<String> {
 
 #[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct GetBubbleMembershipSearchRequest {
+pub struct PostBubbleMembershipSearchRequest {
     #[serde_as(as = "DisplayFromStr")]
     pub bubble_id: u64,
     #[serde(default = "_true", rename = "includeself")]
@@ -28,7 +27,7 @@ pub struct GetBubbleMembershipSearchRequest {
     // role: Option<String>
 }
 
-impl Default for GetBubbleMembershipSearchRequest {
+impl Default for PostBubbleMembershipSearchRequest {
     fn default() -> Self {
         Self {
             bubble_id: 0,
@@ -40,7 +39,7 @@ impl Default for GetBubbleMembershipSearchRequest {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct GetBubbleMembershipSearchResponse {
+pub struct PostBubbleMembershipSearchResponse {
     pub ok: bool,
     #[serde(rename = "pagesize")]
     pub page_size: u64,
@@ -48,18 +47,6 @@ pub struct GetBubbleMembershipSearchResponse {
     pub membership: Vec<Member>,
 }
 
-pub type GetBubbleMembershipSearchResult = crate::APIResult<GetBubbleMembershipSearchResponse>;
+pub type PostBubbleMembershipSearchResult = crate::APIResult<PostBubbleMembershipSearchResponse>;
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    request: GetBubbleMembershipSearchRequest,
-) -> Result<GetBubbleMembershipSearchResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/bubble.membershipsearch"))
-        .json(&request)
-        .send()
-        .await?;
-    let json = r.json::<GetBubbleMembershipSearchResult>().await?;
-    Ok(json)
-}
+client_macros::api!(post, "v1/bubble.membershipsearch", PostBubbleMembershipSearchResult, PostBubbleMembershipSearchRequest);

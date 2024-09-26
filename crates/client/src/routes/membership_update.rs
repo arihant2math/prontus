@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::Membership;
@@ -71,17 +70,4 @@ pub struct PostMembershipUpdateResponse {
 
 pub type PostMembershipUpdateResult = crate::APIResult<PostMembershipUpdateResponse>;
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    request: PostMembershipUpdateRequest
-) -> Result<PostMembershipUpdateResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/membership.update"))
-        .json(&request.to_json())
-        .send()
-        .await?;
-    let json = r.json().await?;
-    Ok(json)
-}
-
+client_macros::api!(post, "v1/membership.update", PostMembershipUpdateResult, PostMembershipUpdateRequest);

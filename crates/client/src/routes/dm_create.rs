@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use crate::Bubble;
 
@@ -16,17 +15,4 @@ pub struct PostDMCreateResponse {
 
 pub type PostDMCreateResult = crate::APIResult<PostDMCreateResponse>;
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    request: PostDMCreateRequest
-) -> Result<PostDMCreateResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/dm.create"))
-        .json(&request)
-        .send()
-        .await?;
-    let json = r.json().await?;
-    Ok(json)
-}
-
+client_macros::api!(post, "v1/dm.create", PostDMCreateResult, PostDMCreateRequest);

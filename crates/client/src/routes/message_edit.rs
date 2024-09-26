@@ -1,18 +1,10 @@
 use crate::routes::message_create::MessageModifyResult;
-use reqwest::Client;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    message_id: u64,
-    message: String,
-) -> Result<MessageModifyResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/message.edit"))
-        .json(&json!({ "message": message, "message_id": message_id }))
-        .send()
-        .await?;
-    let json = r.json().await?;
-    Ok(json)
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MessageEditRequest {
+    pub message: String,
+    pub message_id: u64,
 }
+
+client_macros::api!(post, "v1/message.edit", MessageModifyResult, MessageEditRequest);
