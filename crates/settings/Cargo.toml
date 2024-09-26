@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 home = "0.5"
+log = { version = "0.4", features = [] }
 serde = { version = "1.0", features = ["derive"] }
 simd-json = { version = "0" }
 thiserror = "1"

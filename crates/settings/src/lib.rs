@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
+use log::{debug, info};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SettingsError {
@@ -127,6 +128,7 @@ impl Settings {
             .join(".prontus")
             .join("settings.bnc");
         if old_settings.exists() {
+            info!("Deleting old settings file");
             std::fs::remove_file(old_settings).unwrap();
         }
         home::home_dir()
@@ -136,12 +138,14 @@ impl Settings {
     }
 
     pub async fn delete() -> Result<()> {
+        info!("Deleting settings file");
         let path = Self::path();
         tokio::fs::remove_file(path).await?;
         Ok(())
     }
 
     pub async fn load() -> Result<Self> {
+        debug!("Loading settings");
         let path = Self::path();
         if path.exists() {
             // TODO: switch to OpenOptions
@@ -155,6 +159,7 @@ impl Settings {
     }
 
     pub async fn save(&self) -> Result<()> {
+        debug!("Saving settings");
         let path = Self::path();
         tokio::fs::create_dir_all(path.parent().unwrap()).await?;
         let data = simd_json::to_string(&self)?;
