@@ -13,7 +13,8 @@ pub struct GetAnnouncementListResponse {
     pub ok: bool,
     pub announcements: Vec<Announcement>,
     pub pagesize: u64,
-    pub hasmore: bool,
+    #[serde(rename = "hasmore")]
+    pub has_more: bool,
     pub cursors: Cursors,
 }
 
