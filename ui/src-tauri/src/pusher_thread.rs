@@ -62,6 +62,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                         .summary(&format!("New message from {user}",
                                                           user = event.message.user.fullname))
                                         .body(&event.message.message)
+                                        .appname("Prontus")
                                         .icon("thunderbird")
                                         .timeout(Timeout::Milliseconds(6000))
                                         .show().unwrap();
