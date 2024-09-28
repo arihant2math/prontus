@@ -39,7 +39,7 @@ impl Parse for APIEndpoint {
 /// - The request type to send to the API
 ///
 /// # Example
-/// ```rust
+/// ```no_run
 /// // Generates a function named `get` that sends a GET request v2/bubble.info when passed
 /// // a Pronto base URL, a reqwest client, and a GetBubbleInfoRequest.
 /// client_macros::api!(get, "v2/bubble.info", GetBubbleInfoResponse, GetBubbleInfoRequest);
@@ -107,13 +107,13 @@ pub fn api(input: TokenStream) -> TokenStream {
                         return Ok(json);
                     }
                     Err(e) => {
-                        log::error!("Error parsing JSON response: {:?}.", e);
-                        log::error!("Response: {:?}", text);
+                        log::error!("Error parsing json response: {:?}, text: {}.", e, text);
                         return Err(crate::ResponseError::from(e));
                     }
                 }
             }
         }
     };
+
     TokenStream::from(expanded)
 }

@@ -1,3 +1,5 @@
+extern crate alloc;
+
 use std::sync::Arc;
 
 use chrono::Utc;

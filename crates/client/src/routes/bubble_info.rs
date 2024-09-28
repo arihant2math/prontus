@@ -27,4 +27,15 @@ pub struct GetBubbleInfoRequest {
 
 pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;
 
-client_macros::api!(get, "v2/bubble.info", GetBubbleInfoResult, GetBubbleInfoRequest);
+pub async fn get(pronto_base_url: &str, client: &reqwest::Client, request: GetBubbleInfoRequest) -> Result<GetBubbleInfoResult, crate::ResponseError> {
+    let r = client.get(format!("{pronto_base_url}{}", "v2/bubble.info")).query(&request).send().await?;
+    let text = r.text().await?;
+    let json = serde_json::from_str(&text);
+    match json {
+        Ok(json) => { return Ok(json); }
+        Err(e) => {
+            log::error!("Error parsing JSON response: {:?}" , e );
+            return Err(crate::ResponseError::from(e));
+        }
+    }
+}
