@@ -22,10 +22,10 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
         code,
         // TODO: Fix
         device: DeviceInfo {
-            browsername: "".to_string(),
+            browsername: "Firefox".to_string(),
             browserversion: "".to_string(),
-            osname: "".to_string(),
-            r#type: "".to_string(),
+            osname: "Windows".to_string(),
+            r#type: "WEB".to_string(),
         },
     })
         .await
