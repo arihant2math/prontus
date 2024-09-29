@@ -8,6 +8,7 @@ use crate::{Membership, MembershipInfo};
 pub enum BubbleMembershipItem {
     Membership(Membership),
     MembershipInfo(MembershipInfo),
+    Other(()),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

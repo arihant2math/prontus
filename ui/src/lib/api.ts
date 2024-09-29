@@ -91,3 +91,12 @@ export async function getCurrentChannelId(): Promise<number> {
 export async function setChannelMute(channelId: number, mute: boolean) {
     return await invoke("set_channel_mute", {channelId, mute});
 }
+
+export async function setChannelPin(channelId: number, pin: boolean) {
+    return await invoke("set_channel_pin", {channelId, pin});
+}
+
+export async function setChannelAlias(channelId: number, alias?: string) {
+    return await invoke("set_channel_alias", {channelId, alias});
+}
+

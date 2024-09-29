@@ -312,17 +312,30 @@ impl ProntoClient {
         }
     }
 
-    pub async fn set_bubble_alias(&self, bubble_id: u64, alias: String) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
-        Ok(membership_update::post(
-            &self.api_base_url,
-            &self.http_client,
-            PostMembershipUpdateRequest {
-                bubble_id,
-                modification: MembershipUpdateModification::Alias(alias),
-            }
-        )
-            .await?
-            .to_result()?)
+    pub async fn set_bubble_alias(&self, bubble_id: u64, alias: Option<String>) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
+        if let Some(alias) = alias {
+            Ok(membership_update::post(
+                &self.api_base_url,
+                &self.http_client,
+                PostMembershipUpdateRequest {
+                    bubble_id,
+                    modification: MembershipUpdateModification::Alias(alias),
+                }
+            )
+                .await?
+                .to_result()?)
+        } else {
+            Ok(membership_update::post(
+                &self.api_base_url,
+                &self.http_client,
+                PostMembershipUpdateRequest {
+                    bubble_id,
+                    modification: MembershipUpdateModification::RemoveAlias,
+                }
+            )
+                .await?
+                .to_result()?)
+        }
     }
 
     pub async fn remove_bubble_alias(&self, bubble_id: u64) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
@@ -344,7 +357,7 @@ impl ProntoClient {
         bubble_id: u64,
         message: String,
         parent_message_id: Option<u64>,
-    ) -> Result<message_create::MessageModifyResponse, ResponseError> {
+    ) -> Result<MessageModifyResponse, ResponseError> {
         Ok(message_create::post(
             &self.api_base_url,
             &self.http_client,

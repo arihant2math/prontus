@@ -41,7 +41,7 @@
             await new Promise(r => setTimeout(r, 10));
         }
 
-        if (settings.appearance.sidebar.category_display_level === "All") {
+        if (!settings.appearance.sidebar.hide_super_categories) {
             let recents = [];
             for (let channel of channels) {
                 if (channel[1].unread > 0) {
@@ -52,6 +52,18 @@
             categoryInfo[-3] = {
                 "id": -3,
                 "title": "Recents",
+            };
+            let pinned = [];
+            for (let channel of channels) {
+                if (channel[2].is_pinned) {
+                    pinned.push(channel);
+                }
+            }
+
+            categories[-4] = pinned;
+            categoryInfo[-4] = {
+                "id": -4,
+                "title": "Pinned",
             };
         }
 
@@ -72,11 +84,14 @@
         <!--TODO: maybe move this to the bottom-->
         <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
-            {#if sidebarCategories.hasOwnProperty(-3)}
+            {#if sidebarCategories.hasOwnProperty(-4) && sidebarCategories[-4].length > 0}
+                <SideCategory name="Pinned" items={sidebarCategories[-4]} buttonClick={handleSidebarClick}/>
+            {/if}
+            {#if sidebarCategories.hasOwnProperty(-3) && sidebarCategories[-3].length > 0}
                 <SideCategory name="Recents" items={sidebarCategories[-3]} buttonClick={handleSidebarClick}/>
             {/if}
             {#each Object.keys(sidebarCategories) as category}
-                {#if sidebarCategoriesInfo[category].id !== -3}
+                {#if sidebarCategoriesInfo[category].id !== -3 && sidebarCategoriesInfo[category].id !== -4}
                     <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
                 {/if}
             {/each}

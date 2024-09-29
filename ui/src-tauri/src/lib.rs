@@ -65,7 +65,7 @@ async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), Backend
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    let bubble_info = state.client.get_bubble_info(id).await.unwrap();
+    let bubble_info = state.client.get_bubble_info(id).await?;
     state.current_channel = bubble_info.bubble;
     Ok(())
 }
@@ -419,6 +419,40 @@ async fn set_channel_mute(state: State<'_, AppState>, channel_id: u64, mute: boo
     Ok(())
 }
 
+#[command]
+async fn set_channel_pin(state: State<'_, AppState>, channel_id: u64, pin: bool) -> Result<(), BackendError> {
+    let membership = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        state.client.pin_bubble(channel_id, pin).await?
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list.iter_mut().find(|(bubble, _, _)| bubble.id == state.current_channel.id).unwrap().2 = Some(membership.membership);
+    Ok(())
+}
+
+#[command]
+async fn set_channel_alias(state: State<'_, AppState>, channel_id: u64, alias: Option<String>) -> Result<(), BackendError> {
+    let membership = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        state.client.set_bubble_alias(channel_id, alias).await?
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list.iter_mut().find(|(bubble, _, _)| bubble.id == state.current_channel.id).unwrap().2 = Some(membership.membership);
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -475,7 +509,9 @@ pub fn run() {
             load_channel_users,
             get_settings,
             set_settings,
-            set_channel_mute
+            set_channel_mute,
+            set_channel_pin,
+            set_channel_alias
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
