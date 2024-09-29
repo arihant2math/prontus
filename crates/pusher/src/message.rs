@@ -131,14 +131,22 @@ pub struct PusherServerUserUpdatedEvent {
 // ",\"change_email\":\"system\",\"change_phone\":\"system\",\"remove_user\":\"system\",\"change_title\":\"admin\",\"change_pronouns\":\"admin\",\"change_own_name\":false,\"change_own_email\":false,\"change_own_phone\":fa
 // lse,\"change_own_title\":true,\"change_own_pronouns\":true},\"profilepicpath\":\"\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\",\"profilepicurl\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/users\\/5279672\\/profilepic?pronto_time=1698399524\"}}"), channel: Some("private-user.5302428") }
 
+// RawPusherMessage { event: "App\\Events\\MembershipUpdated", data: String("{\"membership\":{\"id\":39790610,
+// \"user_id\":5302428,\"bubble_id\":3640189,\"mark\":90239562,\"friends\":true,\"system\":true,\"mute\":true,\"created_at\":\"2024-08-23 14:56:37\",\"updated_at\":\"2024-09-29 20:39:45\",\"markupdated
+// \":\"2024-09-29 03:22:47\",\"isdropin\":false,\"banned\":false,\"reactions\":true,\"notificationrollup\":true,\"alias\":null,\"ishidden\":false,\"removedby\":null,\"meetings\":true,\"muteuntil\":nul
+// l,\"is_pinned\":false,\"supergroup_alert_seen\":true,\"role\":\"member\",\"snooze\":null,\"notificationpreference\":\"DEFAULT_INHERIT\",\"user\":{\"id\":5302428,\"firstname\":\"Ashwin\",\"lastname\"
+// :\"Naren\",\"username\":null,\"locale\":\"en_US\",\"lastseen\":\"2024-09-29 20:39:41\",\"profilepic\":true,\"status\":0,\"created_at\":\"2023-08-04 00:44:12\",\"updated_at\":\"2024-09-29 20:07:12\",
+// \"deactivated_at\":null,\"email_verified_at\":\"2024-09-25 02:40:01\",\"phone_verified_at\":null,\"isverified\":false,\"dropinorder\":0,\"maxstreams\":10,\"autotranslate\":false,\"isonline\":false,\
+// "lastpresencetime\":\"2024-09-29 20:07:12\",\"acceptedtos\":\"2024-09-25 02:40:01\",\"sentwelcomemsg\":\"2023-08-15 19:22:02\",\"role\":\"user\",\"mute\":false,\"muteuntil\":null,\"isbot\":0,\"fulln
+// ame\":\"Ashwin Naren\",\"hasactivity\":true,\"inactive\":false,\"language\":\"en\",\"permissions\":{\"change_name\":\"system\",\"change_email\":\"system\",\"change_phone\":\"system\",\"remove_user\"
+// :\"system\",\"change_title\":\"admin\",\"change_pronouns\":\"admin\",\"change_own_name\":false,\"change_own_email\":false,\"change_own_phone\":false,\"change_own_title\":true,\"change_own_pronouns\"
+// :true},\"profilepicpath\":\"\\/files\\/users\\/5302428\\/profilepic?pronto_time=1695523284\",\"profilepicurl\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/users\\/5302428\\/profilepic?pronto_time=1695523284\"}}}"), channel: Some("private-user.5302428") }
+
+
 // Received unknown message: RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
 
 // Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":6056679,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
 // Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionRemoved", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":3,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
-// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
-// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionRemoved", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":3,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
-// Received unknown message: RawPusherMessage { event: "App\\Events\\ReactionAdded", data: String("{\"message_id\":89031225,\"reactiontype_id\":1,\"user_id\":5302428,\"count\":4,\"emoji\":\"👍\"}"), channel: Some("private-bubble.3640189.46dlVQnU2z3ID1rKsZX2GzjBckR5L8G4xesWwMjH") }
-
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
