@@ -1,8 +1,10 @@
 extern crate proc_macro;
 use proc_macro::{TokenStream};
-use quote::quote;
+use std::str::FromStr;
+use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
-use syn::{Expr, Token, Type, Ident};
+use syn::{Expr, Token, Type, Ident, TypePath};
+use syn::spanned::Spanned;
 
 struct APIEndpoint {
     method: Ident,
@@ -42,7 +44,7 @@ impl Parse for APIEndpoint {
 /// ```no_run
 /// // Generates a function named `get` that sends a GET request v2/bubble.info when passed
 /// // a Pronto base URL, a reqwest client, and a GetBubbleInfoRequest.
-/// client_macros::api!(get, "v2/bubble.info", GetBubbleInfoResponse, GetBubbleInfoRequest);
+/// // client_macros::api!(get, "v2/bubble.info", GetBubbleInfoResponse, GetBubbleInfoRequest);
 /// ```
 #[proc_macro]
 pub fn api(input: TokenStream) -> TokenStream {
@@ -63,29 +65,66 @@ pub fn api(input: TokenStream) -> TokenStream {
         _ => true,
     };
 
+    let response_non_result_name = match response.clone() {
+        Type::Path(p) => {
+            let segments = p.path.segments;
+            if segments.len() != 1 {
+                return syn::Error::new(response.span(), "Response type must be a wrapped Result type").to_compile_error().into();
+            }
+            let ident = segments[0].ident.clone();
+            // TODO: hack lol
+            format_ident!("{}", &ident.to_string().replace("Result", "Response"))
+        }
+        _ => unimplemented!("response type must be a Path Type"),
+    };
+
+    let parse = quote! {
+        let json = serde_json::from_str(&text);
+        match json {
+            Ok(json) => {
+                return Ok(json);
+            }
+            Err(e) => {
+                let json = serde_json::from_str::<#response_non_result_name>(&text);
+                let e = json.unwrap_err();
+                log::error!("Error parsing json response: {:?}.", e);
+                return Err(crate::ResponseError::from(e));
+            }
+        }
+    };
+
     // Build the output
     let expanded = if has_request {
-        quote! {
-            pub async fn #method(
-                pronto_base_url: &str,
-                client: &reqwest::Client,
-                request: #request,
-            ) -> Result<#response, crate::ResponseError> {
-                let r = client
-                    .#method(format!("{pronto_base_url}{}", #url))
-                    .json(&request)
-                    .send()
-                    .await?;
-                let text = r.text().await?;
-                let json = serde_json::from_str(&text);
-                match json {
-                    Ok(json) => {
-                        return Ok(json);
-                    }
-                    Err(e) => {
-                        log::error!("Error parsing JSON response: {:?}", e);
-                        return Err(crate::ResponseError::from(e));
-                    }
+        if method == "get" {
+            quote! {
+                pub async fn #method(
+                    pronto_base_url: &str,
+                    client: &reqwest::Client,
+                    request: #request,
+                ) -> Result<#response, crate::ResponseError> {
+                    let r = client
+                        .#method(format!("{pronto_base_url}{}", #url))
+                        .query(&request)
+                        .send()
+                        .await?;
+                    let text = r.text().await?;
+                    #parse
+                }
+            }
+        } else {
+            quote! {
+                pub async fn #method(
+                    pronto_base_url: &str,
+                    client: &reqwest::Client,
+                    request: #request,
+                ) -> Result<#response, crate::ResponseError> {
+                    let r = client
+                        .#method(format!("{pronto_base_url}{}", #url))
+                        .json(&request)
+                        .send()
+                        .await?;
+                    let text = r.text().await?;
+                    #parse
                 }
             }
         }
@@ -101,16 +140,7 @@ pub fn api(input: TokenStream) -> TokenStream {
                     .send()
                     .await?;
                 let text = r.text().await?;
-                let json = serde_json::from_str(&text);
-                match json {
-                    Ok(json) => {
-                        return Ok(json);
-                    }
-                    Err(e) => {
-                        log::error!("Error parsing json response: {:?}, text: {}.", e, text);
-                        return Err(crate::ResponseError::from(e));
-                    }
-                }
+                #parse
             }
         }
     };

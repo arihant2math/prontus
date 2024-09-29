@@ -16,6 +16,7 @@ use crate::user_info::GetUserInfoRequest;
 pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
+use crate::announcement_list::GetAnnouncementListRequest;
 use crate::bubble_mark::PostBubbleMarkRequest;
 pub use crate::bubble_membership_search::PostBubbleMembershipSearchRequest;
 use crate::membership_update::{MembershipUpdateModification, PostMembershipUpdateRequest};
@@ -369,8 +370,8 @@ impl ProntoClient {
                 reaction_type_id: reaction_type as i32 as u64
             },
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
     }
 
     pub async fn remove_reaction(
@@ -386,8 +387,8 @@ impl ProntoClient {
                 reaction_type_id: reaction_type as i32 as u64
             }
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
     }
 
     pub async fn user_token_login(&self, token: &str) -> Result<TokenLoginResponse, ResponseError> {
@@ -397,8 +398,17 @@ impl ProntoClient {
             &self.http_client,
             vec![token.to_string()],
         )
-        .await?
-        .to_result()?)
+            .await?
+            .to_result()?)
+    }
+
+    pub async fn get_announcement_list(&self) -> Result<announcement_list::GetAnnouncementListResponse, ResponseError> {
+        Ok(announcement_list::get(&self.api_base_url, &self.http_client, GetAnnouncementListRequest {
+            query: "RECEIVED".to_string(),
+            per_page: 20,
+        })
+            .await?
+            .to_result()?)
     }
 }
 
@@ -451,5 +461,19 @@ mod tests {
         let bubble_list = client.get_bubble_list().await.unwrap();
         let bubble_id = bubble_list.bubbles[0].id;
         let _response = client.get_bubble_info(bubble_id).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_announcement_list() {
+        let client = get_client().await;
+        client.get_announcement_list().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_bubble_history() {
+        let client = get_client().await;
+        let bubble_list = client.get_bubble_list().await.unwrap();
+        let bubble_id = bubble_list.bubbles[0].id;
+        let _response = client.get_bubble_history(bubble_id, None).await.unwrap();
     }
 }

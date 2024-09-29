@@ -1,4 +1,4 @@
-use crate::routes::message_create::MessageModifyResult;
+use crate::routes::message_create::{MessageModifyResponse, MessageModifyResult};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

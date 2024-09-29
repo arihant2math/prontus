@@ -11,7 +11,7 @@ pub struct Cursors {
 pub struct GetAnnouncementListResponse {
     pub ok: bool,
     pub announcements: Vec<Announcement>,
-    pub pagesize: u64,
+    pub pagesize: String,
     #[serde(rename = "hasmore")]
     pub has_more: bool,
     pub cursors: Cursors,
