@@ -48,6 +48,12 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
 
     // TODO: this object doesn't update instantly when a user changes a setting
     let settings = Settings::load().await?;
+    let direct_mentions = {
+        let state = context.inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        ["<@everyone>".to_string(), format!("<@{}>", state.user_info.id)]
+    };
 
     loop {
         let message = pusher_client.server_messages().await.recv().await;
@@ -59,14 +65,37 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
                                 // TODO: Make sure app in not in foreground
                                 if settings.options.notifications {
-                                    Notification::new()
-                                        .summary(&format!("New message from {user}",
-                                                          user = event.message.user.fullname))
-                                        .body(&event.message.message)
-                                        .appname("Prontus")
-                                        .icon("thunderbird")
-                                        .timeout(Timeout::Milliseconds(6000))
-                                        .show().unwrap();
+                                    let state = context.inner();
+                                    let state = state.read().await;
+                                    let state = state.try_inner()?;
+                                    let channel = state.channel_list.iter().find(|c| c.0.id == event.message.bubble_id);
+                                    let mut show_notification = true;
+                                    if let Some((_, _, membership)) = channel {
+                                        if let Some(membership) = membership {
+                                            if membership.notification_preference != "ALL" {
+                                                show_notification = false;
+                                            }
+                                            // TODO: Handle the @everyone preference ...
+                                            for mention in direct_mentions.iter() {
+                                                if event.message.message.contains(mention) {
+                                                    show_notification = true;
+                                                }
+                                            }
+                                            if membership.mute {
+                                                show_notification = false;
+                                            }
+                                        }
+                                    }
+                                    if show_notification {
+                                        Notification::new()
+                                            .summary(&format!("New message from {user}",
+                                                              user = event.message.user.fullname))
+                                            .body(&event.message.message)
+                                            .appname("Prontus")
+                                            .icon("thunderbird")
+                                            .timeout(Timeout::Milliseconds(6000))
+                                            .show().unwrap();
+                                    }
                                 }
                                 let state = context.inner();
                                 let mut state = state.write().await;
