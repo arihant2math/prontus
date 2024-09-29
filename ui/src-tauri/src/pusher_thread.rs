@@ -2,6 +2,7 @@ use futures::future::join_all;
 use log::{info, warn, error};
 use notify_rust::{Notification, Timeout};
 use tauri::{AppHandle, Emitter};
+use client::Reactions;
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
 use settings::Settings;
 use crate::{AppState, BackendError};
@@ -172,6 +173,45 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
 
                                 let _ = handle.emit("messageListUpdate", ());
                                 let _ = handle.emit("channelListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerReactionAddedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let message = state
+                                    .message_list
+                                    .iter_mut()
+                                    .find(|m| m.id == event.message_id);
+                                if let Some(message) = message {
+                                    if message.reactions.iter_mut().find(|r| r.id == event.reactiontype_id).map(|r| {
+                                        r.users.push(event.user_id);
+                                        r.count = event.count;
+                                    }).is_none() {
+                                        message.reactions.push(Reactions {
+                                            id: event.reactiontype_id,
+                                            count: event.count,
+                                            users: vec![event.user_id],
+                                        });
+                                    }
+                                }
+                                let _ = handle.emit("messageListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerReactionRemovedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let message = state
+                                    .message_list
+                                    .iter_mut()
+                                    .find(|m| m.id == event.message_id);
+                                if let Some(message) = message {
+                                    if let Some(reaction) = message.reactions.iter_mut().find(|r| r.id == event.reactiontype_id) {
+                                        reaction.users.retain(|u| u != &event.user_id);
+                                        reaction.count = event.count;
+                                    }
+                                }
+
+                                let _ = handle.emit("messageListUpdate", ());
                             }
                             // TODO: handle other
                             _ => {}
