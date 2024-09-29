@@ -1,4 +1,4 @@
-use client::{Bubble, BubbleStats, PostBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo};
+use client::{Bubble, BubbleStats, PostBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo, Membership};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -38,10 +38,11 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     let mut users = HashMap::new();
     users.insert(user_info.id, user_info.clone());
     let channel_list = channel_list?;
-    let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>)> = vec![];
+    let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)> = vec![];
     for bubble in channel_list.bubbles.clone() {
         let stats = channel_list.stats.iter().find(|s| s.bubble_id == bubble.id).cloned();
-        state_channel_list.push((bubble, stats));
+        let membership = channel_list.memberships.iter().find(|m| m.bubble_id == bubble.id).cloned();
+        state_channel_list.push((bubble, stats, membership));
     }
     let data = AppData {
         user_info,
@@ -102,7 +103,7 @@ async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, Backe
 #[command]
 async fn get_channel_list(
     state: State<'_, AppState>,
-) -> Result<Vec<(Bubble, Option<BubbleStats>)>, BackendError> {
+) -> Result<Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -113,7 +114,7 @@ async fn get_channel_list(
 #[command]
 async fn get_channel_info(
     state: State<'_, AppState>,
-) -> Result<Option<(Bubble, Option<BubbleStats>)>, BackendError> {
+) -> Result<Option<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -122,7 +123,7 @@ async fn get_channel_info(
     let bubble = state
         .channel_list
         .iter()
-        .find(|(bubble, _)| bubble.id == id);
+        .find(|(bubble, _, _)| bubble.id == id);
     Ok(bubble.cloned())
 }
 

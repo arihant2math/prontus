@@ -3,10 +3,10 @@ use crate::UserInfo;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Membership {
-    pub id: i64,
-    pub user_id: i64,
-    pub bubble_id: i64,
-    pub mark: i64,
+    pub id: u64,
+    pub user_id: u64,
+    pub bubble_id: u64,
+    pub mark: u64,
     pub friends: bool,
     pub system: bool,
     pub mute: bool,
@@ -20,7 +20,7 @@ pub struct Membership {
     pub reactions: bool,
     #[serde(rename = "notificationrollup")]
     pub notification_rollup: bool,
-    pub alias: String,
+    pub alias: Option<String>,
     #[serde(rename = "ishidden")]
     pub is_hidden: bool,
     #[serde(rename = "removedby")]
@@ -33,5 +33,5 @@ pub struct Membership {
     pub snooze: Option<bool>,
     #[serde(rename = "notificationpreference")]
     pub notification_preference: String,
-    pub user: UserInfo,
+    pub user: Option<UserInfo>,
 }

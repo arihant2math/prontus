@@ -107,7 +107,7 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
                                 // TODO: double for loop, ew
-                                for (bubble, stats) in state.channel_list.iter_mut() {
+                                for (bubble, stats, _) in state.channel_list.iter_mut() {
                                     for stat in event.stats.iter() {
                                         if bubble.id == stat.bubble_id {
                                             *stats = Some(stat.clone());

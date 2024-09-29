@@ -1,5 +1,5 @@
 use crate::BackendError;
-use client::{Bubble, BubbleStats, Message, ProntoClient, UserInfo};
+use client::{Bubble, BubbleStats, Membership, Message, ProntoClient, UserInfo};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -16,7 +16,7 @@ pub struct AppData {
     pub user_info: UserInfo,
     pub users: HashMap<u64, UserInfo>,
     pub client: Arc<ProntoClient>,
-    pub channel_list: Vec<(Bubble, Option<BubbleStats>)>,
+    pub channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>,
     pub channel_users: HashMap<u64, ChannelUsers>,
     pub current_channel: Bubble,
     pub message_list: Vec<Message>,
