@@ -69,6 +69,7 @@ async fn parse_request(stream: &mut TcpStream) -> (String, String) {
 
 async fn process(stream: &mut TcpStream, client: Arc<ProntoClient>) -> Result<(), Box<dyn Error>> {
     let parse_request = parse_request(stream).await;
+    info!("{}", parse_request.0);
     let request_line = parse_request.0;
     let method = request_line.split_whitespace().collect::<Vec<&str>>()[0];
     let uri = request_line.split_whitespace().collect::<Vec<&str>>()[1];
@@ -81,8 +82,7 @@ async fn process(stream: &mut TcpStream, client: Arc<ProntoClient>) -> Result<()
     let request = request
         .body(parse_request.1)
         .unwrap();
-    debug!("Request: {:?}", request);
-    let response = client.http_client.request(request.method().clone(), request.uri().clone().to_string())
+    let response = client.http_client.request(request.method().clone(), format!("{}{}", &client.api_base_url, request.uri().clone().to_string()))
         .body(request.body().to_string())
         .send().await?;
     // send response
