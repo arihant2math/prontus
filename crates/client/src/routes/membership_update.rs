@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::Membership;
@@ -13,10 +12,19 @@ pub enum MembershipUpdateModification {
     Hide,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct PostMembershipUpdateRequest {
     pub bubble_id: u64,
     pub modification: MembershipUpdateModification,
+}
+
+impl Serialize for PostMembershipUpdateRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        self.to_json().serialize(serializer)
+    }
 }
 
 impl PostMembershipUpdateRequest {
@@ -71,17 +79,4 @@ pub struct PostMembershipUpdateResponse {
 
 pub type PostMembershipUpdateResult = crate::APIResult<PostMembershipUpdateResponse>;
 
-pub async fn post(
-    pronto_base_url: &str,
-    client: &Client,
-    request: PostMembershipUpdateRequest
-) -> Result<PostMembershipUpdateResult, reqwest::Error> {
-    let r = client
-        .post(format!("{pronto_base_url}v1/membership.update"))
-        .json(&request.to_json())
-        .send()
-        .await?;
-    let json = r.json().await?;
-    Ok(json)
-}
-
+client_macros::api!(post, "v1/membership.update", PostMembershipUpdateResult, PostMembershipUpdateRequest);
