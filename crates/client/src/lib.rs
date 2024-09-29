@@ -285,6 +285,32 @@ impl ProntoClient {
             .to_result()?)
     }
 
+    pub async fn mute_bubble(&self, bubble_id: u64, state: bool) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
+        if state {
+            Ok(membership_update::post(
+                &self.api_base_url,
+                &self.http_client,
+                PostMembershipUpdateRequest {
+                    bubble_id,
+                    modification: MembershipUpdateModification::Mute(None),
+                }
+            )
+                .await?
+                .to_result()?)
+        } else {
+            Ok(membership_update::post(
+                &self.api_base_url,
+                &self.http_client,
+                PostMembershipUpdateRequest {
+                    bubble_id,
+                    modification: MembershipUpdateModification::Unmute,
+                }
+            )
+                .await?
+                .to_result()?)
+        }
+    }
+
     pub async fn set_bubble_alias(&self, bubble_id: u64, alias: String) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
         Ok(membership_update::post(
             &self.api_base_url,

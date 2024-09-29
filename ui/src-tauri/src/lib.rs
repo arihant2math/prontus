@@ -401,6 +401,23 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
     Ok(())
 }
 
+#[command]
+async fn set_channel_mute(state: State<'_, AppState>, channel_id: u64, mute: bool) -> Result<(), BackendError> {
+    let membership = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        state.client.mute_bubble(channel_id, mute).await?
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list.iter_mut().find(|(bubble, _, _)| bubble.id == state.current_channel.id).unwrap().2 = Some(membership.membership);
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -450,7 +467,8 @@ pub fn run() {
             get_channel_users,
             load_channel_users,
             get_settings,
-            set_settings
+            set_settings,
+            set_channel_mute
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

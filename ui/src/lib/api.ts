@@ -87,3 +87,7 @@ export async function setSettings(settings: any): Promise<void> {
 export async function getCurrentChannelId(): Promise<number> {
     return await invoke("get_current_channel_id");
 }
+
+export async function setChannelMute(channelId: number, mute: boolean) {
+    return await invoke("set_channel_mute", {channelId, mute});
+}
