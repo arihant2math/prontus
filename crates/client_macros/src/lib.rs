@@ -1,9 +1,8 @@
 extern crate proc_macro;
 use proc_macro::{TokenStream};
-use std::str::FromStr;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
-use syn::{Expr, Token, Type, Ident, TypePath};
+use syn::{Expr, Token, Type, Ident};
 use syn::spanned::Spanned;
 
 struct APIEndpoint {
