@@ -460,10 +460,11 @@ async fn set_channel_notifications(state: State<'_, AppState>, channel_id: u64, 
         let state = state.read().await;
         let state = state.try_inner()?;
 
-        state.client.set_bubble_notifications_preferences(channel_id, match level {
+        state.client.set_bubble_notifications_preferences(channel_id, match &*level {
             "ALL" => client::NotificationsPreference::All,
             "MENTIONS" => client::NotificationsPreference::Mentions,
             "NOTHING" => client::NotificationsPreference::Nothing,
+            _ => return Err(BackendError::NotLoaded),
         }).await?
     };
 

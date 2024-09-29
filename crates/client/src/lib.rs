@@ -19,7 +19,7 @@ pub use routes::*;
 use crate::announcement_list::GetAnnouncementListRequest;
 use crate::bubble_mark::PostBubbleMarkRequest;
 pub use crate::bubble_membership_search::PostBubbleMembershipSearchRequest;
-use crate::membership_update::{MembershipUpdateModification, NotificationsPreference, PostMembershipUpdateRequest};
+pub use crate::membership_update::{MembershipUpdateModification, NotificationsPreference, PostMembershipUpdateRequest};
 pub use crate::message_create::MessageModifyResponse;
 use crate::message_edit::MessageEditRequest;
 use crate::pusher_auth::PusherAuthRequest;
