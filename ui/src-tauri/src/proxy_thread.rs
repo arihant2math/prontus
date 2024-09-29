@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::sync::Arc;
 use http::Request;
-use log::{debug, error, info};
+use log::{error, info};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use client::ProntoClient;
@@ -82,7 +82,7 @@ async fn process(stream: &mut TcpStream, client: Arc<ProntoClient>) -> Result<()
     let request = request
         .body(parse_request.1)
         .unwrap();
-    let response = client.http_client.request(request.method().clone(), format!("{}{}", &client.api_base_url, request.uri().clone().to_string()))
+    let response = client.http_client.request(request.method().clone(), format!("https://stanfordohs.pronto.io/{}", request.uri().clone().to_string()))
         .body(request.body().to_string())
         .send().await?;
     // send response

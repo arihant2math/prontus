@@ -3,7 +3,9 @@
     export let mimetype;
     export let type;
 
+    $: realUrl = url.replace("https://stanfordohs.pronto.io/", "localhost:10521/");
+
     console.warn("MEDIA", type)
 </script>
 
-<img src="{url}" class="max-w-lg" alt="An user posted media item"/>
+<img src="{realUrl}" class="max-w-lg" alt="An user posted media item"/>
