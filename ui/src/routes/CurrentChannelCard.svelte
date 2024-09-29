@@ -4,9 +4,15 @@
     import {getCurrentChannelId, setChannelMute} from "$lib/api.ts";
 
     export let info = null;
-    $: info, console.log(info);
+    $: info, updateMuted(info);
     export let memberListActive = false;
-    let muted = info[2].mute;
+    let muted = null;
+
+    function updateMuted(info) {
+        if (info !== null) {
+            muted = info[2].mute;
+        }
+    }
 
     $: memberListFill = memberListActive ? "currentColor" : "none";
 
@@ -45,7 +51,7 @@
                         class="z-30 w-full max-w-[328px] rounded-lg bg-white dark:bg-slate-800 p-4 shadow-lg flex-col"
                         sideOffset={8}>
                     <label class="inline-flex items-center cursor-pointer p-3">
-                        <input type="checkbox" value="{info[2].mute}" class="sr-only peer" bind:value={muted} on:click={updateMute}>
+                        <input type="checkbox" value="{info[2].mute}" class="sr-only peer" on:click={updateMute}>
                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Mute Channel</span>
                     </label>

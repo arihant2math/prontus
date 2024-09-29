@@ -17,6 +17,7 @@ tauri-build = { version = "2.0.0-rc", features = [] }
 [dependencies]
 client = { path = "../../crates/client" }
 futures = "0.3"
+http = "1.1"
 log = "0.4"
 log4rs = "1.3"
 notify-rust = "4"
@@ -28,6 +29,7 @@ tauri = { version = "2.0.0-rc", features = ["tray-icon", "unstable"] }
 tauri-plugin-shell = "2.0.0-rc"
 thiserror = "1"
 tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
 settings = { path = "../../crates/settings" }
 sentry = "0.34"
 

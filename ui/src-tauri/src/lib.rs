@@ -9,6 +9,7 @@ mod handler;
 pub use handler::{get_code, send_code, get_settings, set_settings};
 
 mod error;
+mod proxy_thread;
 mod pusher_thread;
 mod state;
 #[cfg(desktop)]
@@ -424,6 +425,12 @@ pub fn run() {
         .setup(|app| {
             let context = AppState::unloaded();
             let thread_handle = app.handle().clone();
+            thread::spawn({
+                let context = context.clone();
+                move || {
+                    let _ = proxy_thread::run_proxy_thread(context);
+                }
+            });
             thread::spawn({
                 let context = context.clone();
                 move || {
