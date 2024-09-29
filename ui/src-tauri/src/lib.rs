@@ -453,6 +453,27 @@ async fn set_channel_alias(state: State<'_, AppState>, channel_id: u64, alias: O
     Ok(())
 }
 
+#[command]
+async fn set_channel_notifications(state: State<'_, AppState>, channel_id: u64, level: String) -> Result<(), BackendError> {
+    let membership = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+
+        state.client.set_bubble_notifications_preferences(channel_id, match level {
+            "ALL" => client::NotificationsPreference::All,
+            "MENTIONS" => client::NotificationsPreference::Mentions,
+            "NOTHING" => client::NotificationsPreference::Nothing,
+        }).await?
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list.iter_mut().find(|(bubble, _, _)| bubble.id == state.current_channel.id).unwrap().2 = Some(membership.membership);
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -511,7 +532,8 @@ pub fn run() {
             set_settings,
             set_channel_mute,
             set_channel_pin,
-            set_channel_alias
+            set_channel_alias,
+            set_channel_notifications
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

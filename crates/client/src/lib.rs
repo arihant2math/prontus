@@ -351,7 +351,7 @@ impl ProntoClient {
             .to_result()?)
     }
 
-    pub async fn set_notifications_preferences(&self, bubble_id: u64, preference: NotificationsPreference) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
+    pub async fn set_bubble_notifications_preferences(&self, bubble_id: u64, preference: NotificationsPreference) -> Result<membership_update::PostMembershipUpdateResponse, ResponseError> {
         Ok(membership_update::post(
             &self.api_base_url,
             &self.http_client,
