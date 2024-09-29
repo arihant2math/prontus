@@ -4,28 +4,7 @@
     import {getCurrentChannelId, getCurrentUser} from "$lib/api.ts";
 
     export let info = null;
-    export let bubble = null;
-    export let currentUserMembership = null;
-    $: info, updateBubble();
-    $: bubble, getCurrentUserMembership(bubble);
-
-    async function updateBubble() {
-        bubble = await getCurrentChannelId();
-    }
-
-    async function getCurrentUserMembership(bubble) {
-        let currentUser = await getCurrentUser();
-        if (bubble !== null) {
-            for (let membership of bubble.memberships) {
-                if (membership.user.id === currentUser.id) {
-                    currentUserMembership = membership;
-                    break;
-                }
-            }
-        }
-        console.log(currentUserMembership);
-    }
-
+    $: info, console.log(info);
     export let memberListActive = false;
 
     $: memberListFill = memberListActive ? "currentColor" : "none";
@@ -61,7 +40,7 @@
                         class="z-30 w-full max-w-[328px] rounded-lg bg-white dark:bg-slate-800 p-4 shadow-lg flex-col"
                         sideOffset={8}>
                     <label class="inline-flex items-center cursor-pointer p-3">
-                        <input type="checkbox" value="" class="sr-only peer">
+                        <input type="checkbox" value="{info[2].mute}" class="sr-only peer">
                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Mute Channel</span>
                     </label>
@@ -69,7 +48,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="ALL" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-4" class="font-medium text-gray-900 dark:text-gray-300">
@@ -82,7 +61,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="MENTIONS" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-5" class="font-medium text-gray-900 dark:text-gray-300">
@@ -95,7 +74,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="NONE" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-6" class="font-medium text-gray-900 dark:text-gray-300">
