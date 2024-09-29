@@ -1,18 +1,10 @@
 <script>
     import {DropdownMenu} from "bits-ui";
-    import { Popover } from "bits-ui";
-    import {getCurrentChannelId, setChannelMute} from "$lib/api.ts";
+    import {Popover} from "bits-ui";
+    import {setChannelMute, setChannelNotifications} from "$lib/api.ts";
 
     export let info = null;
-    $: info, updateMuted(info);
     export let memberListActive = false;
-    let muted = null;
-
-    function updateMuted(info) {
-        if (info !== null) {
-            muted = info[2].mute;
-        }
-    }
 
     $: memberListFill = memberListActive ? "currentColor" : "none";
 
@@ -21,7 +13,12 @@
     }
 
     async function updateMute() {
-        await setChannelMute(info[0].id, !muted);
+        await setChannelMute(info[0].id, info[2].mute);
+    }
+
+    async function updateNotificationPreference() {
+        console.log("h");
+        await setChannelNotifications(info[0].id, info[2].notificationpreference);
     }
 </script>
 {#if info !== null && info[0] !== undefined}
@@ -59,7 +56,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="ALL" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="ALL" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-4" class="font-medium text-gray-900 dark:text-gray-300">
@@ -72,7 +69,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="MENTIONS" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="MENTIONS" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-5" class="font-medium text-gray-900 dark:text-gray-300">
@@ -85,7 +82,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="NONE" bind:group={info[2].notificationpreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="NONE" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-6" class="font-medium text-gray-900 dark:text-gray-300">
