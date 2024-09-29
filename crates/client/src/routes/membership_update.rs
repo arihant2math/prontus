@@ -3,6 +3,14 @@ use serde_json::json;
 use crate::Membership;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum NotificationsPreference {
+    All,
+    Mentions,
+    MentionsExcludeAll,
+    Nothing,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum MembershipUpdateModification {
     RemoveAlias,
     Alias(String),
@@ -10,6 +18,8 @@ pub enum MembershipUpdateModification {
     Mute(Option<String>),
     Unmute,
     Hide,
+    NotificationsPreference(NotificationsPreference),
+    Meetings(bool),
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -67,6 +77,24 @@ impl PostMembershipUpdateRequest {
                     "ishidden": 1
                 })
             },
+            MembershipUpdateModification::NotificationsPreference(value) => {
+                let preference = match value {
+                    NotificationsPreference::All => "ALL",
+                    NotificationsPreference::Mentions => "MENTIONS",
+                    NotificationsPreference::MentionsExcludeAll => "MENTIONS_EXCLUDE_ALL",
+                    NotificationsPreference::Nothing => "NONE",
+                };
+                json!({
+                    "bubble_id": self.bubble_id,
+                    "notifications_preference": preference
+                })
+            },
+            MembershipUpdateModification::Meetings(value) => {
+                json!({
+                    "bubble_id": self.bubble_id,
+                    "meetings": value
+                })
+            }
         }
     }
 }
