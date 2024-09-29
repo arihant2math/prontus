@@ -143,6 +143,7 @@ impl ProntoClient {
             .cookie_store(true)
             .cookie_provider(Arc::new(jar))
             .default_headers(headers)
+            .brotli(true)
             .build()?;
         Ok(Self {
             api_base_url,
