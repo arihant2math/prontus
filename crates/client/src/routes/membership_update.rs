@@ -12,10 +12,19 @@ pub enum MembershipUpdateModification {
     Hide,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct PostMembershipUpdateRequest {
     pub bubble_id: u64,
     pub modification: MembershipUpdateModification,
+}
+
+impl Serialize for PostMembershipUpdateRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        self.to_json().serialize(serializer)
+    }
 }
 
 impl PostMembershipUpdateRequest {
