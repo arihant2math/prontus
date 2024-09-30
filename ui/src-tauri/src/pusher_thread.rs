@@ -213,6 +213,21 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
 
                                 let _ = handle.emit("messageListUpdate", ());
                             }
+                            PusherServerEventType::PusherServerMembershipUpdatedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                for (bubble, _, membership) in state.channel_list.iter_mut() {
+                                    if bubble.id == event.membership.bubble_id {
+                                        if let Some(membership) = membership {
+                                            *membership = event.membership.clone();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                let _ = handle.emit("channelListUpdate", ());
+                            }
                             // TODO: handle other
                             _ => {}
                         }

@@ -21,7 +21,7 @@ pub type GetAnnouncementListResult = crate::APIResult<GetAnnouncementListRespons
 
 #[derive(Serialize, Deserialize)]
 pub struct GetAnnouncementListRequest {
-    /// UNREAD, or RECEIVED
+    /// UNREAD, or RECEIVED, or SCHEDULED
     pub query: String,
     /// 20 should work
     #[serde(rename = "perPage")]
