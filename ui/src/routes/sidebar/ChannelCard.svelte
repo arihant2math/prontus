@@ -7,6 +7,8 @@
     export let stats;
     export let membership;
     export let buttonClick;
+    $: title = membership.alias === null ? info.title : membership.alias;
+    $: textColor = membership.mute ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white";
     $: unreadString = stats.unread > 99 ? "99+" : stats.unread;
     $: mentionString = stats.unread_mentions > 99 ? "99+" : stats.unread_mentions;
     $: fontWeight = stats.unread > 0 ? "font-bold" : "font-medium";
@@ -20,7 +22,7 @@
     <ContextMenu.Root>
         <ContextMenu.Trigger class="">
             <button on:click={btnClick}
-                    class="flex items-start p-2 text-gray-900 transition duration-75 rounded-lg pl-4 group hover:bg-gray-100 dark:text-white dark:hover:bg-slate-700 w-full text-ellipsis">
+                    class="flex items-start p-2 {textColor} transition duration-75 rounded-lg pl-4 group hover:bg-gray-100 dark:hover:bg-slate-700 w-full text-ellipsis">
                 {#if info.isdm}
                     <div class="relative">
                         <ProfilePicture user="{info.dmpartner}"/>
@@ -31,8 +33,8 @@
                         {/if}
                     </div>
                 {/if}
-                <span class="text-sm text-left ms-3 flex-1 whitespace-nowrap text-truncate {fontWeight}">{info.title}</span>
-                { #if stats.unread > 0 }
+                <span class="text-sm text-left ms-3 flex-1 whitespace-nowrap text-truncate {fontWeight}">{title}</span>
+                { #if stats.unread > 0 && !membership.mute }
                     {#if stats.unread_mentions > 0}
                         <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>
                     {:else}
@@ -44,14 +46,47 @@
         <ContextMenu.Content class="z-50 w-full max-w-max rounded-xl bg-white dark:bg-slate-700 px-1 py-1.5 shadow-popover outline-none">
             <ContextMenu.Item
                     class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
-                <button class="flex items-center space-x-2" on:click={() => {setChannelPin(info.id, true)}}>
+                <button class="flex items-center space-x-2" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                     </svg>
-                    Pin
+
+                    Mark as Read
                 </button>
             </ContextMenu.Item>
+            <ContextMenu.Item
+                    class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
+                <button class="flex items-center space-x-2" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+
+                    Alias
+                </button>
+            </ContextMenu.Item>
+            {#if membership.is_pinned}
+                <ContextMenu.Item
+                        class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
+                    <button class="flex items-center space-x-2" on:click={() => {setChannelPin(info.id, false)}}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        Unpin
+                    </button>
+                </ContextMenu.Item>
+            {:else}
+                <ContextMenu.Item
+                        class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
+                    <button class="flex items-center space-x-2" on:click={() => {setChannelPin(info.id, true)}}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        Pin
+                    </button>
+                </ContextMenu.Item>
+            {/if}
             <ContextMenu.Item
                     class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
                 <div class="flex items-center space-x-2">
