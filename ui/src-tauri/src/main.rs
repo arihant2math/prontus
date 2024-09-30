@@ -10,7 +10,7 @@ fn init_logging() -> log4rs::Handle {
     let stdout = ConsoleAppender::builder().build();
     let config = Config::builder()
         .appender(Appender::builder().build("stdout", Box::new(stdout)))
-        .build(Root::builder().appender("stdout").build(LevelFilter::Warn))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
         .unwrap();
 
     let handle = log4rs::init_config(config).unwrap();
