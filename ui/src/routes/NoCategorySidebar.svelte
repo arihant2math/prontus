@@ -39,7 +39,7 @@
         <CurrentUserCard bind:user={currentUser} showSettings={showSettings}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#each channels as item}
-                <li><Sideitem info={item[0]} stats={item[1]} buttonClick="{handleSidebarClick}"/></li>
+                <li><Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}"/></li>
             {/each}
         </ul>
     </div>

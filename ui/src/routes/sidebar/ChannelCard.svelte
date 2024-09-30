@@ -1,9 +1,11 @@
 <script>
     import ProfilePicture from "../user/ProfilePicture.svelte";
     import {ContextMenu} from "bits-ui";
+    import {setChannelPin} from "$lib/api.ts";
 
     export let info;
     export let stats;
+    export let membership;
     export let buttonClick;
     $: unreadString = stats.unread > 99 ? "99+" : stats.unread;
     $: mentionString = stats.unread_mentions > 99 ? "99+" : stats.unread_mentions;
@@ -42,13 +44,13 @@
         <ContextMenu.Content class="z-50 w-full max-w-max rounded-xl bg-white dark:bg-slate-700 px-1 py-1.5 shadow-popover outline-none">
             <ContextMenu.Item
                     class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">
-                <div class="flex items-center space-x-2">
+                <button class="flex items-center space-x-2" on:click={() => {setChannelPin(info.id, true)}}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                     </svg>
-                    <p>Pin</p>
-                </div>
+                    Pin
+                </button>
             </ContextMenu.Item>
             <ContextMenu.Item
                     class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-muted hover:bg-gray-100 dark:hover:bg-slate-600">

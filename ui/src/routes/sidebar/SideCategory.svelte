@@ -28,7 +28,7 @@
             transition={slide}>
             <ul class="py-2 space-y-2">
                 {#each items as item}
-                    <li><Sideitem info={item[0]} stats={item[1]} buttonClick="{buttonClick}"/></li>
+                    <li><Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/></li>
                 {/each}
             </ul>
         </Collapsible.Content>
