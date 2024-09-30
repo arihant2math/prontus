@@ -87,6 +87,16 @@ async fn process(stream: &mut TcpStream, client: Arc<ProntoClient>) -> Result<()
         .body(request.body().to_string())
         .send().await?;
     // send response
+    stream.write_all(b"HTTP/1.1 200 OK\r\n").await?;
+    for (name, value) in response.headers() {
+        stream.write_all(name.as_str().as_bytes()).await?;
+        stream.write_all(b": ").await?;
+        stream.write_all(value.as_bytes()).await?;
+        stream.write_all(b"\r\n").await?;
+    }
+
+    stream.write_all(b"\r\n").await?;
+
     let response = response.bytes().await?;
     stream.write_all(&response).await?;
     Ok(())
