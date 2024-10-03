@@ -52,7 +52,7 @@
         return msgs;
     }
 
-    $: threadMessages = getThreadMessages(threadParent);
+    $: threadMessages = getThreadMessages(messages, threadParent);
 
 
     // TODO: progress bar on the top or smth
@@ -96,6 +96,7 @@
 
     function viewThread(parentId) {
         threadParent = parentId;
+        showThread = true;
     }
 
     async function queuedSendMessage(message, threadId) {
