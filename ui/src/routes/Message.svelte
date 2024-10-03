@@ -155,14 +155,16 @@
                 </div>
                 <ReactionPanel message_id={message.id}/>
                 <ul class="fixed hidden flex flex-row text-sm bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 rounded-lg shadow-md" data-popover data-popover-target-parent data-popover-configure data-popover-show-method="hover" data-popover-position="right" data-popover-offset="-150">
-                    <li>
-                        <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => {viewThread(message.id)}}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5" />
-                            </svg>
-                        </button>
-                    </li>
-        <!--            TODO: Forward button -->
+                    {#if !inThread}
+                        <li>
+                            <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => {viewThread(message.id)}}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5" />
+                                </svg>
+                            </button>
+                        </li>
+                    {/if}
+                    <!--            TODO: Forward button -->
                     <li>
                         <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" data-popover-ref-target="reaction-panel">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
