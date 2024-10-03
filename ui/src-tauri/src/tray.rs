@@ -1,3 +1,4 @@
+use log::info;
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -15,6 +16,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
         .menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id.as_ref() {
             "show" => {
+                info!("Show main window");
                 if let Some(window) = app.get_window("main") {
                     let _ = window.show();
                     let _ = window.unminimize();
@@ -22,7 +24,9 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
                 }
             }
             "quit" => {
+                info!("Quitting app");
                 app.exit(0);
+                unreachable!("App should have exited");
             }
             // Add more events here
             _ => {}
