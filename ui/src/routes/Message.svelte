@@ -22,6 +22,18 @@
 
     let editing = false;
 
+    function strft(date) {
+        return date.toLocaleString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+        });
+    }
+
     $: unsent = message.hasOwnProperty("unsent");
     $: dateSpan = spanDate(message, previousMessage);
     $: repeat = isRepeat(message, previousMessage);
@@ -33,8 +45,8 @@
     $: media = message.messagemedia;
     $: embed = message.resource;
     $: reactions = message.reactionsummary;
-    $: messageCreatedAtDate = parseDatetime(message.created_at.split(" ")[0]);
-    $: messageCreatedAtTime = formatTime(message.created_at);
+    $: messageCreatedAtDatetime = strft(parseDatetime(message.created_at));
+    $: messageCreatedatDate = parseDatetime(message.created_at).toDateString();
     $: ml = repeat ? "ml-10" : "ml-0";
     $: py = repeat ? "py-1" : "py-3";
     $: border = parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400";
@@ -78,8 +90,8 @@
         if (previousMessage === null) {
             return true;
         }
-        let currentDatetime = new Date(message.created_at);
-        let previousDatetime = new Date(previousMessage.created_at);
+        let currentDatetime = parseDatetime(message.created_at);
+        let previousDatetime = parseDatetime(previousMessage.created_at);
         return currentDatetime.getDay() !== previousDatetime.getDay();
     }
 
@@ -115,11 +127,12 @@
 {#if editing}
     <RichTextEdit bind:text={message.message} sendMessage={sendEditMessage}/>
 {:else}
-    {#if dateSpan}
-    <!--    TODO: Debug and then put a proper date span here-->
-    {/if}
     {#if !systemMessage && !settings.appearance.messages.compact}
         <div class="flex flex-col">
+            {#if dateSpan}
+                <!--    TODO: Debug and then put a proper date span here-->
+                <p class="text-gray-500 text-center">{messageCreatedatDate}</p>
+            {/if}
             {#if !inThread && parentMessage !== undefined && firstThreadMessage}
                 <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-2 rounded-xl bg-gray-50 dark:bg-slate-700 w-max">
                     {#if parentMessage !== null}
@@ -137,7 +150,7 @@
                     {#if !repeat}
                         <div class="flex items-center space-x-2 rtl:space-x-reverse">
                             <span class="text-sm font-semibold text-gray-900 dark:text-white text-nowrap">{user.fullname}</span>
-                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400 text-nowrap">{messageCreatedAtTime}</span>
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400 text-nowrap">{messageCreatedAtDatetime}</span>
                         </div>
                     {/if}
                     <RichTextContainer message="{message.message}"/>
