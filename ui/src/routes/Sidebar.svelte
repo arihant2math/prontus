@@ -92,7 +92,12 @@
             {/if}
             {#each Object.keys(sidebarCategories) as category}
                 {#if sidebarCategoriesInfo[category].id !== -3 && sidebarCategoriesInfo[category].id !== -4}
-                    <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                    {#if sidebarCategoriesInfo[category].hasOwnProperty("user_category")}
+                        <!--TODO: Fix-->
+                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                    {:else}
+                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick}/>
+                    {/if}
                 {/if}
             {/each}
         </ul>

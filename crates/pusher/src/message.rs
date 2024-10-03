@@ -155,6 +155,9 @@ pub struct PusherServerUserUpdatedEvent {
 // bc45047dbab\",\"thumbnail\":\"\",\"width\":1268,\"height\":950,\"filesize\":640894,\"duration\":null,\"created_at\":\"2024-09-28 23:05:50\",\"updated_at\":\"2024-09-28 23:05:50\",\"uuid\":\"4e407183-10d9-48
 // 8d-b5be-91dbe0d1b685\",\"mediatype\":\"PHOTO\",\"urlmimetype\":\"image\\/png\",\"thumbnailmimetype\":null,\"path\":\"\\/files\\/orgs\\/2245\\/announcements\\/32222\\/3422de00-7dee-11ef-9549-dbc45047dbab\",\"thumbnailpath\":\"\",\"external\":false}],\"announcementtrans\":[]}}"), channel: Some("private-user.5302428") }
 
+// RawPusherMessage { event: "App\\Events\\CategoryUpdated", data: String("{\"category\":{\"id\":679345,\"organization_
+// id\":2245,\"created_at\":\"2023-08-13 04:44:16\",\"updated_at\":\"2023-08-13 04:44:16\",\"sortorder\":149,\"title\":\"Clubs\",\"externalid\":null,\"usercategory\":{\"id\":9689,\"user_id\":5302428,\"category_id\":679345,\"alias\":\"test\",\"created_at\":\"2024-10-03 03:35:32\",\"updated_at\":\"2024-10-03 03:35:32\"}}}"), channel: Some("private-user.5302428") }
+
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
