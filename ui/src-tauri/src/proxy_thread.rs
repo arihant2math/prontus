@@ -1,15 +1,45 @@
-use std::error::Error;
-use std::sync::Arc;
-use http::Request;
-use log::{error, info};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
+use crate::AppState;
 use client::ProntoClient;
-use crate::{AppState, BackendError};
+use hyper::body::Incoming;
+use hyper::server::conn::http1;
+use hyper::service::Service;
+use hyper::{Request, Response};
+use hyper_util::rt::TokioIo;
+use std::future::Future;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use tokio::net::TcpListener;
 
-// TODO: Should not be backend error result
+pub struct ServiceHandler {
+    client: Arc<ProntoClient>,
+}
+
+impl ServiceHandler {
+    pub fn new(client: Arc<ProntoClient>) -> Self {
+        Self { client }
+    }
+}
+
+impl Service<Request<Incoming>> for ServiceHandler {
+    type Response = Response<reqwest::Body>;
+    type Error = reqwest::Error;
+    type Future = std::pin::Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
+
+    fn call(&self, req: Request<Incoming>) -> Self::Future {
+        let client = self.client.clone();
+        Box::pin(async move {
+            let response = client.http_client
+                .request(req.method().clone(), format!("https://files.chat.trypronto.com/{}", req.uri().clone().to_string()))
+                .send()
+                .await?;
+            Ok(response.into())
+        })
+    }
+}
+
+
 #[tokio::main]
-pub async fn run_proxy_thread(context: AppState) -> Result<(), BackendError> {
+pub async fn run_proxy_thread(context: AppState) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     loop {
         if context.is_loaded().await {
             break;
@@ -22,82 +52,32 @@ pub async fn run_proxy_thread(context: AppState) -> Result<(), BackendError> {
         state.client.clone()
     };
 
-    let listen_addr = "127.0.0.1:10521";
-    let server_addr = client.api_base_url.clone();
+    let addr = SocketAddr::from(([127, 0, 0, 1], 10521));
 
-    info!("Proxy Server Started\nListening on: {}\nProxying to: {}", listen_addr,server_addr);
+    // We create a TcpListener and bind it to 127.0.0.1:3000
+    let listener = TcpListener::bind(addr).await?;
 
-    let listener = TcpListener::bind(listen_addr).await?;
-
+    // We start a loop to continuously accept incoming connections
     loop {
-        let (mut stream, _) = listener.accept().await?;
-        tokio::spawn({
-            let client = client.clone();
+        let (stream, _) = listener.accept().await?;
 
+        // Use an adapter to access something implementing `tokio::io` traits as if they implement
+        // `hyper::rt` IO traits.
+        let io = TokioIo::new(stream);
+
+        // Spawn a tokio task to serve multiple connections concurrently
+        tokio::task::spawn({
+            let client = client.clone();
             async move {
-                if let Err(e) = process(&mut stream, client).await {
-                    error!("failed to process connection; error = {}", e);
+                // Finally, we bind the incoming connection to our `hello` service
+                if let Err(err) = http1::Builder::new()
+                    // `service_fn` converts our function in a `Service`
+                    .serve_connection(io, ServiceHandler::new(client.clone()))
+                    .await
+                {
+                    eprintln!("Error serving connection: {:?}", err);
                 }
             }
         });
     }
-}
-
-async fn parse_request(stream: &mut TcpStream) -> (String, String) {
-    let mut buffer = [0; 2048];
-    stream.read(&mut buffer).await.unwrap();
-    let request_str = std::str::from_utf8(&buffer).unwrap();
-
-    let lines: Vec<String> = request_str.lines().map(|line| line.to_string()).collect();
-    let request_line = lines.first().unwrap().to_string();
-
-    // get body
-    let mut collect = false;
-    let mut body = String::from("");
-    for line in &lines {
-        if collect {
-            body.push_str(line);
-        }
-        if line.is_empty() {
-            collect = true;
-        }
-    }
-    body = body.trim_matches(char::from(0)).to_string();
-
-    (request_line, body)
-}
-
-async fn process(stream: &mut TcpStream, client: Arc<ProntoClient>) -> Result<(), Box<dyn Error>> {
-    let parse_request = parse_request(stream).await;
-    info!("{}", parse_request.0);
-    let request_line = parse_request.0;
-    let method = request_line.split_whitespace().collect::<Vec<&str>>()[0];
-    let uri = request_line.split_whitespace().collect::<Vec<&str>>()[1];
-    let request = Request::builder()
-        .method(method)
-        .uri(uri);
-
-    // TODO: Headers
-
-    let request = request
-        .body(parse_request.1)
-        .unwrap();
-    // TODO: hardcoded
-    let response = client.http_client.request(request.method().clone(), format!("https://files.chat.trypronto.com/{}", request.uri().clone().to_string()))
-        .body(request.body().to_string())
-        .send().await?;
-    // send response
-    stream.write_all(b"HTTP/1.1 200 OK\r\n").await?;
-    for (name, value) in response.headers() {
-        stream.write_all(name.as_str().as_bytes()).await?;
-        stream.write_all(b": ").await?;
-        stream.write_all(value.as_bytes()).await?;
-        stream.write_all(b"\r\n").await?;
-    }
-
-    stream.write_all(b"\r\n").await?;
-
-    let response = response.bytes().await?;
-    stream.write_all(&response).await?;
-    Ok(())
 }

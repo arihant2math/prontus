@@ -32,4 +32,6 @@ tokio = { version = "1", features = ["full"] }
 tokio-util = "0.7"
 settings = { path = "../../crates/settings" }
 sentry = "0.34"
-
+hyper = { version = "1", features = ["full"] }
+http-body-util = "0.1"
+hyper-util = { version = "0.1", features = ["full"] }
