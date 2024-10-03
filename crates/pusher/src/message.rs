@@ -139,9 +139,9 @@ pub struct PusherServerUserUpdatedEvent {
     pub user: client::UserInfo,
 }
 
-// Received unknown message: RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
+// RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
 
-//Received unknown message: RawPusherMessage { event: "App\\Events\\AnnouncementUpdated", data: String("{\"announcement\":{\"id\":32222,\"organ
+// RawPusherMessage { event: "App\\Events\\AnnouncementUpdated", data: String("{\"announcement\":{\"id\":32222,\"organ
 // ization_id\":2245,\"senderuser_id\":5279806,\"targets\":{\"bubble_ids\":[2828820]},\"announcement\":\"\\u2b50\\ufe0f Hey Sophomores! \\u2b50\\ufe0f\\n\\nJust a quick reminder that our first movie night is s
 // tarting at 5pm pst today!! Hope to see you there!\\n\\nZoom link: https:\\/\\/stanford.zoom.us\\/j\\/91400975734?pwd=2lA6b9bRi0VvzEKngRijdEgMyN75nv.1\\n\\n-Izzy and Neel\",\"created_at\":\"2024-09-28 23:05:
 // 50\",\"updated_at\":\"2024-09-28 23:05:51\",\"deleted_at\":null,\"sent\":\"2024-09-28 23:05:51\",\"scheduled\":null,\"read\":\"2024-09-30 01:22:02\",\"lang\":\"en\",\"sender\":{\"id\":5279806,\"firstname\":
@@ -157,6 +157,27 @@ pub struct PusherServerUserUpdatedEvent {
 
 // RawPusherMessage { event: "App\\Events\\CategoryUpdated", data: String("{\"category\":{\"id\":679345,\"organization_
 // id\":2245,\"created_at\":\"2023-08-13 04:44:16\",\"updated_at\":\"2023-08-13 04:44:16\",\"sortorder\":149,\"title\":\"Clubs\",\"externalid\":null,\"usercategory\":{\"id\":9689,\"user_id\":5302428,\"category_id\":679345,\"alias\":\"test\",\"created_at\":\"2024-10-03 03:35:32\",\"updated_at\":\"2024-10-03 03:35:32\"}}}"), channel: Some("private-user.5302428") }
+
+// RawPusherMessage { event: "App\\Events\\BubbleChanged", data: String("{\"bubble\":{\"id\":3832006,\"updated_at\":\"2024-10-02 18:36:12\"}}"), channel: Some("private-user.5302428") }
+// RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641609
+// ,\"translation\":\"<@5301875> BAHAHAHA\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:47:23\",\"created_at\":\"2024-10-03 04:47:23\",\"id\":910634,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641758
+// ,\"translation\":\"Hahahahaha\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:23\",\"created_at\":\"2024-10-03 04:50:23\",\"id\":910636,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641761
+// ,\"translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:25\",\"created_at\":\"2024-10-03 04:50:25\",\"id\":910637,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641763
+// ,\"translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:27\",\"created_at\":\"2024-10-03 04:50:27\",\"id\":910638,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// 2024-10-02T21:50:42.023731400-07:00 WARN ui_lib::pusher_thread - Received unknown message: RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641776
+// ,\"translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:41\",\"created_at\":\"2024-10-03 04:50:41\",\"id\":910639,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// 2024-10-02T21:50:43.842035200-07:00 WARN ui_lib::pusher_thread - Received unknown message: RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641780
+// ,\"translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:43\",\"created_at\":\"2024-10-03 04:50:43\",\"id\":910640,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// 2024-10-02T21:50:44.373499500-07:00 WARN ui_lib::pusher_thread - Received unknown message: RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641785
+// ,\"translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:44\",\"created_at\":\"2024-10-03 04:50:44\",\"id\":910641,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// 2024-10-02T21:50:44.435793-07:00 WARN ui_lib::pusher_thread - Received unknown message: RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641782,\"
+// translation\":\"lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:50:44\",\"created_at\":\"2024-10-03 04:50:44\",\"id\":910642,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641824
+// ,\"translation\":\"Lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:51:29\",\"created_at\":\"2024-10-03 04:51:29\",\"id\":910645,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
+// RawPusherMessage { event: "App\\Events\\BubbleChanged", data: String("{\"bubble\":{\"id\":3832006,\"updated_at\":\"2024-10-03 04:45:44\"}}"), channel: Some("private-user.5302428") }
 
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
