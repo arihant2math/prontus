@@ -103,3 +103,7 @@ export async function setChannelAlias(channelId: number, alias?: string) {
 export async function setChannelNotifications(channelId: number, level: string) {
     return await invoke("set_channel_notifications", {channelId, level});
 }
+
+export async function readChannel(channelId: number) {
+    return await invoke("read_channel", {channelId});
+}

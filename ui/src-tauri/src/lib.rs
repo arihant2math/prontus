@@ -475,6 +475,20 @@ async fn set_channel_notifications(state: State<'_, AppState>, channel_id: u64, 
     Ok(())
 }
 
+#[command]
+async fn read_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(), BackendError> {
+    {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        let latest_bubble_id = state.channel_list.iter().find(|(info, _, _)| info.id == channel_id).cloned().unwrap().1.unwrap().latest_message_id;
+        state.client.update_bubble_mark(channel_id, latest_bubble_id).await?;
+    }
+
+    // TODO: update bubble stats
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -534,7 +548,8 @@ pub fn run() {
             set_channel_mute,
             set_channel_pin,
             set_channel_alias,
-            set_channel_notifications
+            set_channel_notifications,
+            read_channel
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

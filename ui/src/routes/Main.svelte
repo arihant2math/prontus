@@ -10,7 +10,7 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages, getSettings
+        getCurrentUser, getChannelInfo, getParentMessages, getSettings, readChannel
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
@@ -75,6 +75,9 @@
         });
         let channelPromise = getChannelInfo().then((info) => {
             channelInfo = info;
+            if (settings.options.read_messages) {
+                readChannel(info.id);
+            }
         });
         await Promise.all([messagesPromise, usersPromise, channelPromise]);
         // clear input
