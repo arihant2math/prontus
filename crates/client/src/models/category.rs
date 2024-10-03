@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-struct UserCategory {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UserCategory {
     pub id: i64,
     pub user_id: i64,
     pub category_id: i64,
