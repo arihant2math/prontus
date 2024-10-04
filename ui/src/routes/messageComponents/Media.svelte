@@ -4,7 +4,7 @@
     export let type;
 
     // TODO: hardcoded
-    $: realUrl = url.replace("https://files.chat.trypronto.com/", "localhost:10521/");
+    $: realUrl = url.replace("https://files.chat.trypronto.com/", "http://localhost:10521/");
 
     console.warn("MEDIA", type)
 </script>
