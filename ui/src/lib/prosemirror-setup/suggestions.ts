@@ -43,8 +43,7 @@ const mentionPlugin = getMentionsPlugin({
                 }
                 done(results);
             } else {
-                // TODO: remove
-                done([{tag: 'SOHS'}, {tag: 'Stanford Online High School'}, {tag: 'Stanford'}])
+                done([])
             }
         }, 0);
     },
