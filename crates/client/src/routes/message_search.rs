@@ -1,18 +1,10 @@
 use crate::Member;
 use serde::{Deserialize, Serialize};
 
-use serde_with::serde_as;
-use serde_with::DisplayFromStr;
-
 fn _true() -> bool {
     true
 }
 
-fn default_order_by() -> Vec<String> {
-    vec!["firstname".to_string(), "lastname".to_string()]
-}
-
-#[serde_as]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PostMessageSearchRequest {
     pub search_type: String,
