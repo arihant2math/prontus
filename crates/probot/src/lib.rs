@@ -48,7 +48,7 @@ impl Bot {
                 Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => {
                     match message {
                         PusherServerMessage::Event(event) => {
-                            self.handler.handle(event.event).await;
+                            self.handler.handle(self.client.clone(), event.event).await;
                         }
                         PusherServerMessage::Error(e) => {
                             error!("Received error: {:?}", e);
