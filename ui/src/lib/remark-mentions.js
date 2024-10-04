@@ -55,7 +55,7 @@ export default function remarkMentions(
         }
 
         // Separate leading white space
-        // TODO: this is broken atm due to bad regex
+        // TODO: this is messy atm due to bad regex
         if (value.indexOf("<") > 0) {
             whitespace.push({
                 type: "text",
