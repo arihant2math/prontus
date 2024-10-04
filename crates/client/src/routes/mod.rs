@@ -10,6 +10,7 @@ pub mod membership_update;
 pub mod message_create;
 pub mod message_delete;
 pub mod message_edit;
+pub mod message_search;
 pub mod pusher_auth;
 pub mod reaction_add;
 pub mod reaction_remove;
