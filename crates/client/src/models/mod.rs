@@ -8,6 +8,7 @@ mod membership;
 mod membership_info;
 mod message;
 mod organization;
+mod task;
 mod user_info;
 
 pub use announcement::Announcement;
@@ -20,4 +21,5 @@ pub use membership::Membership;
 pub use membership_info::MembershipInfo;
 pub use message::{Message, MessageMedia, MessageResource, Reactions};
 pub use organization::Organization;
+pub use task::Task;
 pub use user_info::UserInfo;
