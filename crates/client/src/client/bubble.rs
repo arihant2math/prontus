@@ -1,5 +1,5 @@
 use crate::bubble_list::GetBubbleListResponse;
-use crate::{bubble_history, bubble_info, bubble_list, bubble_mark, bubble_membership_search, dm_create, membership_update, MembershipUpdateModification, NotificationsPreference, PostBubbleMembershipSearchRequest, PostMembershipUpdateRequest, ProntoClient, ResponseError};
+use crate::{bubble_create, bubble_delete, bubble_history, bubble_info, bubble_list, bubble_mark, bubble_membership_search, dm_create, membership_update, MembershipUpdateModification, NotificationsPreference, PostBubbleMembershipSearchRequest, PostMembershipUpdateRequest, ProntoClient, ResponseError};
 use crate::bubble_history::GetBubbleHistoryResponse;
 use crate::bubble_info::GetBubbleInfoResponse;
 use crate::bubble_mark::PostBubbleMarkRequest;
@@ -12,6 +12,19 @@ impl ProntoClient {
             dm_create::PostDMCreateRequest {
                 organization_id,
                 user_id,
+            },
+        )
+            .await?
+            .to_result()?)
+    }
+
+    pub async fn create_bubble(&self, organization_id: u64, name: String) -> Result<bubble_create::PostBubbleCreateResponse, ResponseError> {
+        Ok(bubble_create::post(
+            &self.api_base_url,
+            &self.http_client,
+            bubble_create::PostBubbleCreateRequest {
+                organization_id,
+                title: name,
             },
         )
             .await?
@@ -181,5 +194,18 @@ impl ProntoClient {
         )
             .await?
             .to_result()?)
+    }
+
+    pub async fn delete_bubble(&self, bubble_id: u64) -> Result<(), ResponseError> {
+        bubble_delete::post(
+            &self.api_base_url,
+            &self.http_client,
+            bubble_delete::PostBubbleDeleteRequest {
+                bubble_id,
+            },
+        )
+            .await?
+            .to_result()?;
+        Ok(())
     }
 }
