@@ -32,8 +32,8 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         &settings.auth.api_key.ok_or(BackendError::NotAuthenticated)?,
     )
         .unwrap();
-    let user_info_future = client.get_current_user_info();
-    let channel_list_future = client.get_bubble_list();
+    let user_info_future = client.current_user_info();
+    let channel_list_future = client.bubble_list();
     let (user_info, channel_list) = futures::join!(user_info_future, channel_list_future);
     let user_info = user_info?.user;
     let mut users = HashMap::new();
@@ -65,7 +65,7 @@ async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), Backend
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    let bubble_info = state.client.get_bubble_info(id).await?;
+    let bubble_info = state.client.bubble_info(id).await?;
     state.current_channel = bubble_info.bubble;
     Ok(())
 }
@@ -90,7 +90,7 @@ async fn get_user(state: State<'_, AppState>, id: u64) -> Result<UserInfo, Backe
             return Ok(user.clone());
         }
         debug!("{:?}", state.users.keys());
-        state.client.get_user_info(Some(id)).await?
+        state.client.user_info(Some(id)).await?
     };
 
     let state = state.inner().inner();
@@ -136,7 +136,7 @@ async fn load_messages(state: State<'_, AppState>) -> Result<(), BackendError> {
         let state = state.try_inner()?;
 
         let id = state.current_channel.id;
-        state.client.get_bubble_history(id, None).await?
+        state.client.bubble_history(id, None).await?
     };
     let state = state.inner().inner();
     let mut state = state.write().await;
@@ -193,7 +193,7 @@ async fn get_more_messages(
         let id = state.current_channel.id;
         state
             .client
-            .get_bubble_history(id, Some(last_message_id))
+            .bubble_history(id, Some(last_message_id))
             .await?
     };
 
@@ -242,7 +242,7 @@ async fn send_message(
         let state = state.try_inner()?;
         let user_id = state.user_info.id;
         let id = state.current_channel.id;
-        state.client.post_message(user_id, id, message, thread).await?
+        state.client.send_message(user_id, id, message, thread).await?
     };
 
     let state = state.inner().inner();
@@ -370,7 +370,7 @@ async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), B
         let state = state.read().await;
         let state = state.try_inner()?;
         let page = state.channel_users.get(&id).map(|u| u.page).unwrap_or(1);
-        state.client.get_bubble_membership(PostBubbleMembershipSearchRequest {
+        state.client.bubble_membership(PostBubbleMembershipSearchRequest {
             bubble_id: id,
             page,
             ..Default::default()
