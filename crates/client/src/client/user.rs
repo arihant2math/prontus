@@ -5,7 +5,7 @@ impl ProntoClient {
     pub async fn current_user_info(
         &self,
     ) -> Result<user_info::GetUserInfoResponse, ResponseError> {
-        self.get_user_info(None).await
+        self.user_info(None).await
     }
 
     pub async fn user_info(
