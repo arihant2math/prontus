@@ -110,7 +110,7 @@ impl From<APIError> for ResponseError {
 }
 
 impl ProntoClient {
-    /// Create a new ProntoClient
+    /// Create a new ProntoClient with the base url and api token.
     pub fn new(api_base_url: String, pronto_api_token: &str) -> Result<Self, NewClientError> {
         // create the cookie store
         let cookies = vec![format!("api_token={}", pronto_api_token)];
