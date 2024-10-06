@@ -119,7 +119,7 @@
                     </svg>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content
-                        class="w-full max-w-[229px] rounded-xl bg-white dark:bg-slate-800 border border-muted px-1 py-1.5 shadow-popover"
+                        class="w-full max-w-[229px] rounded-xl bg-white dark:bg-slate-800 px-1 py-1.5 shadow-popover"
                         sideOffset={8}>
                     {#if !info[0].isdm}
                         <DropdownMenu.Item
