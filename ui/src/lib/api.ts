@@ -107,3 +107,7 @@ export async function setChannelNotifications(channelId: number, level: string) 
 export async function readChannel(channelId: number) {
     return await invoke("read_channel", {channelId});
 }
+
+export async function createDm(userId: number) {
+    return await invoke("create_dm", {userId});
+}
