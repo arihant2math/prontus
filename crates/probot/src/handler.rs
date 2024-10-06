@@ -98,10 +98,21 @@ impl Handler for CommandHandler {
                 _ => return Ok(()),
             };
             let response = self.handle(input.message.message.clone());
-            let user_info = pronto_client.get_user_info(None).await.unwrap().user;
+            let user_info = pronto_client.user_info(None).await.unwrap().user;
             // TODO: parent message
-            pronto_client.post_message(user_info.id, input.message.bubble_id, response, None).await;
+            pronto_client.send_message(user_info.id, input.message.bubble_id, response, None).await?;
             Ok(())
         })
+    }
+}
+
+pub struct NoopHandler;
+
+impl Handler for NoopHandler {
+    type Error = Box<dyn error::Error + Send + Sync>;
+    type Future = std::pin::Pin<Box<dyn Future<Output=Result<(), Self::Error>> + Send>>;
+
+    async fn handle(&self, _: ProntoClient, _: PusherServerEventType) -> Self::Future {
+        Box::pin(async { Ok(()) })
     }
 }

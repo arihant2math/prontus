@@ -8,3 +8,6 @@ async-trait = "0.1.83"
 client = { path = "../client" }
 pusher = { path = "../pusher" }
 log = "0.4.22"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }

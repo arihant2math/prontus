@@ -1,19 +1,61 @@
+/// # Probot
+/// Probot is a framework for building bots for Pronto.
+///
+/// ## Example
+/// A simple noop example:
+/// ```no_run
+/// use probot::{BotBuilder, NoopHandler};
+///
+/// #[tokio::main]
+/// async fn main() {
+///     let mut bot = BotBuilder::new()
+///     .load_client("https://stanfordohs.pronto.io/api/".to_string(), "[your token here]".to_string(), 0)
+///     .handler(NoopHandler)
+///     .build()
+///     .await;
+///     bot.init().await;
+///     bot.run().await;
+/// }
+/// ```
+
 mod handler;
-pub use handler::{handler, Command, CommandHandler, Handler};
+
+use std::collections::HashMap;
+pub use handler::{handler, Command, CommandHandler, Handler, NoopHandler};
 pub(crate) use handler::HandlerWrapper;
 
 use std::future::Future;
 use std::sync::Arc;
 use async_trait::async_trait;
-use client::ProntoClient;
 use log::{error, warn};
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
+pub use client::ProntoClient;
+pub use client;
+pub use pusher;
 
 pub trait TokenLoader {
     type Error;
-    type Future: Future<Output=Result<String, Self::Error>> + Send;
+    type Future: Future<Output=Result<Option<String>, Self::Error>> + Send;
 
     fn load(&self, user_id: u64) -> Self::Future;
+}
+
+impl TokenLoader for String {
+    type Error = Box<dyn error::Error + Send + Sync>;
+    type Future = std::pin::Pin<Box<dyn Future<Output=Result<Option<String>, Self::Error>> + Send>>;
+
+    fn load(&self, _: u64) -> Self::Future {
+        Box::pin(async { Ok(Some(self.clone())) })
+    }
+}
+
+impl TokenLoader for HashMap<u64, String> {
+    type Error = Box<dyn error::Error + Send + Sync>;
+    type Future = std::pin::Pin<Box<dyn Future<Output=Result<Option<String>, Self::Error>> + Send>>;
+
+    fn load(&self, user_id: u64) -> Self::Future {
+        Box::pin(async { Ok(self.get(&user_id).cloned()) })
+    }
 }
 
 pub struct Bot {
@@ -32,7 +74,7 @@ impl Bot {
     pub async fn init(&mut self) {
         self.inited = true;
         self.pusher_client.init().await;
-        let user_info= self.client.get_user_info(None).await.unwrap().user;
+        let user_info = self.client.user_info(None).await.unwrap().user;
         self.pusher_client
             .subscribe(format!("private-organization.{}", user_info.organizations[0].id))
             .await;
@@ -80,6 +122,11 @@ impl BotBuilder {
 
     pub fn client(mut self, client: Arc<ProntoClient>) -> Self {
         self.client = Some(client);
+        self
+    }
+
+    pub fn load_client(mut self, base_url: String, token_loader: impl TokenLoader, user_id: u64) -> Self {
+        self.client = Some(Arc::new(ProntoClient::new(base_url, token_loader.load(user_id).unwrap()).unwrap()));
         self
     }
 
