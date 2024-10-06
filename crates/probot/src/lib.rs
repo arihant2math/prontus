@@ -2,7 +2,9 @@
 /// Probot is a framework for building bots for Pronto.
 ///
 /// ## Example
+///
 /// A simple noop example:
+///
 /// ```no_run
 /// use probot::{BotBuilder, NoopHandler};
 ///
@@ -17,6 +19,36 @@
 ///     bot.run().await;
 /// }
 /// ```
+///
+/// To do anything useful you'll have to implement a handler. Here is an example of a handler that responds messages with the text "hi".
+///
+/// ```
+/// use probot::{ProntoClient, Handler};
+/// use probot::pusher::PusherServerEventType;
+///
+/// pub struct HelloHandler;
+///
+/// impl Handler for HelloHandler {
+///     type Error = Box<dyn error::Error + Send + Sync>;
+///     type Future = std::pin::Pin<Box<dyn Future<Output=Result<(), Self::Error>> + Send>>;
+///
+///     async fn handle(&self, pronto_client: ProntoClient, input: PusherServerEventType) -> Self::Future {
+///         Box::pin(async {
+///             let input = match input {
+///                 PusherServerEventType::PusherServerMessageAddedEvent(message) => message,
+///                 _ => return Ok(()),
+///             };
+///             if input.message.message.clone().to_lowercase().contains("hi") {
+///                 let user_info = pronto_client.user_info(None).await.unwrap().user;
+///                 pronto_client.send_message(user_info.id, input.message.bubble_id, response, None).await?;
+///             }
+///             Ok(())
+///         })
+///     }
+/// }
+/// ```
+///
+///
 
 mod handler;
 
