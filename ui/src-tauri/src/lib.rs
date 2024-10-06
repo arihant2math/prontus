@@ -490,6 +490,56 @@ async fn read_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(),
     Ok(())
 }
 
+#[command]
+async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), BackendError> {
+    let channel_list = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.create_dm(state.user_info.organizations[0].id as u64, user_id).await?;
+        let channel_list = state.client.bubble_list().await?;
+        let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)> = vec![];
+        for bubble in channel_list.bubbles.clone() {
+            let stats = channel_list.stats.iter().find(|s| s.bubble_id == bubble.id).cloned();
+            let membership = channel_list.memberships.iter().find(|m| m.bubble_id == bubble.id).cloned();
+            state_channel_list.push((bubble, stats, membership));
+        }
+        state_channel_list
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list = channel_list;
+
+    Ok(())
+}
+
+#[command]
+async fn create_bubble(state: State<'_, AppState>, name: String) -> Result<(), BackendError> {
+    let channel_list = {
+        let state = state.inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.create_bubble(state.user_info.organizations[0].id as u64, name).await?;
+        let channel_list = state.client.bubble_list().await?;
+        let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)> = vec![];
+        for bubble in channel_list.bubbles.clone() {
+            let stats = channel_list.stats.iter().find(|s| s.bubble_id == bubble.id).cloned();
+            let membership = channel_list.memberships.iter().find(|m| m.bubble_id == bubble.id).cloned();
+            state_channel_list.push((bubble, stats, membership));
+        }
+        state_channel_list
+    };
+
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.channel_list = channel_list;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -550,7 +600,9 @@ pub fn run() {
             set_channel_pin,
             set_channel_alias,
             set_channel_notifications,
-            read_channel
+            read_channel,
+            create_dm,
+            create_bubble
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

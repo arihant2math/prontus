@@ -12,6 +12,12 @@
 
     export let text = "";
     export let sendMessage;
+    let disabled = false;
+    let props = {
+        editable() {
+            return !disabled;
+        },
+    };
 
 
     const doc = defaultMarkdownParser.parse(text);
@@ -19,8 +25,10 @@
 
     export function send() {
         // TODO: temporarily disable editing
+        disabled = true;
         sendMessage(customMarkdownSerializer.serialize(editorState.doc)).then(() => {
             clear();
+            disabled = false;
         });
     }
 
@@ -65,4 +73,5 @@
         placeholder="Message"
         {editorState}
         on:change={handleChange}
+        editorViewProps={props}
 />
