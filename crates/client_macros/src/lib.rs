@@ -23,7 +23,7 @@ impl Parse for APIEndpoint {
         input.parse::<Token![,]>()?;
         let request: Type = input.parse()?;
         let mut extra_args: Vec<Ident> = Vec::new();
-        while let Ok(_) = input.parse::<Token![,]>() {
+        while input.parse::<Token![,]>().is_ok() {
             extra_args.push(input.parse()?);
         }
         Ok(Self {
@@ -77,10 +77,7 @@ pub fn api(input: TokenStream) -> TokenStream {
         .into();
     }
 
-    let has_request = match request {
-        Type::Never(_) => false,
-        _ => true,
-    };
+    let has_request = !matches!(request, Type::Never(_));
 
     let response_name = match response.clone() {
         Type::Path(p) => {
