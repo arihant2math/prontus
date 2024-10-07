@@ -45,4 +45,9 @@ pub struct PostMessageSearchResponse {
 
 pub type PostMessageSearchResult = crate::APIResult<PostMessageSearchResponse>;
 
-client_macros::api!(post, "v1/message.search", PostMessageSearchResult, PostMessageSearchRequest);
+client_macros::api!(
+    post,
+    "v1/message.search",
+    PostMessageSearchResult,
+    PostMessageSearchRequest
+);

@@ -7,4 +7,9 @@ pub struct MessageEditRequest {
     pub message_id: u64,
 }
 
-client_macros::api!(post, "v1/message.edit", MessageModifyResult, MessageEditRequest);
+client_macros::api!(
+    post,
+    "v1/message.edit",
+    MessageModifyResult,
+    MessageEditRequest
+);

@@ -1,5 +1,7 @@
-use crate::{reaction_add, reaction_remove, MessageModifyResponse, ProntoClient, ReactionType, ResponseError};
 use crate::reaction_add::ReactionModifyRequest;
+use crate::{
+    reaction_add, reaction_remove, MessageModifyResponse, ProntoClient, ReactionType, ResponseError,
+};
 
 impl ProntoClient {
     pub async fn add_reaction(
@@ -12,11 +14,11 @@ impl ProntoClient {
             &self.http_client,
             ReactionModifyRequest {
                 message_id,
-                reaction_type_id: reaction_type as i32 as u64
+                reaction_type_id: reaction_type as i32 as u64,
             },
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn remove_reaction(
@@ -29,10 +31,10 @@ impl ProntoClient {
             &self.http_client,
             ReactionModifyRequest {
                 message_id,
-                reaction_type_id: reaction_type as i32 as u64
-            }
+                reaction_type_id: reaction_type as i32 as u64,
+            },
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 }

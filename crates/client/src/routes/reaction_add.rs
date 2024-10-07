@@ -8,4 +8,9 @@ pub struct ReactionModifyRequest {
     pub reaction_type_id: u64,
 }
 
-client_macros::api!(post, "v1/message.addreaction", MessageModifyResult, ReactionModifyRequest);
+client_macros::api!(
+    post,
+    "v1/message.addreaction",
+    MessageModifyResult,
+    ReactionModifyRequest
+);

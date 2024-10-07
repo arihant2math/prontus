@@ -49,32 +49,34 @@
 /// ```
 ///
 ///
-
 mod handler;
 
-use std::collections::HashMap;
-pub use handler::{handler, Command, CommandHandler, Handler, NoopHandler};
 pub(crate) use handler::HandlerWrapper;
+pub use handler::{handler, Command, CommandHandler, Handler, NoopHandler};
+use std::collections::HashMap;
 
+use async_trait::async_trait;
+pub use client;
+pub use client::ProntoClient;
+use log::{error, warn};
+pub use pusher;
+use pusher::{
+    PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper,
+};
 use std::future::Future;
 use std::sync::Arc;
-use async_trait::async_trait;
-use log::{error, warn};
-use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
-pub use client::ProntoClient;
-pub use client;
-pub use pusher;
 
 pub trait TokenLoader {
     type Error;
-    type Future: Future<Output=Result<Option<String>, Self::Error>> + Send;
+    type Future: Future<Output = Result<Option<String>, Self::Error>> + Send;
 
     fn load(&self, user_id: u64) -> Self::Future;
 }
 
 impl TokenLoader for String {
     type Error = Box<dyn error::Error + Send + Sync>;
-    type Future = std::pin::Pin<Box<dyn Future<Output=Result<Option<String>, Self::Error>> + Send>>;
+    type Future =
+        std::pin::Pin<Box<dyn Future<Output = Result<Option<String>, Self::Error>> + Send>>;
 
     fn load(&self, _: u64) -> Self::Future {
         Box::pin(async { Ok(Some(self.clone())) })
@@ -83,7 +85,8 @@ impl TokenLoader for String {
 
 impl TokenLoader for HashMap<u64, String> {
     type Error = Box<dyn error::Error + Send + Sync>;
-    type Future = std::pin::Pin<Box<dyn Future<Output=Result<Option<String>, Self::Error>> + Send>>;
+    type Future =
+        std::pin::Pin<Box<dyn Future<Output = Result<Option<String>, Self::Error>> + Send>>;
 
     fn load(&self, user_id: u64) -> Self::Future {
         Box::pin(async { Ok(self.get(&user_id).cloned()) })
@@ -100,7 +103,12 @@ pub struct Bot {
 impl Bot {
     pub async fn new(client: Arc<ProntoClient>, handler: HandlerWrapper) -> Self {
         let pusher_client = PusherClient::new(client.clone()).await;
-        Self { client, pusher_client, handler, inited: false }
+        Self {
+            client,
+            pusher_client,
+            handler,
+            inited: false,
+        }
     }
 
     pub async fn init(&mut self) {
@@ -108,7 +116,10 @@ impl Bot {
         self.pusher_client.init().await;
         let user_info = self.client.user_info(None).await.unwrap().user;
         self.pusher_client
-            .subscribe(format!("private-organization.{}", user_info.organizations[0].id))
+            .subscribe(format!(
+                "private-organization.{}",
+                user_info.organizations[0].id
+            ))
             .await;
         self.pusher_client
             .subscribe(format!("private-user.{}", user_info.id))
@@ -119,20 +130,18 @@ impl Bot {
         loop {
             let message = self.pusher_client.server_messages().await.recv().await;
             match message {
-                Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => {
-                    match message {
-                        PusherServerMessage::Event(event) => {
-                            self.handler.handle(self.client.clone(), event.event).await;
-                        }
-                        PusherServerMessage::Error(e) => {
-                            error!("Received error: {:?}", e);
-                        }
-                        PusherServerMessage::Other(raw) => {
-                            warn!("Received unknown message: {:?}", raw);
-                        }
-                        _ => {}
+                Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => match message {
+                    PusherServerMessage::Event(event) => {
+                        self.handler.handle(self.client.clone(), event.event).await;
                     }
-                }
+                    PusherServerMessage::Error(e) => {
+                        error!("Received error: {:?}", e);
+                    }
+                    PusherServerMessage::Other(raw) => {
+                        warn!("Received unknown message: {:?}", raw);
+                    }
+                    _ => {}
+                },
                 Err(e) => {
                     error!("Error receiving message: {:?}", e);
                 }
@@ -149,7 +158,10 @@ pub struct BotBuilder {
 
 impl BotBuilder {
     pub fn new() -> Self {
-        Self { client: None, handler: None }
+        Self {
+            client: None,
+            handler: None,
+        }
     }
 
     pub fn client(mut self, client: Arc<ProntoClient>) -> Self {
@@ -157,12 +169,25 @@ impl BotBuilder {
         self
     }
 
-    pub fn load_client(mut self, base_url: String, token_loader: impl TokenLoader, user_id: u64) -> Self {
-        self.client = Some(Arc::new(ProntoClient::new(base_url, token_loader.load(user_id).unwrap()).unwrap()));
+    pub fn load_client(
+        mut self,
+        base_url: String,
+        token_loader: impl TokenLoader,
+        user_id: u64,
+    ) -> Self {
+        self.client = Some(Arc::new(
+            ProntoClient::new(base_url, token_loader.load(user_id).unwrap()).unwrap(),
+        ));
         self
     }
 
-    pub fn handler(mut self, handler: impl Handler<Error=Box<dyn error::Error + Send + Sync>, Future=std::pin::Pin<dyn Future<Output=Result<(), Handler::Error>>>> + 'static) -> Self {
+    pub fn handler(
+        mut self,
+        handler: impl Handler<
+                Error = Box<dyn error::Error + Send + Sync>,
+                Future = std::pin::Pin<dyn Future<Output = Result<(), Handler::Error>>>,
+            > + 'static,
+    ) -> Self {
         self.handler = Some(HandlerWrapper::new(handler));
         self
     }

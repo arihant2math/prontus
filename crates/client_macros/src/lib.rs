@@ -1,9 +1,9 @@
 extern crate proc_macro;
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
-use syn::{Expr, Token, Type, Ident};
 use syn::spanned::Spanned;
+use syn::{Expr, Ident, Token, Type};
 
 struct APIEndpoint {
     method: Ident,
@@ -55,8 +55,18 @@ pub fn api(input: TokenStream) -> TokenStream {
         request,
     } = syn::parse_macro_input!(input as APIEndpoint);
 
-    if method != "get" && method != "post" && method != "put" && method != "delete" && method != "patch" {
-        return syn::Error::new(method.span(), "Invalid HTTP method. Must be one of: get, post, put, patch, delete").to_compile_error().into();
+    if method != "get"
+        && method != "post"
+        && method != "put"
+        && method != "delete"
+        && method != "patch"
+    {
+        return syn::Error::new(
+            method.span(),
+            "Invalid HTTP method. Must be one of: get, post, put, patch, delete",
+        )
+        .to_compile_error()
+        .into();
     }
 
     let has_request = match request {
@@ -68,7 +78,12 @@ pub fn api(input: TokenStream) -> TokenStream {
         Type::Path(p) => {
             let segments = p.path.segments;
             if segments.len() != 1 {
-                return syn::Error::new(response.span(), "Response type must be a wrapped Result type").to_compile_error().into();
+                return syn::Error::new(
+                    response.span(),
+                    "Response type must be a wrapped Result type",
+                )
+                .to_compile_error()
+                .into();
             }
             let ident = segments[0].ident.clone();
             // TODO: hack lol

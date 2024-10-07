@@ -179,7 +179,6 @@ pub struct PusherServerUserUpdatedEvent {
 // ,\"translation\":\"Lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:51:29\",\"created_at\":\"2024-10-03 04:51:29\",\"id\":910645,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
 // RawPusherMessage { event: "App\\Events\\BubbleChanged", data: String("{\"bubble\":{\"id\":3832006,\"updated_at\":\"2024-10-03 04:45:44\"}}"), channel: Some("private-user.5302428") }
 
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
     PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),
@@ -243,40 +242,84 @@ impl From<String> for PusherServerMessage {
                 Self::Error(data)
             }
             "App\\Events\\UserPresence" => {
-                create_event!(raw, PusherServerUserPresenceEvent, PusherServerUserPresenceEvent)
+                create_event!(
+                    raw,
+                    PusherServerUserPresenceEvent,
+                    PusherServerUserPresenceEvent
+                )
             }
             "App\\Events\\BubbleStats" => {
-                create_event!(raw, PusherServerBubbleStatsEvent, PusherServerBubbleStatsEvent)
-            },
+                create_event!(
+                    raw,
+                    PusherServerBubbleStatsEvent,
+                    PusherServerBubbleStatsEvent
+                )
+            }
             "App\\Events\\MembershipUpdated" => {
-                create_event!(raw, PusherServerMembershipUpdatedEvent, PusherServerMembershipUpdatedEvent)
-            },
+                create_event!(
+                    raw,
+                    PusherServerMembershipUpdatedEvent,
+                    PusherServerMembershipUpdatedEvent
+                )
+            }
             "App\\Events\\MessageUpdated" => {
-                create_event!(raw, PusherServerMessageUpdatedEvent, PusherServerMessageUpdatedEvent)
+                create_event!(
+                    raw,
+                    PusherServerMessageUpdatedEvent,
+                    PusherServerMessageUpdatedEvent
+                )
             }
             "App\\Events\\MessageAdded" => {
-                create_event!(raw, PusherServerMessageAddedEvent, PusherServerMessageAddedEvent)
+                create_event!(
+                    raw,
+                    PusherServerMessageAddedEvent,
+                    PusherServerMessageAddedEvent
+                )
             }
             "App\\Events\\MessageRemoved" => {
-                create_event!(raw, PusherServerMessageRemovedEvent, PusherServerMessageRemovedEvent)
+                create_event!(
+                    raw,
+                    PusherServerMessageRemovedEvent,
+                    PusherServerMessageRemovedEvent
+                )
             }
             "client-App\\Events\\UserTyping" => {
-                create_event!(raw, PusherServerUserTypingEvent, PusherServerUserTypingEvent)
+                create_event!(
+                    raw,
+                    PusherServerUserTypingEvent,
+                    PusherServerUserTypingEvent
+                )
             }
             "client-App\\Events\\UserStoppedTyping" => {
-                create_event!(raw, PusherServerUserStoppedTypingEvent, PusherServerUserStoppedTypingEvent)
+                create_event!(
+                    raw,
+                    PusherServerUserStoppedTypingEvent,
+                    PusherServerUserStoppedTypingEvent
+                )
             }
             "App\\Events\\MarkUpdated" => {
                 create_event!(raw, PusherMarkUpdatedEvent, PusherServerMarkUpdatedEvent)
             }
             "App\\Events\\ReactionAdded" => {
-                create_event!(raw, PusherServerReactionAddedEvent, PusherServerReactionAddedEvent)
+                create_event!(
+                    raw,
+                    PusherServerReactionAddedEvent,
+                    PusherServerReactionAddedEvent
+                )
             }
             "App\\Events\\ReactionRemoved" => {
-                create_event!(raw, PusherServerReactionRemovedEvent, PusherServerReactionRemovedEvent)
+                create_event!(
+                    raw,
+                    PusherServerReactionRemovedEvent,
+                    PusherServerReactionRemovedEvent
+                )
             }
             "App\\Events\\UserUpdated" => {
-                create_event!(raw, PusherServerUserUpdatedEvent, PusherServerUserUpdatedEvent)
+                create_event!(
+                    raw,
+                    PusherServerUserUpdatedEvent,
+                    PusherServerUserUpdatedEvent
+                )
             }
             _ => Self::Other(raw),
         }

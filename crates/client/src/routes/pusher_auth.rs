@@ -11,4 +11,9 @@ pub struct PusherAuthResponse {
     pub auth: String,
 }
 
-client_macros::api!(post, "v1/pusher.auth", PusherAuthResponse, PusherAuthRequest);
+client_macros::api!(
+    post,
+    "v1/pusher.auth",
+    PusherAuthResponse,
+    PusherAuthRequest
+);

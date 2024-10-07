@@ -1,7 +1,7 @@
 use crate::Category;
 use crate::UserInfo;
-use serde::{Deserialize, Serialize};
 use crate::{Membership, MembershipInfo};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]

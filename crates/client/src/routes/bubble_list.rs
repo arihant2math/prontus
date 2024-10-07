@@ -7,7 +7,7 @@ pub struct GetBubbleListResponse {
     pub ok: bool,
     pub bubbles: Vec<Bubble>,
     pub stats: Vec<BubbleStats>,
-    pub memberships: Vec<Membership>
+    pub memberships: Vec<Membership>,
 }
 
 pub type GetBubbleListResult = crate::APIResult<GetBubbleListResponse>;

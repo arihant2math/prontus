@@ -1,9 +1,9 @@
 pub mod announcement_create;
 pub mod announcement_list;
 pub mod announcement_mark_read;
-pub mod bubble_history;
 pub mod bubble_create;
 pub mod bubble_delete;
+pub mod bubble_history;
 pub mod bubble_info;
 pub mod bubble_list;
 pub mod bubble_mark;

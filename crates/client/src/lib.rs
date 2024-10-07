@@ -8,17 +8,19 @@ use thiserror::Error;
 
 pub use crate::bubble_membership_search::PostBubbleMembershipSearchRequest;
 use crate::files::PutFileResponse;
-pub use crate::membership_update::{MembershipUpdateModification, NotificationsPreference, PostMembershipUpdateRequest};
+pub use crate::membership_update::{
+    MembershipUpdateModification, NotificationsPreference, PostMembershipUpdateRequest,
+};
 pub use crate::message_create::MessageModifyResponse;
 pub use api_error::APIError;
 pub use models::*;
 pub use routes::*;
 
 pub mod api_error;
+mod client;
 pub mod models;
 pub mod routes;
 pub(crate) mod serde_datetime;
-mod client;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -141,11 +143,21 @@ impl ProntoClient {
         })
     }
 
-    pub async fn upload_file(&self, filename: &str, file: Vec<u8>) -> Result<PutFileResponse, ResponseError> {
-        Ok(files::put(&self.api_base_url, &self.http_client, files::PutFileRequest {
-            file_name: filename.to_string(),
-            file_data: file,
-        }).await?.to_result()?)
+    pub async fn upload_file(
+        &self,
+        filename: &str,
+        file: Vec<u8>,
+    ) -> Result<PutFileResponse, ResponseError> {
+        Ok(files::put(
+            &self.api_base_url,
+            &self.http_client,
+            files::PutFileRequest {
+                file_name: filename.to_string(),
+                file_data: file,
+            },
+        )
+        .await?
+        .to_result()?)
     }
 }
 
@@ -180,7 +192,9 @@ mod tests {
         });
         let settings = settings::Settings::load().await.unwrap();
         let client = ProntoClient::new(
-            "https://stanfordohs.pronto.io/api/".to_string(), &settings.auth.api_key.unwrap());
+            "https://stanfordohs.pronto.io/api/".to_string(),
+            &settings.auth.api_key.unwrap(),
+        );
         client.unwrap()
     }
 
