@@ -13,30 +13,20 @@ pub enum SettingsError {
 
 pub type Result<T> = std::result::Result<T, SettingsError>;
 
-#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub enum Theme {
     Light,
     Dark,
+    #[default]
     Auto,
 }
 
-impl Default for Theme {
-    fn default() -> Self {
-        Theme::Auto
-    }
-}
-
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize)]
 pub enum CategoryDisplayLevel {
+    #[default]
     All,
     NonSingleton,
     None,
-}
-
-impl Default for CategoryDisplayLevel {
-    fn default() -> Self {
-        Self::All
-    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
