@@ -23,5 +23,6 @@ pub mod task_complete;
 pub mod task_list;
 pub mod user_info;
 pub mod user_login;
+pub mod user_search;
 pub mod user_token_login;
 pub mod user_verify;
