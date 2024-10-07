@@ -123,17 +123,13 @@ pub struct Settings {
 impl Settings {
     pub fn path() -> PathBuf {
         // TODO: remove this deletion in the far far future
-        let old_settings = home::home_dir()
-            .unwrap()
-            .join(".prontus")
+        let old_settings = prontus_dir()
             .join("settings.bnc");
         if old_settings.exists() {
             info!("Deleting old settings file");
             std::fs::remove_file(old_settings).unwrap();
         }
-        home::home_dir()
-            .unwrap()
-            .join(".prontus")
+        prontus_dir()
             .join("settings.json")
     }
 
@@ -172,6 +168,12 @@ impl Settings {
         file.write(data.as_bytes()).await?;
         Ok(())
     }
+}
+
+pub fn prontus_dir() -> PathBuf {
+    home::home_dir()
+        .expect("Could not locate home directory")
+        .join(".prontus")
 }
 
 #[cfg(test)]
