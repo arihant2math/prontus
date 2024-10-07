@@ -1,6 +1,6 @@
 <script>
     import ProfilePicture from "../user/ProfilePicture.svelte";
-    import {readChannel, setChannelPin} from "$lib/api.ts";
+    import {readChannel, setChannelMute, setChannelPin} from "$lib/api.ts";
     import {MenuItem} from "@tauri-apps/api/menu/menuItem";
     import {Menu} from "@tauri-apps/api/menu/menu";
 
@@ -51,6 +51,17 @@
                 text: 'Pin',
                 action: () => {
                     setChannelPin(info.id, true);
+                },
+            }));
+        }
+
+        if (membership.mute) {
+
+        } else {
+            menuItemsPromise.push(MenuItem.new({
+                text: 'Unmute',
+                action: () => {
+                    setChannelMute(false)
                 },
             }));
         }
