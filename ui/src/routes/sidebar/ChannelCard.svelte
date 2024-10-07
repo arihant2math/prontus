@@ -24,7 +24,14 @@
 
         let menuItemsPromise = [];
 
-        if (info.isdm) {
+        menuItemsPromise.push(MenuItem.new({
+            text: 'Open',
+            action: () => {
+                buttonClick(info.id);
+            },
+        }));
+
+        if (stats.unread > 0) {
             menuItemsPromise.push(MenuItem.new({
                 text: 'Mark as Read',
                 action: () => {
