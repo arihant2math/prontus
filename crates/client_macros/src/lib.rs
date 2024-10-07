@@ -74,7 +74,7 @@ pub fn api(input: TokenStream) -> TokenStream {
         _ => true,
     };
 
-    let response_non_result_name = match response.clone() {
+    let response_name = match response.clone() {
         Type::Path(p) => {
             let segments = p.path.segments;
             if segments.len() != 1 {
@@ -99,7 +99,7 @@ pub fn api(input: TokenStream) -> TokenStream {
                 return Ok(json);
             }
             Err(e) => {
-                let json = serde_json::from_str::<#response_non_result_name>(&text);
+                let json = serde_json::from_str::<#response_name>(&text);
                 let e = json.unwrap_err();
                 log::error!("Error parsing json response: {:?}.", e);
                 let json = serde_json::from_str::<()>(&text);
