@@ -5,12 +5,14 @@ edition = "2021"
 
 [dependencies]
 client = { path = "../client" }
+settings = { path = "../settings" }
 heed = "0.20"
 milli = { git = "https://github.com/meilisearch/meilisearch", tag = "v1.10.2" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
+dashmap = { version = "6.1.0", features = ["serde"] }
 
 [[example]]
 name = "example"
