@@ -25,7 +25,7 @@
         let menuItemsPromise = [];
 
         if (info.isdm) {
-            menuItems.push(MenuItem.new({
+            menuItemsPromise.push(MenuItem.new({
                 text: 'Mark as Read',
                 action: () => {
                     readChannel(info.id);
@@ -33,14 +33,14 @@
             }));
         }
         if (membership.is_pinned) {
-            menuItems.push(MenuItem.new({
+            menuItemsPromise.push(MenuItem.new({
                 text: 'Unpin',
                 action: () => {
                     setChannelPin(info.id, false);
                 },
             }));
         } else {
-            menuItems.push(MenuItem.new({
+            menuItemsPromise.push(MenuItem.new({
                 text: 'Pin',
                 action: () => {
                     setChannelPin(info.id, true);
@@ -48,7 +48,7 @@
             }));
         }
 
-        menuItems.push(MenuItem.new({
+        menuItemsPromise.push(MenuItem.new({
             text: 'Hide',
             action: () => {
                 // TODO
@@ -65,14 +65,18 @@
         await menu.popup();
     }
 
-    function addListener() {
+    async function addListener() {
+        while (listItem === null) {
+            await new Promise(r => setTimeout(r, 50));
+        }
         listItem.addEventListener("contextmenu", (event) => {
-            console.log("CTX Menu")
             showContextMenu(event)
         });
     }
+
+    addListener();
 </script>
-<li bind:this={listItem} on:load={addListener}>
+<li class="select-none" bind:this={listItem} on:load={addListener}>
         <button on:click={btnClick}
                 class="flex items-start p-2 {textColor} transition duration-75 rounded-lg pl-4 group hover:bg-gray-100 dark:hover:bg-slate-700 w-full text-ellipsis">
             {#if info.isdm}
