@@ -49,4 +49,9 @@ pub struct PostBubbleMembershipSearchResponse {
 
 pub type PostBubbleMembershipSearchResult = crate::APIResult<PostBubbleMembershipSearchResponse>;
 
-client_macros::api!(post, "v1/bubble.membershipsearch", PostBubbleMembershipSearchResult, PostBubbleMembershipSearchRequest);
+client_macros::api!(
+    post,
+    "v1/bubble.membershipsearch",
+    PostBubbleMembershipSearchResult,
+    PostBubbleMembershipSearchRequest
+);

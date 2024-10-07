@@ -16,5 +16,5 @@ pub struct Category {
     pub title: String,
     pub sort_order: Option<u32>,
     #[serde(rename = "usercategory")]
-    pub user_category: Option<UserCategory>
+    pub user_category: Option<UserCategory>,
 }

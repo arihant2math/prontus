@@ -27,8 +27,16 @@ pub struct PutFileResponse {
 pub type PutFileResult = crate::APIResult<PutFileResponse>;
 
 #[allow(unused_variables)]
-pub async fn put(pronto_base_url: &str, client: &Client, request: PutFileRequest) -> Result<PutFileResult, crate::ResponseError> {
-    client.put(&format!("{}/api/files?filename={}", pronto_base_url, request.file_name))
+pub async fn put(
+    pronto_base_url: &str,
+    client: &Client,
+    request: PutFileRequest,
+) -> Result<PutFileResult, crate::ResponseError> {
+    client
+        .put(&format!(
+            "{}/api/files?filename={}",
+            pronto_base_url, request.file_name
+        ))
         .body(request.file_data)
         .send()
         .await?;

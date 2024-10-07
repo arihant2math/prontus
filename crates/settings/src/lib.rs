@@ -1,42 +1,32 @@
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use tokio::io::AsyncWriteExt;
 use log::{debug, info};
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SettingsError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("SIMD JSON error: {0}")]
-    SimdJSON(#[from] simd_json::Error)
+    SimdJSON(#[from] simd_json::Error),
 }
 
 pub type Result<T> = std::result::Result<T, SettingsError>;
 
-#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub enum Theme {
     Light,
     Dark,
+    #[default]
     Auto,
 }
 
-impl Default for Theme {
-    fn default() -> Self {
-        Theme::Auto
-    }
-}
-
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize)]
 pub enum CategoryDisplayLevel {
+    #[default]
     All,
     NonSingleton,
-    None
-}
-
-impl Default for CategoryDisplayLevel {
-    fn default() -> Self {
-        Self::All
-    }
+    None,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -71,7 +61,7 @@ impl Default for MessageAppearance {
         MessageAppearance {
             compact: false,
             hide_embeds: false,
-            rich_text: true
+            rich_text: true,
         }
     }
 }
@@ -117,7 +107,7 @@ pub struct Settings {
     #[serde(default)]
     pub appearance: Appearance,
     #[serde(default)]
-    pub options: Options
+    pub options: Options,
 }
 
 impl Settings {
@@ -146,9 +136,7 @@ impl Settings {
         if path.exists() {
             // TODO: switch to OpenOptions
             let mut data = tokio::fs::read_to_string(&path).await?;
-            unsafe {
-                Ok(simd_json::from_str(&mut data)?)
-            }
+            unsafe { Ok(simd_json::from_str(&mut data)?) }
         } else {
             Ok(Self::default())
         }

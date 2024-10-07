@@ -1,6 +1,6 @@
 use crate::models::Bubble;
-use serde::{Deserialize, Serialize};
 use client_macros::api;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BubbleStats {
@@ -28,4 +28,9 @@ pub struct GetBubbleInfoRequest {
 
 pub type GetBubbleInfoResult = crate::APIResult<GetBubbleInfoResponse>;
 
-api!(get, "v2/bubble.info", GetBubbleInfoResult, GetBubbleInfoRequest);
+api!(
+    get,
+    "v2/bubble.info",
+    GetBubbleInfoResult,
+    GetBubbleInfoRequest
+);

@@ -1,15 +1,16 @@
 extern crate proc_macro;
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
-use syn::{Expr, Token, Type, Ident};
 use syn::spanned::Spanned;
+use syn::{Expr, Ident, Token, Type};
 
 struct APIEndpoint {
     method: Ident,
     url: Expr,
     response: Type,
     request: Type,
+    extra_args: Vec<Ident>
 }
 
 impl Parse for APIEndpoint {
@@ -21,11 +22,16 @@ impl Parse for APIEndpoint {
         let response: Type = input.parse()?;
         input.parse::<Token![,]>()?;
         let request: Type = input.parse()?;
+        let mut extra_args: Vec<Ident> = Vec::new();
+        while input.parse::<Token![,]>().is_ok() {
+            extra_args.push(input.parse()?);
+        }
         Ok(Self {
             method,
             url,
             request,
             response,
+            extra_args
         })
     }
 }
@@ -53,22 +59,36 @@ pub fn api(input: TokenStream) -> TokenStream {
         url,
         response,
         request,
+        #[allow(unused)]
+        extra_args
     } = syn::parse_macro_input!(input as APIEndpoint);
 
-    if method != "get" && method != "post" && method != "put" && method != "delete" && method != "patch" {
-        return syn::Error::new(method.span(), "Invalid HTTP method. Must be one of: get, post, put, patch, delete").to_compile_error().into();
+    if method != "get"
+        && method != "post"
+        && method != "put"
+        && method != "delete"
+        && method != "patch"
+    {
+        return syn::Error::new(
+            method.span(),
+            "Invalid HTTP method. Must be one of: get, post, put, patch, delete",
+        )
+        .to_compile_error()
+        .into();
     }
 
-    let has_request = match request {
-        Type::Never(_) => false,
-        _ => true,
-    };
+    let has_request = !matches!(request, Type::Never(_));
 
-    let response_non_result_name = match response.clone() {
+    let response_name = match response.clone() {
         Type::Path(p) => {
             let segments = p.path.segments;
             if segments.len() != 1 {
-                return syn::Error::new(response.span(), "Response type must be a wrapped Result type").to_compile_error().into();
+                return syn::Error::new(
+                    response.span(),
+                    "Response type must be a wrapped Result type",
+                )
+                .to_compile_error()
+                .into();
             }
             let ident = segments[0].ident.clone();
             // TODO: hack lol
@@ -84,9 +104,13 @@ pub fn api(input: TokenStream) -> TokenStream {
                 return Ok(json);
             }
             Err(e) => {
-                let json = serde_json::from_str::<#response_non_result_name>(&text);
+                let json = serde_json::from_str::<#response_name>(&text);
                 let e = json.unwrap_err();
                 log::error!("Error parsing json response: {:?}.", e);
+                let json = serde_json::from_str::<()>(&text);
+                if json.is_err() {
+                    return Err(crate::ResponseError::NotJson(text));
+                }
                 return Err(crate::ResponseError::from(e));
             }
         }

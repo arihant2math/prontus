@@ -16,4 +16,9 @@ pub struct PostBubbleDeleteResponse {
 
 pub type PostBubbleDeleteResult = crate::APIResult<PostBubbleDeleteResponse>;
 
-client_macros::api!(post, "v1/bubble.delete", PostBubbleDeleteResult, PostBubbleDeleteRequest);
+client_macros::api!(
+    post,
+    "v1/bubble.delete",
+    PostBubbleDeleteResult,
+    PostBubbleDeleteRequest
+);

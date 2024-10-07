@@ -8,9 +8,14 @@ pub struct PostBubbleMarkRequest {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PostBubbleMarkResponse {
-    pub ok: bool
+    pub ok: bool,
 }
 
 pub type PostBubbleMarkResult = crate::APIResult<PostBubbleMarkResponse>;
 
-client_macros::api!(post, "v1/bubble.mark", PostBubbleMarkResult, PostBubbleMarkRequest);
+client_macros::api!(
+    post,
+    "v1/bubble.mark",
+    PostBubbleMarkResult,
+    PostBubbleMarkRequest
+);

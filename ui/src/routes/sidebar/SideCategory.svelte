@@ -9,7 +9,7 @@
     $: show = true;
 </script>
 
-<li>
+<li class="select-none">
     <Collapsible.Root bind:open={show}>
         <Collapsible.Trigger
         class="text-sm flex items-center w-full p-2 text-gray-700 transition duration-75 rounded-lg group dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">

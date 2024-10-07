@@ -1,6 +1,9 @@
-use chrono::Utc;
-use crate::{message_create, message_delete, message_edit, MessageModifyResponse, ProntoClient, ResponseError};
 use crate::message_edit::MessageEditRequest;
+use crate::{
+    message_create, message_delete, message_edit, MessageModifyResponse, ProntoClient,
+    ResponseError,
+};
+use chrono::Utc;
 
 impl ProntoClient {
     pub async fn send_message(
@@ -28,14 +31,16 @@ impl ProntoClient {
         message_id: u64,
         message: String,
     ) -> Result<MessageModifyResponse, ResponseError> {
-        Ok(
-            message_edit::post(&self.api_base_url, &self.http_client, MessageEditRequest {
+        Ok(message_edit::post(
+            &self.api_base_url,
+            &self.http_client,
+            MessageEditRequest {
                 message_id,
-                message
-            })
-                .await?
-                .to_result()?,
+                message,
+            },
         )
+        .await?
+        .to_result()?)
     }
 
     pub async fn delete_message(

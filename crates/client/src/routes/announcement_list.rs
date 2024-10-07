@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 pub use crate::Announcement;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Cursors {
@@ -28,4 +28,9 @@ pub struct GetAnnouncementListRequest {
     pub per_page: u64,
 }
 
-client_macros::api!(get, "v2/announcement.list", GetAnnouncementListResult, GetAnnouncementListRequest);
+client_macros::api!(
+    get,
+    "v2/announcement.list",
+    GetAnnouncementListResult,
+    GetAnnouncementListRequest
+);

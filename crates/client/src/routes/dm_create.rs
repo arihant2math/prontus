@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::Bubble;
+use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct PostDMCreateRequest {
@@ -15,4 +15,9 @@ pub struct PostDMCreateResponse {
 
 pub type PostDMCreateResult = crate::APIResult<PostDMCreateResponse>;
 
-client_macros::api!(post, "v1/dm.create", PostDMCreateResult, PostDMCreateRequest);
+client_macros::api!(
+    post,
+    "v1/dm.create",
+    PostDMCreateResult,
+    PostDMCreateRequest
+);

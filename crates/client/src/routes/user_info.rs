@@ -21,13 +21,14 @@ pub async fn get(
     request: GetUserInfoRequest,
 ) -> Result<GetUserInfoResult, reqwest::Error> {
     let r = if request.id.is_none() {
-        client
-            .get(format!("{pronto_base_url}v1/user.info"))
+        client.get(format!("{pronto_base_url}v1/user.info"))
     } else {
         client
             .get(format!("{pronto_base_url}v1/user.info"))
             .json(&request)
-    }.send().await?;
+    }
+    .send()
+    .await?;
     let json = r.json().await?;
     Ok(json)
 }
