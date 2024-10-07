@@ -1,6 +1,6 @@
 # Prontus
 
-A WIP client for Pronto (https://pronto.io).
+A WIP client for Pronto (https://pronto.io), a messaging application used by educational institutions.
 
 ## Progress
 https://github.com/arihant2math/prontus/issues/1
