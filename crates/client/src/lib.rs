@@ -101,6 +101,8 @@ pub enum ResponseError {
     ReqwestError(#[from] reqwest::Error),
     #[error("Serde JSON error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
+    #[error("Not JSON error: {0}")]
+    NotJson(String),
     #[error("API error: {0}")]
     ApiError(String),
 }
