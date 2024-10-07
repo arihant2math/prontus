@@ -1,6 +1,4 @@
-use crate::models::Bubble;
 use crate::UserInfo;
-use client_macros::api;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -31,14 +29,16 @@ pub async fn post(
     client: &reqwest::Client,
     request: PostUserSearchRequest,
 ) -> Result<PostUserSearchResult, crate::ResponseError> {
-    unimplemented!();
     let r = client
         .post(format!("{pronto_base_url}{}", "clients/users/search"))
         .json(&request)
         .send()
         .await?;
     let text = r.text().await?;
+    #[allow(unused)]
     let json = serde_json::from_str(&text);
+    unimplemented!();
+    #[allow(unreachable_code)]
     match json {
         Ok(json) => Ok(json),
         Err(_) => {
