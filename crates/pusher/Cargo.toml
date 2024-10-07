@@ -13,5 +13,5 @@ tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
 
 [[example]]
-name = "sandbox"
+name = "recv"
 path = "examples/sandbox.rs"
