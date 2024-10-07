@@ -10,6 +10,7 @@ struct APIEndpoint {
     url: Expr,
     response: Type,
     request: Type,
+    extra_args: Vec<Ident>
 }
 
 impl Parse for APIEndpoint {
@@ -21,11 +22,16 @@ impl Parse for APIEndpoint {
         let response: Type = input.parse()?;
         input.parse::<Token![,]>()?;
         let request: Type = input.parse()?;
+        let mut extra_args: Vec<Ident> = Vec::new();
+        while let Ok(_) = input.parse::<Token![,]>() {
+            extra_args.push(input.parse()?);
+        }
         Ok(Self {
             method,
             url,
             request,
             response,
+            extra_args
         })
     }
 }
@@ -53,6 +59,8 @@ pub fn api(input: TokenStream) -> TokenStream {
         url,
         response,
         request,
+        #[allow(unused)]
+        extra_args
     } = syn::parse_macro_input!(input as APIEndpoint);
 
     if method != "get"
