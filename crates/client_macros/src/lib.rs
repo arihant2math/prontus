@@ -10,6 +10,7 @@ struct APIEndpoint {
     url: Expr,
     response: Type,
     request: Type,
+    #[allow(dead_code)]
     extra_args: Vec<Ident>
 }
 
@@ -60,7 +61,7 @@ pub fn api(input: TokenStream) -> TokenStream {
         response,
         request,
         #[allow(unused)]
-        extra_args
+        extra_args: _
     } = syn::parse_macro_input!(input as APIEndpoint);
 
     if method != "get"
