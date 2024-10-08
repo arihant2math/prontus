@@ -16,12 +16,12 @@ use serde_json::{Map, Value};
 use tokio::sync::mpsc;
 
 pub fn message_index_location() -> PathBuf {
-    PathBuf::from(settings::prontus_dir().join("message_index"))
+    PathBuf::from(r#"D:\tmp-milli-message-index-location"#.to_string())
 }
 
 pub fn get_index(dataset: &PathBuf) -> milli::Result<Index> {
     let mut options = EnvOpenOptions::new();
-    options.map_size(1 * 1024 * 1024 * 1024); // 1 GB
+    options.map_size(128 * 1024 * 1024 * 1024); // 100 GB
 
     Index::new(options, dataset.to_str().unwrap())
 }
@@ -112,6 +112,12 @@ impl MessageIndexInfo {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct IndexerSettings {
+    /// Virtual limit imposed on index size
+    max_size: Option<usize>,
+}
+
 pub struct MessageIndexer {
     client: ProntoClient,
     info: MessageIndexInfo,
@@ -119,10 +125,11 @@ pub struct MessageIndexer {
     index: Index,
     mpsc_rx: Arc<Mutex<mpsc::Receiver<Message>>>,
     mpsc_tx: Arc<mpsc::Sender<Message>>,
+    indexer_settings: IndexerSettings
 }
 
 impl MessageIndexer {
-    pub async fn new(index_path: &PathBuf) -> Self {
+    pub async fn new(index_path: &PathBuf, indexer_settings: IndexerSettings) -> Self {
         let index_info_path = index_path.join("index_info.json");
         tokio::fs::create_dir_all(index_info_path.parent().unwrap()).await.unwrap();
         if !index_info_path.exists() {
@@ -142,6 +149,7 @@ impl MessageIndexer {
             info: message_index_info,
             index_info_path: index_info_path.to_str().unwrap().to_string(),
             mpsc_tx: Arc::new(tx),
+            indexer_settings
         }
     }
 
@@ -178,6 +186,11 @@ impl MessageIndexer {
     }
 
     pub async fn execute(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        // Do nothing if the index is too large
+        if self.index.on_disk_size().unwrap() > self.indexer_settings.max_size.unwrap_or(usize::MAX) as u64 {
+            return Ok(());
+        }
+
         let filterable_fields = vec!["user_id".to_string(), "bubble_id".to_string(), "parent_message_id".to_string()];
         let searchable_fields = vec!["message".to_string(), "user_fullname".to_string()];
 
@@ -195,7 +208,6 @@ impl MessageIndexer {
 
         settings.execute(|_| (), || false)?;
 
-        let config = IndexerConfig::default();
         let indexing_config = IndexDocumentsConfig::default();
 
         let builder =
@@ -208,12 +220,20 @@ impl MessageIndexer {
             let channel = channel.clone();
             tasks.push({
                 let future = if let Some(index_info) = &self.info.bubbles.get(&channel.id) {
-                    self.client.bubble_history(channel.id, Some(index_info.latest_message))
+                    if index_info.upwards_index_complete {
+                        None
+                    } else {
+                        Some(self.client.bubble_history(channel.id, Some(index_info.first_message)))
+                    }
                 } else {
-                    self.client.bubble_history(channel.id, None)
+                    Some(self.client.bubble_history(channel.id, None))
                 };
                 async move {
-                    (channel.id, future.await.unwrap())
+                    if let Some(future) = future {
+                        (channel.id, future.await.unwrap().messages)
+                    } else {
+                        (channel.id, Default::default())
+                    }
                 }
             });
         }
@@ -221,23 +241,33 @@ impl MessageIndexer {
         let new_messages = futures::future::join_all(tasks).await;
         println!("Messages received");
         for (id, messages) in new_messages {
-            for message in messages.messages.clone().into_iter() {
+            if messages.len() > 0 {
+                if let Some(index_info) = &self.info.bubbles.get(&id) {
+                    println!("Backtrack {}: {} -> {}", id, index_info.first_message, messages.last().unwrap().id);
+                } else {
+                    println!("New channel {}: None -> {}", id, messages.last().unwrap().id);
+                }
+            }
+            for message in messages.clone().into_iter() {
                 documents_batch.append_json_array(serde_json::to_string(&StoredMessage::from(message)).unwrap().as_bytes()).unwrap();
             }
             if let Some(index_info) = &self.info.bubbles.get(&id).map(|v| v.clone()) {
-                if messages.messages.len() > 0 {
-                    self.info.bubbles.insert(id, index_info.extend(messages.messages.last().unwrap().id, messages.messages.first().unwrap().id));
+                if messages.last().map(|m| m.id) == Some(index_info.first_message) {
+                    self.info.bubbles.insert(id, index_info.complete());
+                } else if messages.len() > 0 {
+                    self.info.bubbles.insert(id, index_info.extend(messages.last().unwrap().id, messages.first().unwrap().id));
                 } else {
                     self.info.bubbles.insert(id, index_info.complete());
                 }
             } else {
-                if messages.messages.len() > 0 {
-                    self.info.bubbles.insert(id, BubbleIndexInfo { latest_message: messages.messages.first().unwrap().id, first_message: messages.messages.last().unwrap().id, upwards_index_complete: false });
+                if messages.len() > 0 {
+                    self.info.bubbles.insert(id, BubbleIndexInfo { latest_message: messages.first().unwrap().id, first_message: messages.last().unwrap().id, upwards_index_complete: false });
                 }
             }
         }
         println!("Receiving channel messages");
-        while self.mpsc_rx.lock().unwrap().is_empty() {
+        println!("Processing {} messages", self.mpsc_rx.lock().unwrap().len());
+        while !self.mpsc_rx.lock().unwrap().is_empty() {
             let message = self.mpsc_rx.lock().unwrap().recv().await.unwrap();
             if let Some(index_info) = &self.info.bubbles.get(&message.bubble_id) {
                 self.info.bubbles.insert(message.bubble_id, index_info.extend(message.id, message.id));
@@ -249,8 +279,8 @@ impl MessageIndexer {
         let documents_batch = documents_batch.into_inner()?;
         let documents = DocumentsBatchReader::from_reader(Cursor::new(documents_batch))?;
         let (builder, user_error) = builder.add_documents(documents)?;
-        user_error.unwrap();
-        builder.execute().unwrap();
+        user_error?;
+        builder.execute()?;
         println!("Committing");
         wtxn.commit()?;
 
@@ -271,9 +301,9 @@ pub struct SearchResults {
 }
 
 impl Search {
-    pub fn new() -> Self {
+    pub fn new(index_path: &PathBuf) -> Self {
         Search {
-            index: get_index(&message_index_location()).unwrap(),
+            index: get_index(index_path).unwrap(),
             logger: DefaultSearchLogger,
         }
     }

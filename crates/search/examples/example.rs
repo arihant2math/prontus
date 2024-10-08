@@ -12,7 +12,7 @@ use std::thread;
 #[tokio::main]
 async fn indexer_thread() {
     tokio::fs::create_dir_all(&message_index_location()).await.unwrap();
-    let indexer = Arc::new(search::MessageIndexer::new(&message_index_location()).await);
+    let indexer = Arc::new(search::MessageIndexer::new(&message_index_location(), search::IndexerSettings::default()).await);
     tokio::task::spawn({
         let indexer = indexer.clone();
         async move {
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     thread::spawn(|| {
         indexer_thread();
     });
-    let mut search = Search::new();
+    let mut search = Search::new(&message_index_location());
     println!("Init complete");
 
     loop {
