@@ -23,7 +23,7 @@ impl ProntoClient {
         .to_result()?)
     }
 
-    pub async fn list_announcements(
+    pub async fn announcement_list(
         &self,
     ) -> Result<announcement_list::GetAnnouncementListResponse, ResponseError> {
         Ok(announcement_list::get(

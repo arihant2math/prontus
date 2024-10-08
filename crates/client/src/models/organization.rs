@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Organization {
-    pub id: i64,
+    pub id: u64,
     pub name: String,
     // TODO: Datetime
     pub created_at: String,

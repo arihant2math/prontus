@@ -229,7 +229,15 @@ mod tests {
     #[tokio::test]
     async fn test_get_announcement_list() {
         let client = get_client().await;
-        client.list_announcements().await.unwrap();
+        client.announcement_list().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_task_list() {
+        let client = get_client().await;
+        let response = client.current_user_info().await.unwrap();
+        client.task_list(response.user.organizations[0].id, false).await.unwrap();
+        client.task_list(response.user.organizations[0].id, true).await.unwrap();
     }
 
     #[tokio::test]
