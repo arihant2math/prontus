@@ -6,12 +6,23 @@ use milli::{
 };
 use search::{message_index_location, Search};
 use std::io::BufRead;
+use std::sync::Arc;
 use std::thread;
 
 #[tokio::main]
 async fn indexer_thread() {
     tokio::fs::create_dir_all(&message_index_location()).await.unwrap();
-    let mut indexer = search::MessageIndexer::new(&message_index_location()).await;
+    let indexer = Arc::new(search::MessageIndexer::new(&message_index_location()).await);
+    tokio::task::spawn({
+        let indexer = indexer.clone();
+        async move {
+            let result = indexer.fastforward().await;
+            println!("Fastforward complete");
+            if let Err(e) = result {
+                eprintln!("Error: {:?}", e);
+            }
+        }
+    });
     loop {
         let r = indexer.execute().await;
         if let Err(e) = r {
@@ -31,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Init complete");
 
     loop {
-        // read query from stdin
+        // read the query from stdin
         let query = stdin().lock().lines().next().unwrap().unwrap();
 
 
@@ -50,10 +61,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             TimeBudget::max(),
             None,
             None,
-        )?;
+        ).unwrap();
         println!("Results in {} seconds", results.elapsed.as_secs_f32());
         for result in results.results {
-            println!("{}: {}", result.0, result.1.get("message").unwrap());
+            println!("{}: {}", result.1.get("user_fullname").unwrap(), result.1.get("message").unwrap());
         }
     }
 }

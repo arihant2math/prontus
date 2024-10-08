@@ -1,4 +1,4 @@
-use client::{Message, ProntoClient, UserInfo};
+use client::{Message, ProntoClient};
 use heed::EnvOpenOptions;
 use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
 use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};
@@ -30,9 +30,11 @@ pub fn get_index(dataset: &PathBuf) -> milli::Result<Index> {
 pub struct StoredMessage {
     pub id: u64,
     pub user_id: u64,
+    pub user_firstname: String,
+    pub user_lastname: String,
+    pub user_fullname: String,
     pub bubble_id: u64,
     pub message: String,
-    pub user: UserInfo,
     pub system_event: Option<String>,
     pub parent_message_id: Option<u64>,
     pub first_child_message_id: Option<u64>,
@@ -51,9 +53,11 @@ impl From<Message> for StoredMessage {
         Self {
             id: value.id,
             user_id: value.user_id,
+            user_firstname: value.user.firstname,
+            user_lastname: value.user.lastname,
+            user_fullname: value.user.fullname,
             bubble_id: value.bubble_id,
             message: value.message,
-            user: value.user,
             system_event: value.system_event,
             parent_message_id: value.parent_message_id,
             first_child_message_id: value.first_child_message_id,
@@ -102,7 +106,7 @@ pub struct MessageIndexInfo {
 }
 
 impl MessageIndexInfo {
-    pub fn save(&self, path: PathBuf) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub fn save(&self, path: &PathBuf) -> Result<(), Box<dyn Error + Send + Sync>> {
         serde_json::to_writer(std::fs::File::create(path)?, &self)?;
         Ok(())
     }
@@ -129,7 +133,7 @@ impl MessageIndexer {
 
         let client = ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), "p10LpQ2V7bIJFkkhHlBNBGthClYHEUvXj2eVzpzQ.1258569865").unwrap();
 
-        let (tx, mut rx) = mpsc::channel(512);
+        let (tx, rx) = mpsc::channel(512);
 
         Self {
             client,
@@ -145,32 +149,42 @@ impl MessageIndexer {
         let bubble_list = &self.client.bubble_list().await?;
         // This clone is necessary so that we don't process updates from the execution function,
         // which will update the latest message after it receives messages via the mpsc.
+        let mut handles = vec![];
         for (bubble, info) in self.info.bubbles.clone() {
             let stats = bubble_list.stats.iter().find(|stat| stat.bubble_id == bubble).unwrap();
             if stats.latest_message_id != info.latest_message {
-                tokio::task::spawn(async move {
-                    loop {
-                        let messages = self.client.bubble_history(bubble, Some(info.latest_message)).await.unwrap();
-                        let should_break = messages.messages.iter().any(|m| m.id <= info.latest_message);
-                        for message in messages.messages {
-                            self.mpsc_tx.send(message).await.unwrap();
-                        }
-                        if should_break {
-                            break;
+                let handle = tokio::task::spawn({
+                    let client = self.client.clone();
+                    let mpsc_tx = self.mpsc_tx.clone();
+                    async move {
+                        loop {
+                            let messages = client.bubble_history(bubble, Some(info.latest_message)).await.unwrap();
+                            let should_break = messages.messages.iter().any(|m| m.id <= info.latest_message);
+                            for message in messages.messages {
+                                mpsc_tx.send(message).await.unwrap();
+                            }
+                            if should_break {
+                                break;
+                            }
                         }
                     }
                 });
+                handles.push(handle);
             }
         }
+        futures::future::join_all(handles).await;
+        self.info.save(&PathBuf::from(self.index_info_path.clone()))?;
         Ok(())
     }
 
     pub async fn execute(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
         let filterable_fields = vec!["user_id".to_string(), "bubble_id".to_string(), "parent_message_id".to_string()];
-        let searchable_fields = vec!["message".to_string()];
+        let searchable_fields = vec!["message".to_string(), "user_fullname".to_string()];
 
         let bubble_list = &self.client.bubble_list().await?;
-        let mut wtxn = self.index.write_txn()?;
+        let mut wtxn = tokio::time::timeout(Duration::from_secs(2), async {
+            self.index.write_txn()
+        }).await??;
         let config = IndexerConfig::default();
         let mut settings = Settings::new(&mut wtxn, &self.index, &config);
         let searchable_fields = searchable_fields.iter().map(|s| s.to_string()).collect();
@@ -188,6 +202,7 @@ impl MessageIndexer {
             IndexDocuments::new(&mut wtxn, &self.index, &config, indexing_config, |_| (), || false).unwrap();
 
         let mut documents_batch = DocumentsBatchBuilder::new(Vec::new());
+        println!("Getting messages");
         let mut tasks = vec![];
         for channel in bubble_list.bubbles.clone() {
             let channel = channel.clone();
@@ -204,11 +219,12 @@ impl MessageIndexer {
         }
 
         let new_messages = futures::future::join_all(tasks).await;
+        println!("Messages received");
         for (id, messages) in new_messages {
             for message in messages.messages.clone().into_iter() {
                 documents_batch.append_json_array(serde_json::to_string(&StoredMessage::from(message)).unwrap().as_bytes()).unwrap();
             }
-            if let Some(index_info) = &self.info.bubbles.get(&id) {
+            if let Some(index_info) = &self.info.bubbles.get(&id).map(|v| v.clone()) {
                 if messages.messages.len() > 0 {
                     self.info.bubbles.insert(id, index_info.extend(messages.messages.last().unwrap().id, messages.messages.first().unwrap().id));
                 } else {
@@ -220,13 +236,15 @@ impl MessageIndexer {
                 }
             }
         }
-        while let Ok(message) = self.mpsc_rx.lock().unwrap().try_recv().await {
-            documents_batch.append_json_array(serde_json::to_string(&StoredMessage::from(message)).unwrap().as_bytes()).unwrap();
+        println!("Receiving channel messages");
+        while self.mpsc_rx.lock().unwrap().is_empty() {
+            let message = self.mpsc_rx.lock().unwrap().recv().await.unwrap();
             if let Some(index_info) = &self.info.bubbles.get(&message.bubble_id) {
                 self.info.bubbles.insert(message.bubble_id, index_info.extend(message.id, message.id));
             } else {
                 self.info.bubbles.insert(message.bubble_id, BubbleIndexInfo { latest_message: message.id, first_message: message.id, upwards_index_complete: false });
             }
+            documents_batch.append_json_array(serde_json::to_string(&StoredMessage::from(message)).unwrap().as_bytes()).unwrap();
         }
         let documents_batch = documents_batch.into_inner()?;
         let documents = DocumentsBatchReader::from_reader(Cursor::new(documents_batch))?;
@@ -235,6 +253,8 @@ impl MessageIndexer {
         builder.execute().unwrap();
         println!("Committing");
         wtxn.commit()?;
+
+        self.info.save(&PathBuf::from(self.index_info_path.clone()))?;
 
         Ok(())
     }

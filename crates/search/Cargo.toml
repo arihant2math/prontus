@@ -13,6 +13,7 @@ serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 dashmap = { version = "6.1.0", features = ["serde"] }
+log = "0.4"
 
 [[example]]
 name = "example"

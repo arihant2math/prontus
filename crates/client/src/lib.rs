@@ -80,6 +80,7 @@ impl From<i32> for ReactionType {
     }
 }
 
+#[derive(Clone)]
 pub struct ProntoClient {
     pub api_base_url: String,
     pub http_client: reqwest::Client,
