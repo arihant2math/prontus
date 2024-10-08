@@ -102,6 +102,8 @@ pub enum ResponseError {
     ReqwestError(#[from] reqwest::Error),
     #[error("Serde JSON error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
+    #[error("Serde JSON detailed error: {0}")]
+    DetailedSerdeJsonError(#[from] serde_path_to_error::Error<serde_json::Error>),
     #[error("Not JSON error: {0}")]
     NotJson(String),
     #[error("API error: {0}")]
@@ -246,5 +248,17 @@ mod tests {
         let bubble_list = client.bubble_list().await.unwrap();
         let bubble_id = bubble_list.bubbles[0].id;
         let _response = client.bubble_history(bubble_id, None).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_user_search() {
+        let client = get_client().await;
+        let _response = client
+            .user_search(user_search::GetUserSearchRequest {
+                query: "test".to_string(),
+                ..Default::default()
+            })
+            .await
+            .unwrap();
     }
 }

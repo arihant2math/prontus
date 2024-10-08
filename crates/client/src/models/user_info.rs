@@ -2,29 +2,38 @@ use crate::Organization;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum ProfilePicture {
+    #[serde(rename = "profilepicurl")]
+    Url(String),
+    #[serde(rename = "profilepicpath")]
+    Path(String),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UserInfo {
     pub id: u64,
     pub firstname: String,
     pub lastname: String,
-    pub username: Option<String>,
-    pub pronouns: Option<String>,
-    #[serde(rename = "profilepicurl")]
-    pub profile_picture_url: String,
-    #[serde(rename = "isverified")]
+    #[serde(flatten)]
+    pub profile_picture: ProfilePicture,
+    #[serde(rename = "isverified", default)]
     pub verified: bool,
-    #[serde(rename = "isonline")]
+    #[serde(rename = "isonline", default)]
     pub online: bool,
     pub role: String,
+    #[serde(default)]
     pub mute: bool,
-    #[serde(rename = "isbot")]
-    pub is_bot: u8,
+    // #[serde(rename = "isbot")]
+    // pub is_bot: u8,
     #[serde(rename = "hasmobileapp")]
     pub has_mobile_app: Option<bool>,
     pub fullname: String,
-    #[serde(rename = "hasactivity")]
+    #[serde(rename = "hasactivity", default)]
     pub has_activity: bool,
+    #[serde(default)]
     pub inactive: bool,
-    pub language: String,
+    pub language: Option<String>,
     #[serde(default)]
     pub organizations: Vec<Organization>,
 }
+//{"data":[{"id":5282599,"firstname":"(Clara) Ver\u00f3nica Valdano, PhD","lastname":"","fullname":"(Clara) Ver\u00f3nica Valdano, PhD","role":"user","profilepicpath":"\/files\/users\/5282599\/profilepic?pronto_time=1707263427","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5282599\/profilepic?pronto_time=1707263427","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-07-31T16:22:43+00:00","updated_at":"2024-10-07T23:43:15+00:00"},{"id":6056672,"firstname":"Aadish","lastname":"Verma","fullname":"Aadish Verma","role":"user","profilepicpath":"\/files\/users\/6056672\/profilepic?pronto_time=1724175784","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/6056672\/profilepic?pronto_time=1724175784","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-01T21:35:27+00:00","updated_at":"2024-10-08T16:05:17+00:00"},{"id":5301905,"firstname":"Aaishah","lastname":"Khan","fullname":"Aaishah Khan","role":"user","profilepicpath":"\/files\/users\/5301905\/profilepic?pronto_time=-62169984000","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:22+00:00","updated_at":"2024-10-07T18:23:52+00:00"},{"id":5301877,"firstname":"Aanya","lastname":"Arunkumar","fullname":"Aanya Arunkumar","role":"user","profilepicpath":"\/files\/users\/5301877\/profilepic?pronto_time=-58979923200","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:18+00:00","updated_at":"2024-10-08T04:20:27+00:00"},{"id":5302450,"firstname":"Aanya","lastname":"Bhutani","fullname":"Aanya Bhutani","role":"user","profilepicpath":"\/files\/users\/5302450\/profilepic?pronto_time=1691183192","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5302450\/profilepic?pronto_time=1691183192","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:44:14+00:00","updated_at":"2024-10-08T14:49:20+00:00"},{"id":5302376,"firstname":"Aanya","lastname":"Gupta","fullname":"Aanya Gupta","role":"user","profilepicpath":"\/files\/users\/5302376\/profilepic?pronto_time=1691250066","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5302376\/profilepic?pronto_time=1691250066","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:44:05+00:00","updated_at":"2024-10-08T16:04:00+00:00"},{"id":5279681,"firstname":"Aarit","lastname":"Atreja","fullname":"Aarit Atreja","role":"user","profilepicpath":"\/files\/users\/5279681\/profilepic?pronto_time=1691438360","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5279681\/profilepic?pronto_time=1691438360","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-07-28T18:15:39+00:00","updated_at":"2024-10-08T02:01:20+00:00"},{"id":5301874,"firstname":"Aariya","lastname":"Amarsaikhan","fullname":"Aariya Amarsaikhan","role":"user","profilepicpath":"\/files\/users\/5301874\/profilepic?pronto_time=1722346392","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:18+00:00","updated_at":"2024-09-15T16:12:34+00:00"},{"id":5279857,"firstname":"Aarna","lastname":"Vikram","fullname":"Aarna Vikram","role":"user","profilepicpath":"\/files\/users\/5279857\/profilepic?pronto_time=1694583255","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5279857\/profilepic?pronto_time=1694583255","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-07-28T18:17:38+00:00","updated_at":"2024-10-08T14:08:53+00:00"},{"id":5302339,"firstname":"Aaron","lastname":"Bai","fullname":"Aaron Bai","role":"user","profilepicpath":"\/files\/users\/5302339\/profilepic?pronto_time=1692594969","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5302339\/profilepic?pronto_time=1692594969","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:44:00+00:00","updated_at":"2024-10-08T01:23:27+00:00"},{"id":5301912,"firstname":"Aaron","lastname":"Lei","fullname":"Aaron Lei","role":"user","profilepicpath":"\/files\/users\/5301912\/profilepic?pronto_time=-62169984000","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:23+00:00","updated_at":"2023-08-14T05:44:59+00:00"},{"id":5301922,"firstname":"Aaron","lastname":"Mizrachi","fullname":"Aaron Mizrachi","role":"user","profilepicpath":"\/files\/users\/5301922\/profilepic?pronto_time=1715373212","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5301922\/profilepic?pronto_time=1715373212","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:24+00:00","updated_at":"2024-10-02T20:29:57+00:00"},{"id":5302035,"firstname":"Aaron","lastname":"Tong","fullname":"Aaron Tong","role":"user","profilepicpath":"\/files\/users\/5302035\/profilepic?pronto_time=1694569741","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5302035\/profilepic?pronto_time=1694569741","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:33:36+00:00","updated_at":"2024-06-10T20:47:16+00:00"},{"id":5279859,"firstname":"Aaron","lastname":"Wang","fullname":"Aaron Wang","role":"user","profilepicpath":"\/files\/users\/5279859\/profilepic?pronto_time=-58979923200","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-07-28T18:17:39+00:00","updated_at":"2024-09-29T15:42:08+00:00"},{"id":6057026,"firstname":"Abby (Russel)","lastname":"Roxas","fullname":"Abby (Russel) Roxas","role":"user","profilepicpath":"\/files\/users\/6057026\/profilepic?pronto_time=-58979923200","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-02T04:46:03+00:00","updated_at":"2024-08-26T16:34:38+00:00"},{"id":5302385,"firstname":"Abby","lastname":"Hurst","fullname":"Abby Hurst","role":"user","profilepicpath":"\/files\/users\/5302385\/profilepic?pronto_time=1691528554","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/5302385\/profilepic?pronto_time=1691528554","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2023-08-04T00:44:06+00:00","updated_at":"2024-10-08T14:42:36+00:00"},{"id":6056667,"firstname":"Abhinav","lastname":"Srinivas","fullname":"Abhinav Srinivas","role":"user","profilepicpath":"\/files\/users\/6056667\/profilepic?pronto_time=-58979923200","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-01T21:35:27+00:00","updated_at":"2024-10-08T14:31:20+00:00"},{"id":6056584,"firstname":"Abigail","lastname":"Tak","fullname":"Abigail Tak","role":"user","profilepicpath":"\/files\/users\/6056584\/profilepic?pronto_time=-62169984000","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-01T21:33:51+00:00","updated_at":"2024-09-11T00:27:04+00:00"},{"id":6056653,"firstname":"Adalyn","lastname":"Miller","fullname":"Adalyn Miller","role":"user","profilepicpath":"\/files\/users\/6056653\/profilepic?pronto_time=1723130987","profilepicurl":"https:\/\/files.chat.trypronto.com\/files\/users\/6056653\/profilepic?pronto_time=1723130987","active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-01T21:35:25+00:00","updated_at":"2024-10-08T14:11:21+00:00"},{"id":6056502,"firstname":"Adam","lastname":"Ali","fullname":"Adam Ali","role":"user","profilepicpath":"\/files\/users\/6056502\/profilepic?pronto_time=-62169984000","profilepicurl":null,"active":true,"isbot":false,"locked":true,"deactivated_at":null,"created_at":"2024-08-01T21:33:39+00:00","updated_at":"2024-10-01T18:24:05+00:00"}],"cursors":{"prev":null,"next":"eyIwIjoiQWRhbSBBbGkiLCIxIjo2MDU2NTAyLCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9"},"links":{"first":null,"last":null,"next":"https:\/\/stanfordohs.pronto.io\/clients\/users\/search?page_size=30&query=test&relation=All&cursor=eyIwIjoiQWRhbSBBbGkiLCIxIjo2MDU2NTAyLCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9","prev":null}}
