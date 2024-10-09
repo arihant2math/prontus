@@ -106,6 +106,8 @@ pub struct MessageIndexInfo {
 }
 
 impl MessageIndexInfo {
+    // TODO: Load function
+
     pub fn save(&self, path: &PathBuf) -> Result<(), Box<dyn Error + Send + Sync>> {
         serde_json::to_writer(std::fs::File::create(path)?, &self)?;
         Ok(())
