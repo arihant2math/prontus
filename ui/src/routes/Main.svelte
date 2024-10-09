@@ -76,7 +76,7 @@
         let channelPromise = getChannelInfo().then((info) => {
             channelInfo = info;
             if (settings.options.read_messages) {
-                readChannel(info.id);
+                readChannel(channelInfo[0].id);
             }
         });
         await Promise.all([messagesPromise, usersPromise, channelPromise]);
@@ -141,8 +141,8 @@
                 <MemberList bind:channelUsers={channelUsers}/>
             {/if}
             {#if showThread}
-                <div class="w-max h-full overflow-x-hidden overflow-y-hidden">
-                    <button class="fixed top-4 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg" on:click={() => {showThread = false}}>
+                <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
+                    <button class="fixed top-16 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg" on:click={() => {showThread = false}}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>
