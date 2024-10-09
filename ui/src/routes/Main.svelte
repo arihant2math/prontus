@@ -126,6 +126,7 @@
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
     {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
         <NoCategorySidebar bind:currentUser={currentUser} showSettings={showSettings}
+                           bind:settings={settings}
                            showDmDialog={() => {createDmDialogOpen = true}}
                            handleSidebarClick={handleSidebarClick}/>
     {:else}
