@@ -1,4 +1,4 @@
-use client::{Bubble, BubbleStats, PostBubbleMembershipSearchRequest, Message, ProntoClient, ReactionType, UserInfo, Membership};
+use client::{Bubble, BubbleStats, Membership, Message, PostBubbleMembershipSearchRequest, ProntoClient, ReactionType, UserInfo};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -7,19 +7,19 @@ use tauri::{command, Manager, State};
 use client::user_search::GetUserSearchRequest;
 
 mod handler;
-pub use handler::{get_code, send_code, get_settings, set_settings};
+pub use handler::{get_code, get_settings, send_code, set_settings};
 
 mod error;
-mod proxy_thread;
-mod pusher_thread;
 mod state;
+mod task;
 #[cfg(desktop)]
 mod tray;
 
 pub use error::BackendError;
-use pusher_thread::run_pusher_thread;
+use task::pusher_thread::run_pusher_thread;
 use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
+use task::proxy_thread;
 use crate::state::ChannelUsers;
 
 #[command]
