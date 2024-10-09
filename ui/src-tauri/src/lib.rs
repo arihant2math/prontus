@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::thread;
 use log::debug;
 use tauri::{command, Manager, State};
+use client::user_search::GetUserSearchRequest;
 
 mod handler;
 pub use handler::{get_code, send_code, get_settings, set_settings};
@@ -540,6 +541,20 @@ async fn create_bubble(state: State<'_, AppState>, name: String) -> Result<(), B
     Ok(())
 }
 
+#[command]
+async fn user_search(state: State<'_, AppState>, query: String) -> Result<Vec<UserInfo>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    let response = state.client.user_search(GetUserSearchRequest {
+        query,
+        ..Default::default()
+    }).await?;
+
+    Ok(response.data)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -602,7 +617,8 @@ pub fn run() {
             set_channel_notifications,
             read_channel,
             create_dm,
-            create_bubble
+            create_bubble,
+            user_search
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

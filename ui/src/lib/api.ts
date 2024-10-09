@@ -111,3 +111,7 @@ export async function readChannel(channelId: number) {
 export async function createDm(userId: number) {
     return await invoke("create_dm", {userId});
 }
+
+export async function userSearch(query: string) {
+    return await invoke("user_search", {query});
+}
