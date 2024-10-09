@@ -1,5 +1,5 @@
 <script>
-    import UserCard from "./user/UserCard.svelte";
+    import UserCard from "./user/UserListItem.svelte";
     import {getChannelUsers, getCurrentChannelId, loadChannelUsers} from "$lib/api.ts";
 
     export let channelUsers;

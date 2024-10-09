@@ -4,7 +4,7 @@
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";
     import {parseDatetime} from "$lib/helpers.ts";
-    import Sideitem from "./sidebar/ChannelCard.svelte";
+    import Sideitem from "./sidebar/ChannelListItem.svelte";
 
     export let currentUser;
     export let showSettings;

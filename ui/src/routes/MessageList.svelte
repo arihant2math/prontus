@@ -45,9 +45,9 @@
     {#each messages as message, i}
         {#if i < messages.length - 1 && i > 0}
             <Message message={message} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings}/>
-        {:else if i < message.length - 1}
+        {:else if i === 0}
             <Message message={message} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings}/>
-        {:else if i > 0}
+        {:else if i === message.length - 1}
             <Message message={message} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings}/>
         {:else}
             <Message message={message} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings}/>

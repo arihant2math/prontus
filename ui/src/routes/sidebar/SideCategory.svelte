@@ -1,5 +1,5 @@
 <script>
-    import Sideitem from "./ChannelCard.svelte";
+    import Sideitem from "./ChannelListItem.svelte";
     import {Collapsible} from "bits-ui";
     import {slide} from "svelte/transition";
 
