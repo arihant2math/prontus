@@ -1,0 +1,15 @@
+[package]
+name = "ui_macros"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "2.0"
+quote = "1.0"
+log = "0.4"
+reqwest = { version = "0.12", features = ["cookies", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
