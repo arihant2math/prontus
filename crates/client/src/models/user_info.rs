@@ -2,20 +2,14 @@ use crate::Organization;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum ProfilePicture {
-    #[serde(rename = "profilepicurl")]
-    Url(String),
-    #[serde(rename = "profilepicpath")]
-    Path(String),
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UserInfo {
     pub id: u64,
     pub firstname: String,
     pub lastname: String,
-    #[serde(flatten)]
-    pub profile_picture: ProfilePicture,
+    #[serde(rename = "profilepicurl")]
+    pub profile_picture_url: Option<String>,
+    #[serde(rename = "profilepicpath")]
+    pub profile_picture_path: Option<String>,
     #[serde(rename = "isverified", default)]
     pub verified: bool,
     #[serde(rename = "isonline", default)]
