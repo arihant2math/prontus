@@ -15,6 +15,7 @@
     };
 
     export let showSettings;
+    export let showDmDialog;
 </script>
 
 <div class="flex flex-row px-4 w-full border-b border-gray-500 z-40 h-[60px]">
@@ -68,7 +69,7 @@
             </DropdownMenu.Item>
             <DropdownMenu.Item
                     class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium !ring-0 !ring-transparent data-[highlighted]:bg-muted">
-                <button class="flex items-center">
+                <button class="flex items-center" on:click={showDmDialog}>
                     New DM
                 </button>
             </DropdownMenu.Item>
