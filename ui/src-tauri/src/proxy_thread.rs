@@ -29,7 +29,7 @@ impl Service<Request<Incoming>> for ServiceHandler {
         let client = self.client.clone();
         Box::pin(async move {
             let response = client.http_client
-                .request(req.method().clone(), format!("https://files.chat.trypronto.com/{}", req.uri().clone().to_string()))
+                .request(req.method().clone(), format!("https://stanfordohs.pronto.io{}", req.uri().clone().to_string()))
                 .send()
                 .await?;
             Ok(response.into())
