@@ -17,7 +17,7 @@
     export let showSettings;
 </script>
 
-<div class="flex flex-row px-4 w-full border-b border-gray-500 z-40">
+<div class="flex flex-row px-4 w-full border-b border-gray-500 z-40 h-[60px]">
     <DropdownMenu.Root>
         <DropdownMenu.Trigger class="flex-auto flex flex-row space-x-4 p-2 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-700">
             <div class="align-middle h-full">
