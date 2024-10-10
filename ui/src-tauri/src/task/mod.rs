@@ -1,2 +1,7 @@
-pub mod proxy_thread;
-pub mod pusher_thread;
+mod proxy_thread;
+mod pusher_thread;
+mod search_thread;
+
+pub use proxy_thread::run_proxy_thread;
+pub use pusher_thread::run_pusher_thread;
+pub use search_thread::run_search_thread;

@@ -98,6 +98,10 @@ pub struct Options {
     pub analytics: bool,
     #[serde(default)]
     pub read_messages: bool,
+    #[serde(default)]
+    pub search_messages: Option<String>,
+    #[serde(default)]
+    pub search_users: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
