@@ -69,7 +69,8 @@ impl HandlerWrapper {
     pub async fn handle(&self, pronto_client: Arc<ProntoClient>, input: PusherServerEventType) {
         let result = self.handler.handle(pronto_client, input).await;
         if let Err(err) = result {
-            eprintln!("Error: {}", err);
+            e
+            !("Error: {}", err);
         }
     }
 }

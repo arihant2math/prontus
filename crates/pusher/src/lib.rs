@@ -2,6 +2,7 @@ mod message;
 
 use client::ProntoClient;
 use futures_util::{SinkExt, StreamExt};
+use log::error;
 pub use message::*;
 use std::sync::Arc;
 use std::thread;
@@ -43,7 +44,7 @@ async fn read_task(
                 break;
             }
             Err(e) => {
-                println!("Error: {:?}", e);
+                error!("Error: {:?}", e);
             }
             _ => {}
         }
