@@ -24,6 +24,7 @@
     import CreateDm from "./dialog/CreateDm.svelte";
     import Announcements from "./dialog/Announcements.svelte";
     import CurrentUserCard from "./user/CurrentUserCard.svelte";
+    import Tasks from "./dialog/Tasks.svelte";
 
     let currentUser;
     let messages = [];
@@ -39,6 +40,7 @@
     let createDmDialogOpen = false;
     let settingsDialogOpen = false;
     let announcementsDialogOpen = false;
+    let tasksDialogOpen = false;
 
     function showSettings() {
         settingsDialogOpen = true;
@@ -134,12 +136,12 @@
                            bind:settings={settings}
                            showDmDialog={() => {createDmDialogOpen = true}}
                            handleSidebarClick={handleSidebarClick}
-                           on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {}}/>
+                           on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
     {:else}
         <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
                  showDmDialog={() => {createDmDialogOpen = true}}
                  bind:settings={settings}
-                 on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {}}/>
+                 on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
     {/if}
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
@@ -182,4 +184,5 @@
     <Settings bind:settings={settings} bind:showSettings={settingsDialogOpen}/>
     <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
     <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
+    <Tasks bind:tasksDialogOpen={tasksDialogOpen}/>
 </div>

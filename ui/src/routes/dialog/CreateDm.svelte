@@ -21,11 +21,8 @@
                 Create DM
             </Dialog.Title>
             <Separator.Root class="-mx-5 mb-6 mt-5 block h-px bg-gray-500"/>
-            <Dialog.Description class="text-sm">
-                Create a direct message to a user.
-            </Dialog.Description>
             <div class="flex flex-col items-start gap-1 pb-11 pt-7">
-                <!-- TODO: Input -->
+                
             </div>
             <div class="flex w-full justify-end">
                 <Dialog.Close
