@@ -83,7 +83,7 @@
        class="h-full">
     <div class="w-[375px] h-full z-40 bg-gray-50 dark:bg-slate-950">
         <!--TODO: maybe move this to the bottom-->
-        <CurrentUserCard bind:user={currentUser} showSettings={showSettings} showDmDialog={showDmDialog}/>
+        <CurrentUserCard bind:user={currentUser} showSettings={showSettings} showDmDialog={showDmDialog} on:showAnnouncements on:showTasks/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#if sidebarCategories.hasOwnProperty(-4) && sidebarCategories[-4].length > 0}
                 <SideCategory name="Pinned" items={sidebarCategories[-4]} buttonClick={handleSidebarClick}/>

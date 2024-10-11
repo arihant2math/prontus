@@ -8,6 +8,7 @@ use hyper_util::rt::TokioIo;
 use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use log::error;
 use tokio::net::TcpListener;
 
 pub struct ServiceHandler {
@@ -75,7 +76,7 @@ pub async fn run_proxy_thread(context: AppState) -> Result<(), Box<dyn std::erro
                     .serve_connection(io, ServiceHandler::new(client.clone()))
                     .await
                 {
-                    eprintln!("Error serving connection: {:?}", err);
+                    error!("Error serving connection: {:?}", err);
                 }
             }
         });

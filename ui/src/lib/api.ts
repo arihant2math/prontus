@@ -115,3 +115,11 @@ export async function createDm(userId: number) {
 export async function userSearch(query: string) {
     return await invoke("user_search", {query});
 }
+
+export async function getAnnouncements() {
+    return await invoke("get_announcements");
+}
+
+export async function getTasks() {
+    return await invoke("get_tasks");
+}

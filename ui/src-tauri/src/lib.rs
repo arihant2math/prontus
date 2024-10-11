@@ -1,4 +1,4 @@
-use client::{Bubble, BubbleStats, Membership, Message, PostBubbleMembershipSearchRequest, ProntoClient, ReactionType, UserInfo};
+use client::{Announcement, Bubble, BubbleStats, Membership, Message, PostBubbleMembershipSearchRequest, ProntoClient, ReactionType, Task, UserInfo};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -16,10 +16,10 @@ mod task;
 mod tray;
 
 pub use error::BackendError;
-use task::pusher_thread::run_pusher_thread;
+use task::run_pusher_thread;
 use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
-use task::proxy_thread;
+use task::run_proxy_thread;
 use crate::state::ChannelUsers;
 
 #[command]
@@ -555,6 +555,28 @@ async fn user_search(state: State<'_, AppState>, query: String) -> Result<Vec<Us
     Ok(response.data)
 }
 
+#[command]
+async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announcement>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    let response = state.client.announcement_list().await?;
+
+    Ok(response.announcements)
+}
+
+#[command]
+async fn get_tasks(state: State<'_, AppState>, completed: bool) -> Result<Vec<Task>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    let response = state.client.task_list(state.user_info.organizations[0].id, completed).await?;
+
+    Ok(response.tasks)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -564,7 +586,7 @@ pub fn run() {
             thread::spawn({
                 let context = context.clone();
                 move || {
-                    let _ = proxy_thread::run_proxy_thread(context);
+                    let _ = run_proxy_thread(context);
                 }
             });
             thread::spawn({
@@ -618,7 +640,9 @@ pub fn run() {
             read_channel,
             create_dm,
             create_bubble,
-            user_search
+            user_search,
+            get_announcements,
+            get_tasks
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

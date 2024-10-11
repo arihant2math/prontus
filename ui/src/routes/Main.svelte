@@ -1,6 +1,6 @@
 <script>
     import ChannelCard from "./CurrentChannelCard.svelte";
-    import Settings, {showSettings} from "./Settings.svelte";
+    import Settings from "./dialog/Settings.svelte";
     import MemberList from "./MemberList.svelte";
 
     import {
@@ -21,6 +21,9 @@
     import NoCategorySidebar from "./NoCategorySidebar.svelte";
     import {Dialog, Label, Separator} from "bits-ui";
     import {fade} from "svelte/transition";
+    import CreateDm from "./dialog/CreateDm.svelte";
+    import Announcements from "./dialog/Announcements.svelte";
+    import CurrentUserCard from "./user/CurrentUserCard.svelte";
 
     let currentUser;
     let messages = [];
@@ -34,6 +37,12 @@
     let settings = null;
 
     let createDmDialogOpen = false;
+    let settingsDialogOpen = false;
+    let announcementsDialogOpen = false;
+
+    function showSettings() {
+        settingsDialogOpen = true;
+    }
 
     const getThreadMessages = () => {
         if (threadParent === null) {
@@ -119,20 +128,18 @@
         parentMessages = await getParentMessages();
     });
 </script>
-{#if settings !== null}
-    <Settings bind:settings={settings}/>
-{/if}
-
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
     {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
         <NoCategorySidebar bind:currentUser={currentUser} showSettings={showSettings}
                            bind:settings={settings}
                            showDmDialog={() => {createDmDialogOpen = true}}
-                           handleSidebarClick={handleSidebarClick}/>
+                           handleSidebarClick={handleSidebarClick}
+                           on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {}}/>
     {:else}
         <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
                  showDmDialog={() => {createDmDialogOpen = true}}
-                 bind:settings={settings}/>
+                 bind:settings={settings}
+                 on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {}}/>
     {/if}
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
@@ -172,42 +179,7 @@
             {/if}
         </div>
     </div>
-    <Dialog.Root bind:open={createDmDialogOpen}>
-        <Dialog.Trigger/>
-        <Dialog.Portal>
-            <Dialog.Overlay
-                    transition={fade}
-                    transitionConfig={{ duration: 150 }}
-                    class="fixed inset-0 z-50 bg-black/80"
-            />
-            <Dialog.Content
-                    class="fixed left-[50%] top-[50%] z-50 w-full max-w-[94%] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white dark:bg-slate-800 p-5 shadow-2xl outline-none sm:max-w-[490px] md:w-full">
-                <Dialog.Title
-                        class="flex w-full items-center justify-center text-lg font-semibold">
-                    Create DM
-                </Dialog.Title>
-                <Separator.Root class="-mx-5 mb-6 mt-5 block h-px bg-gray-500"/>
-                <Dialog.Description class="text-sm">
-                    Create a direct message to a user.
-                </Dialog.Description>
-                <div class="flex flex-col items-start gap-1 pb-11 pt-7">
-                    <!-- TODO: Input -->
-                </div>
-                <div class="flex w-full justify-end">
-                    <Dialog.Close
-                            class="inline-flex items-center justify-center px-4 py-2 text-[15px] rounded-md disabled:bg-gray-100 disabled:dark:bg-slate-700 bg-blue-600 hover:bg-blue-500 font-semibold shadow-sm outline-none" disabled>
-                        Create
-                    </Dialog.Close>
-                </div>
-                <Dialog.Close
-                        class="absolute right-5 top-5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-98">
-                    <div>
-                        <!--            TODO: replace-->
-                        Close
-                        <span class="sr-only">Close</span>
-                    </div>
-                </Dialog.Close>
-            </Dialog.Content>
-        </Dialog.Portal>
-    </Dialog.Root>
+    <Settings bind:settings={settings} bind:showSettings={settingsDialogOpen}/>
+    <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
+    <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
 </div>

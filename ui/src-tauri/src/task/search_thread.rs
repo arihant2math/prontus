@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::sync::Arc;
+use log::{error, info};
 use settings::Settings;
 
 // TODO: handle changes in settings like path changing
@@ -18,9 +19,9 @@ pub async fn run_search_thread() -> Result<(), Box<dyn std::error::Error + Send 
                     let indexer = indexer.clone();
                     async move {
                         let result = indexer.fastforward().await;
-                        println!("Fastforward complete");
+                        info!("Fastforward complete");
                         if let Err(e) = result {
-                            eprintln!("Error: {:?}", e);
+                            error!("Error: {:?}", e);
                         }
                     }
                 }));
@@ -28,7 +29,7 @@ pub async fn run_search_thread() -> Result<(), Box<dyn std::error::Error + Send 
         }
         if settings.options.search_messages.is_none() {
             let mut set_none = false;
-            if let Some(mut future) = future.take() {
+            if let Some(future) = future.take() {
                 future.abort();
                 set_none = true;
             }
