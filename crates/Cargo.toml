@@ -1,3 +1,6 @@
 [workspace]
-members = ["client", "client_macros", "probot", "pusher", "search", "settings", "ui_macros"]
+members = ["client", "client_macros", "encrypt", "encrypt-internal", "probot", "pusher", "search", "settings", "ui_macros"]
 resolver = "2"
+
+[workspace.dependencies]
+reqwest = "0.12"
