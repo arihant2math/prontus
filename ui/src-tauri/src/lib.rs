@@ -28,10 +28,10 @@ async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         return Ok(());
     }
     let settings = Settings::load().await?;
-    // FIXME: Hardcoded
+
     let client = ProntoClient::new(
-        "https://stanfordohs.pronto.io/api/".to_string(),
-        &settings.auth.api_key.ok_or(BackendError::NotAuthenticated)?,
+        settings.auth.as_ref().ok_or(BackendError::NotAuthenticated)?.base_url.to_string(),
+        &settings.auth.ok_or(BackendError::NotAuthenticated)?.api_key,
     )
         .unwrap();
     let user_info_future = client.current_user_info();

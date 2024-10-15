@@ -1,7 +1,10 @@
 use tauri::ipc::InvokeError;
+use crate::state;
 
 #[derive(Debug, thiserror::Error)]
 pub enum BackendError {
+    #[error("Unlock error: {0}")]
+    UnlockError(#[from] state::UnlockError),
     #[error("The application state has not been loaded yet")]
     NotLoaded,
     #[error("The user is not authenticated")]

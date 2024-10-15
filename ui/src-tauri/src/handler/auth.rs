@@ -33,12 +33,20 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
         .to_result()
         .unwrap();
     let token = &response.users[0].login_token;
+    // "https://stanfordohs.pronto.io/api/"
+    let base_url = format!("https://{}.pronto.io/api/", response.users[0].user.organizations[0].shortname);
     let mut settings = Settings::load().await?;
-    settings.auth.api_key = Some(token.clone());
+    let auth = settings::Auth {
+        base_url: base_url.clone(),
+        api_key: token.clone(),
+        saved_email: None,
+        saved_phone: None
+    };
+    settings.auth = Some(auth);
     settings.save().await?;
-    // TODO: This is the part where we can switch base urls
+
     let client =
-        ProntoClient::new("https://stanfordohs.pronto.io/api/".to_string(), token).unwrap();
+        ProntoClient::new(base_url.clone(), token).unwrap();
     // TODO: Standardize device info
     let response = client
         .user_token_login(
@@ -49,7 +57,7 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
     info!("Login successful");
 
     let mut settings = Settings::load().await?;
-    settings.auth.api_key = Some(response.users[0].access_token.clone());
+    settings.auth.as_mut().ok_or(BackendError::NotAuthenticated)?.api_key = response.users[0].access_token.clone();
     settings.save().await?;
     // TODO: Error handling as usual
     Ok(())

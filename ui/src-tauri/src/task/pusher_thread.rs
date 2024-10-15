@@ -4,12 +4,20 @@ use notify_rust::{Notification, Timeout};
 use tauri::{AppHandle, Emitter};
 use client::Reactions;
 use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
-use settings::Settings;
-use crate::{AppState, BackendError};
+use settings::{Settings, SettingsError};
+use crate::{state, AppState};
+use thiserror::Error;
 
-// TODO: Should not be backend error result
+#[derive(Debug, Error)]
+pub enum PusherThreadError {
+    #[error("Settings error: {0}")]
+    SettingsError(#[from] SettingsError),
+    #[error("Unlock error: {0}")]
+    UnlockError(#[from] state::UnlockError),
+}
+
 #[tokio::main]
-pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(), BackendError> {
+pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(), PusherThreadError> {
     loop {
         if context.is_loaded().await {
             break;

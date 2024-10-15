@@ -1,9 +1,15 @@
-use crate::BackendError;
 use client::{Bubble, BubbleStats, Membership, Message, ProntoClient, UserInfo};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
+use thiserror::Error;
 use tokio::sync::RwLock;
+
+#[derive(Copy, Clone, Debug, Error)]
+pub enum UnlockError {
+    #[error("Not loaded")]
+    NotLoaded,
+}
 
 #[derive(Clone)]
 pub struct ChannelUsers {
@@ -29,17 +35,17 @@ pub enum InnerAppState {
 }
 
 impl InnerAppState {
-    pub fn try_inner(&self) -> Result<&AppData, BackendError> {
+    pub fn try_inner(&self) -> Result<&AppData, UnlockError> {
         match self {
             InnerAppState::Loaded(data) => Ok(data),
-            InnerAppState::Unloaded => Err(BackendError::NotLoaded),
+            InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
         }
     }
 
-    pub fn try_inner_mut(&mut self) -> Result<&mut AppData, BackendError> {
+    pub fn try_inner_mut(&mut self) -> Result<&mut AppData, UnlockError> {
         match self {
             InnerAppState::Loaded(data) => Ok(data),
-            InnerAppState::Unloaded => Err(BackendError::NotLoaded),
+            InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
         }
     }
 }

@@ -116,7 +116,7 @@ impl MessageIndexInfo {
 #[derive(Clone, Default)]
 pub struct IndexerSettings {
     /// Virtual limit imposed on index size
-    max_size: Option<usize>,
+    pub max_size: Option<usize>,
 }
 
 pub struct MessageIndexer {

@@ -1,4 +1,4 @@
-use log::{debug, info};
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tokio::io::AsyncWriteExt;
@@ -72,8 +72,8 @@ pub struct Auth {
     pub saved_email: Option<String>,
     #[serde(default)]
     pub saved_phone: Option<String>,
-    #[serde(default)]
-    pub api_key: Option<String>,
+    pub api_key: String,
+    pub base_url: String,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -97,21 +97,31 @@ pub struct Options {
     #[serde(default)]
     pub analytics: bool,
     #[serde(default)]
-    pub read_messages: bool,
+    pub read_messages: bool
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct MessagesSearchIndex {
+    pub path: String,
+    pub max_size: u64
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct Search {
     #[serde(default)]
-    pub search_messages: Option<String>,
-    #[serde(default)]
-    pub search_users: Option<String>,
+    pub messages: Option<MessagesSearchIndex>
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Settings {
     #[serde(default)]
-    pub auth: Auth,
+    pub auth: Option<Auth>,
     #[serde(default)]
     pub appearance: Appearance,
     #[serde(default)]
     pub options: Options,
+    #[serde(default)]
+    pub search: Search
 }
 
 impl Settings {
@@ -140,7 +150,9 @@ impl Settings {
         if path.exists() {
             // TODO: switch to OpenOptions
             let mut data = tokio::fs::read_to_string(&path).await?;
-            unsafe { Ok(simd_json::from_str(&mut data)?) }
+            unsafe { Ok(simd_json::from_str(&mut data).inspect_err(|e| {
+                error!("Error parsing settings: {:?}", e);
+            }).unwrap_or_default()) }
         } else {
             Ok(Self::default())
         }
