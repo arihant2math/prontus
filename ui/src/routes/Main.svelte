@@ -16,14 +16,12 @@
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import MessageList from "./MessageList.svelte";
     import {listen} from "@tauri-apps/api/event";
-    import Sidebar from "./Sidebar.svelte";
+    import Sidebar from "./sidebar/Sidebar.svelte";
     import {loadTheme} from "$lib/helpers.ts";
-    import NoCategorySidebar from "./NoCategorySidebar.svelte";
     import {Dialog, Label, Separator} from "bits-ui";
     import {fade} from "svelte/transition";
     import CreateDm from "./dialog/CreateDm.svelte";
     import Announcements from "./dialog/Announcements.svelte";
-    import CurrentUserCard from "./user/CurrentUserCard.svelte";
     import Tasks from "./dialog/Tasks.svelte";
 
     let currentUser;
@@ -131,18 +129,10 @@
     });
 </script>
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
-        <NoCategorySidebar bind:currentUser={currentUser} showSettings={showSettings}
-                           bind:settings={settings}
-                           showDmDialog={() => {createDmDialogOpen = true}}
-                           handleSidebarClick={handleSidebarClick}
-                           on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
-    {:else}
-        <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
-                 showDmDialog={() => {createDmDialogOpen = true}}
+    <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
+                 on:showDmDialog={() => {createDmDialogOpen = true}}
                  bind:settings={settings}
                  on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
-    {/if}
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>

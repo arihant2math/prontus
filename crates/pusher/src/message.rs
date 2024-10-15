@@ -139,21 +139,20 @@ pub struct PusherServerUserUpdatedEvent {
     pub user: client::UserInfo,
 }
 
-// RawPusherMessage { event: "App\\Events\\AnnouncementRemoved", data: String("{\"announcement_id\":31608}"), channel: Some("private-organization.2245") }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerAnnouncementAddedEvent {
+    pub announcement: client::Announcement,
+}
 
-// RawPusherMessage { event: "App\\Events\\AnnouncementUpdated", data: String("{\"announcement\":{\"id\":32222,\"organ
-// ization_id\":2245,\"senderuser_id\":5279806,\"targets\":{\"bubble_ids\":[2828820]},\"announcement\":\"\\u2b50\\ufe0f Hey Sophomores! \\u2b50\\ufe0f\\n\\nJust a quick reminder that our first movie night is s
-// tarting at 5pm pst today!! Hope to see you there!\\n\\nZoom link: https:\\/\\/stanford.zoom.us\\/j\\/91400975734?pwd=2lA6b9bRi0VvzEKngRijdEgMyN75nv.1\\n\\n-Izzy and Neel\",\"created_at\":\"2024-09-28 23:05:
-// 50\",\"updated_at\":\"2024-09-28 23:05:51\",\"deleted_at\":null,\"sent\":\"2024-09-28 23:05:51\",\"scheduled\":null,\"read\":\"2024-09-30 01:22:02\",\"lang\":\"en\",\"sender\":{\"id\":5279806,\"firstname\":
-// \"Izzy\",\"lastname\":\"Nguyen\",\"username\":null,\"locale\":\"\",\"lastseen\":\"2024-09-29 04:11:38\",\"profilepic\":true,\"status\":0,\"created_at\":\"2023-07-28 18:17:03\",\"updated_at\":\"2024-09-29 04
-// :11:50\",\"deactivated_at\":null,\"email_verified_at\":\"2024-09-20 22:48:01\",\"phone_verified_at\":null,\"isverified\":false,\"dropinorder\":0,\"maxstreams\":10,\"autotranslate\":true,\"isonline\":false,\
-// "lastpresencetime\":\"2024-09-29 04:11:50\",\"acceptedtos\":\"2024-09-20 22:48:01\",\"sentwelcomemsg\":null,\"role\":\"user\",\"mute\":true,\"muteuntil\":null,\"isbot\":0,\"fullname\":\"Izzy Nguyen\",\"hasa
-// ctivity\":true,\"inactive\":false,\"language\":\"en\",\"permissions\":{\"change_name\":\"system\",\"change_email\":\"system\",\"change_phone\":\"system\",\"remove_user\":\"system\",\"change_title\":\"admin\
-// ",\"change_pronouns\":\"admin\",\"change_own_name\":false,\"change_own_email\":false,\"change_own_phone\":false,\"change_own_title\":true,\"change_own_pronouns\":true},\"profilepicpath\":\"\\/files\\/users\
-// \/5279806\\/profilepic?pronto_time=1700314741\",\"profilepicurl\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/users\\/5279806\\/profilepic?pronto_time=1700314741\"},\"announcementmedia\":[{\"id\":8696,
-// \"announcement_id\":32222,\"title\":\"Screenshot 2024-09-28 at 4.05.06\\u202fPM.png\",\"url\":\"https:\\/\\/files.chat.trypronto.com\\/files\\/orgs\\/2245\\/announcements\\/32222\\/3422de00-7dee-11ef-9549-d
-// bc45047dbab\",\"thumbnail\":\"\",\"width\":1268,\"height\":950,\"filesize\":640894,\"duration\":null,\"created_at\":\"2024-09-28 23:05:50\",\"updated_at\":\"2024-09-28 23:05:50\",\"uuid\":\"4e407183-10d9-48
-// 8d-b5be-91dbe0d1b685\",\"mediatype\":\"PHOTO\",\"urlmimetype\":\"image\\/png\",\"thumbnailmimetype\":null,\"path\":\"\\/files\\/orgs\\/2245\\/announcements\\/32222\\/3422de00-7dee-11ef-9549-dbc45047dbab\",\"thumbnailpath\":\"\",\"external\":false}],\"announcementtrans\":[]}}"), channel: Some("private-user.5302428") }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerAnnouncementUpdatedEvent {
+    pub announcement: client::Announcement,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerAnnouncementRemovedEvent {
+    pub announcement_id: u64,
+}
 
 // RawPusherMessage { event: "App\\Events\\CategoryUpdated", data: String("{\"category\":{\"id\":679345,\"organization_
 // id\":2245,\"created_at\":\"2023-08-13 04:44:16\",\"updated_at\":\"2023-08-13 04:44:16\",\"sortorder\":149,\"title\":\"Clubs\",\"externalid\":null,\"usercategory\":{\"id\":9689,\"user_id\":5302428,\"category_id\":679345,\"alias\":\"test\",\"created_at\":\"2024-10-03 03:35:32\",\"updated_at\":\"2024-10-03 03:35:32\"}}}"), channel: Some("private-user.5302428") }
@@ -193,6 +192,9 @@ pub enum PusherServerEventType {
     PusherServerReactionAddedEvent(PusherServerReactionAddedEvent),
     PusherServerReactionRemovedEvent(PusherServerReactionRemovedEvent),
     PusherServerUserUpdatedEvent(PusherServerUserUpdatedEvent),
+    PusherServerAnnouncementAddedEvent(PusherServerAnnouncementAddedEvent),
+    PusherServerAnnouncementUpdatedEvent(PusherServerAnnouncementUpdatedEvent),
+    PusherServerAnnouncementRemovedEvent(PusherServerAnnouncementRemovedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -319,6 +321,27 @@ impl From<String> for PusherServerMessage {
                     raw,
                     PusherServerUserUpdatedEvent,
                     PusherServerUserUpdatedEvent
+                )
+            }
+            "App\\Events\\AnnouncementAdded" => {
+                create_event!(
+                    raw,
+                    PusherServerAnnouncementAddedEvent,
+                    PusherServerAnnouncementAddedEvent
+                )
+            }
+            "App\\Events\\AnnouncementUpdated" => {
+                create_event!(
+                    raw,
+                    PusherServerAnnouncementUpdatedEvent,
+                    PusherServerAnnouncementUpdatedEvent
+                )
+            }
+            "App\\Events\\AnnouncementRemoved" => {
+                create_event!(
+                    raw,
+                    PusherServerAnnouncementRemovedEvent,
+                    PusherServerAnnouncementRemovedEvent
                 )
             }
             _ => Self::Other(raw),

@@ -497,7 +497,7 @@ async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), Backe
         let state = state.inner().inner();
         let state = state.read().await;
         let state = state.try_inner()?;
-        state.client.create_dm(state.user_info.organizations[0].id as u64, user_id).await?;
+        state.client.create_dm(state.user_info.organizations[0].id, user_id).await?;
         let channel_list = state.client.bubble_list().await?;
         let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)> = vec![];
         for bubble in channel_list.bubbles.clone() {

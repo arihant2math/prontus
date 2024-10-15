@@ -150,9 +150,11 @@ impl Settings {
         if path.exists() {
             // TODO: switch to OpenOptions
             let mut data = tokio::fs::read_to_string(&path).await?;
-            unsafe { Ok(simd_json::from_str(&mut data).inspect_err(|e| {
-                error!("Error parsing settings: {:?}", e);
-            }).unwrap_or_default()) }
+            unsafe {
+                Ok(simd_json::from_str(&mut data).inspect_err(|e| {
+                    error!("Error parsing settings: {:?}", e);
+                }).unwrap_or_default())
+            }
         } else {
             Ok(Self::default())
         }
