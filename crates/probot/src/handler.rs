@@ -116,7 +116,7 @@ impl Handler for CommandHandler {
 
     async fn handle(
         &self,
-        pronto_client: ProntoClient,
+        pronto_client: Arc<ProntoClient>,
         input: PusherServerEventType,
     ) -> Self::Future {
         Box::pin(async {
@@ -141,7 +141,7 @@ impl Handler for NoopHandler {
     type Error = Box<dyn error::Error + Send + Sync>;
     type Future = std::pin::Pin<Box<dyn Future<Output = Result<(), Self::Error>> + Send>>;
 
-    async fn handle(&self, _: ProntoClient, _: PusherServerEventType) -> Self::Future {
+    async fn handle(&self, _: Arc<ProntoClient>, _: PusherServerEventType) -> Self::Future {
         Box::pin(async { Ok(()) })
     }
 }

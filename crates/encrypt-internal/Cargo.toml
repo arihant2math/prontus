@@ -1,0 +1,8 @@
+[package]
+name = "encrypt_internal"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crypto_box = { version = "0.9.1", features = ["chacha20"] }
+keyring = { version = "3.3.0", features = ["apple-native", "windows-native", "sync-secret-service"] }

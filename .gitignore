@@ -1,10 +1,10 @@
 **/target
-**/.idea/*
+**/.idea/
 **/Cargo.lock
 **/node_modules/
 **/.svelte-kit/
 **/package-lock.json
-**/Cargo.lock
 *.pyc
 dist/
 extracted/
+**/venv/

@@ -241,8 +241,8 @@ def main():
         "--workers",
         metavar="w",
         type=int,
-        default=1,  # TODO: Change this to number of cores - 1
-        help="the number of workers to spawn",
+        default=1,
+        help="the local socket to bind to",
     )
     args = parser.parse_args()
     states = States()

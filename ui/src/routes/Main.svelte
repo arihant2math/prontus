@@ -29,7 +29,7 @@
     let currentUser;
     let messages = [];
     let parentMessages = [];
-    let channelInfo = null;
+    let channelInfo;
     let channelUsers = [];
     let showMemberList = false;
     let showThread = false;
