@@ -1,5 +1,7 @@
 <script>
-    import SideCategory from "./sidebar/SideCategory.svelte";
+    import SideCategory from "./SideCategory.svelte";
+    import CategorySidebar from "./CategorySidebar.svelte";
+
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";
 
@@ -13,7 +15,7 @@
                        bind:settings={settings}
                        on:showAnnouncements on:showTasks on:showDmDialog/>
 {:else}
-    <DefaultSidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
+    <CategorySidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
              bind:settings={settings}
              on:showAnnouncements on:showTasks on:showDmDialog/>
 {/if}
