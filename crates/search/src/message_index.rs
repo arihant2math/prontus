@@ -1,18 +1,19 @@
+use client::{Message, ProntoClient};
+use dashmap::DashMap;
+use heed::EnvOpenOptions;
+use log::{debug, info};
+use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
+use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};
+use milli::Index;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::io::Cursor;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use dashmap::DashMap;
-use heed::EnvOpenOptions;
-use log::{debug, info};
-use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
-use milli::Index;
-use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};
-use serde::{Serialize, Deserialize};
 use tokio::sync::mpsc;
-use client::{Message, ProntoClient};
 
+#[allow(unused)]
 pub fn message_index_location() -> PathBuf {
     PathBuf::from(r#"D:\tmp-milli-message-index-location"#.to_string())
 }

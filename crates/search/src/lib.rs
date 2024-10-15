@@ -1,18 +1,18 @@
-mod message_index;
 mod index;
+mod message_index;
 
+use crate::message_index::get_index;
+pub use message_index::{IndexerSettings, MessageIndexer};
 use milli::score_details::ScoringStrategy;
 use milli::tokenizer::Language;
 use milli::{
     execute_search, filtered_universe, AscDesc, DefaultSearchLogger, DocumentId, GeoSortStrategy,
     Index, SearchContext, TermsMatchingStrategy, TimeBudget,
 };
-use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use std::error::Error;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
-use crate::message_index::get_index;
 
 pub struct Search {
     index: Index,

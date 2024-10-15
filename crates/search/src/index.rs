@@ -1,9 +1,10 @@
-use std::path::PathBuf;
 use heed::EnvOpenOptions;
+use std::path::PathBuf;
 
+#[allow(unused)]
 pub trait Index {
     type Error;
-    const index_location: PathBuf;
+    const INDEX_LOCATION: PathBuf;
 
     fn index(&self, location: &PathBuf) -> milli::Result<milli::Index> {
         let mut options = EnvOpenOptions::new();
