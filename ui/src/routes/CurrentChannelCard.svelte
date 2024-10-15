@@ -17,7 +17,6 @@
     }
 
     async function updateNotificationPreference() {
-        console.log("h");
         await setChannelNotifications(info[0].id, info[2].notificationpreference);
     }
 </script>

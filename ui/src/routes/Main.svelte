@@ -129,10 +129,11 @@
     });
 </script>
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
-                 on:showDmDialog={() => {createDmDialogOpen = true}}
-                 bind:settings={settings}
-                 on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
+    <Sidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
+             on:showDmDialog={() => {createDmDialogOpen = true}}
+             bind:settings={settings}
+             on:showSettings={showSettings}
+             on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>

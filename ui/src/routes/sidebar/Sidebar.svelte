@@ -14,7 +14,7 @@
                        bind:settings={settings}
                        on:showAnnouncements on:showTasks on:showDmDialog/>
 {:else}
-    <Sidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
+    <DefaultSidebar bind:currentUser={currentUser} showSettings={showSettings} handleSidebarClick={handleSidebarClick}
              bind:settings={settings}
              on:showAnnouncements on:showTasks on:showDmDialog/>
 {/if}
