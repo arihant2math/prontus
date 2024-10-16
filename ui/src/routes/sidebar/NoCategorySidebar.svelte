@@ -1,10 +1,9 @@
 <script>
-    import CurrentUserCard from "./user/CurrentUserCard.svelte";
-    import SideCategory from "./sidebar/SideCategory.svelte";
+    import CurrentUserCard from "../user/CurrentUserCard.svelte";
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";
     import {parseDatetime} from "$lib/helpers.ts";
-    import Sideitem from "./sidebar/ChannelListItem.svelte";
+    import Sideitem from "./ChannelListItem.svelte";
 
     export let currentUser;
     export let handleSidebarClick;
