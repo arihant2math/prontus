@@ -1,9 +1,6 @@
 <script>
-    import SideCategory from "./SideCategory.svelte";
     import CategorySidebar from "./CategorySidebar.svelte";
-
-    import {listen} from "@tauri-apps/api/event";
-    import {getChannelList} from "$lib/api.ts";
+    import NoCategorySidebar from "./NoCategorySidebar.svelte";
 
     export let currentUser;
     export let showSettings;
