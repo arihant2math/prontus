@@ -3,7 +3,6 @@
     import NoCategorySidebar from "./NoCategorySidebar.svelte";
 
     export let currentUser;
-    export let showSettings;
     export let handleSidebarClick;
     export let settings;
 </script>
