@@ -99,6 +99,7 @@ pub fn api(input: TokenStream) -> TokenStream {
     };
 
     let parse = quote! {
+        log::trace!("Response: {}", text);
         let json = serde_json::from_str(&text);
         match json {
             Ok(json) => {
