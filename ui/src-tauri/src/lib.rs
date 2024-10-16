@@ -556,12 +556,12 @@ async fn user_search(state: State<'_, AppState>, query: String) -> Result<Vec<Us
 }
 
 #[command]
-async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announcement>, BackendError> {
+async fn get_announcements(state: State<'_, AppState>, query: String) -> Result<Vec<Announcement>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
 
-    let response = state.client.announcement_list().await?;
+    let response = state.client.announcement_list(query).await?;
 
     Ok(response.announcements)
 }

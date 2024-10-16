@@ -25,12 +25,13 @@ impl ProntoClient {
 
     pub async fn announcement_list(
         &self,
+        query: String,
     ) -> Result<announcement_list::GetAnnouncementListResponse, ResponseError> {
         Ok(announcement_list::get(
             &self.api_base_url,
             &self.http_client,
             GetAnnouncementListRequest {
-                query: "RECEIVED".to_string(),
+                query,
                 per_page: 20,
             },
         )
