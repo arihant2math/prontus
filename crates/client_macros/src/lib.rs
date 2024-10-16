@@ -108,7 +108,7 @@ pub fn api(input: TokenStream) -> TokenStream {
                 let json = serde_json::from_str::<#response_name>(&text);
                 let e = json.unwrap_err();
                 log::error!("Error parsing json response: {:?}.", e);
-                let json = serde_json::from_str::<()>(&text);
+                let json = serde_json::from_str::<serde_json::Value>(&text);
                 if json.is_err() {
                     return Err(crate::ResponseError::NotJson(text));
                 }
