@@ -8,7 +8,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_in_public,
     unconditional_recursion,
     unused,
     unused_allocation,
@@ -17,8 +16,8 @@
     while_true
 )]
 
-use crypto_box::{ChaChaBox, PublicKey, SecretKey};
 use crypto_box::aead::{Aead, AeadCore, OsRng};
+use crypto_box::{ChaChaBox, PublicKey, SecretKey};
 use keyring::Entry;
 
 pub struct DMEncryption {
@@ -55,7 +54,10 @@ static SERVICE: &str = "prontus-encrypt";
 static DEFAULT_USER: &str = "com_prontus_default";
 
 pub fn load_secret_key() -> [u8; 32] {
-    let secret_vector = Entry::new(SERVICE, DEFAULT_USER).unwrap().get_secret().unwrap();
+    let secret_vector = Entry::new(SERVICE, DEFAULT_USER)
+        .unwrap()
+        .get_secret()
+        .unwrap();
     let mut secret_key = [0u8; 32];
     secret_key.copy_from_slice(&secret_vector);
     secret_key

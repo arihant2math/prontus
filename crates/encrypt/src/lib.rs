@@ -1,6 +1,5 @@
 #![deny(
     bad_style,
-    const_err,
     dead_code,
     improper_ctypes,
     non_shorthand_field_patterns,
@@ -19,23 +18,30 @@
 
 mod retrieval;
 
-use std::borrow::Cow;
-pub use encrypt_internal::*;
 use crate::retrieval::PublicLookupService;
+pub use encrypt_internal::*;
+use std::borrow::Cow;
 
 pub struct Encrypt {
     pub dm_encryption: DMEncryption,
-    pub lookup_service: PublicLookupService
+    pub lookup_service: PublicLookupService,
 }
 
 impl Encrypt {
-    pub async fn new(public_lookup_service: &PublicLookupService, org_id: u64, user_id: u64) -> Option<Self> {
-        let key = public_lookup_service.lookup(org_id, user_id)?.to_string().as_bytes();
+    pub async fn new(
+        public_lookup_service: &PublicLookupService,
+        org_id: u64,
+        user_id: u64,
+    ) -> Option<Self> {
+        let key = public_lookup_service
+            .lookup(org_id, user_id)?
+            .to_string()
+            .as_bytes();
         let secret_key = load_secret_key();
         let dm_encryption = DMEncryption::new(&secret_key, key);
         Some(Self {
             dm_encryption,
-            lookup_service
+            lookup_service,
         })
     }
 
