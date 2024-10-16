@@ -40,10 +40,6 @@
     let announcementsDialogOpen = false;
     let tasksDialogOpen = false;
 
-    function showSettings() {
-        settingsDialogOpen = true;
-    }
-
     const getThreadMessages = () => {
         if (threadParent === null) {
             showThread = false;
@@ -132,7 +128,7 @@
     <Sidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
              on:showDmDialog={() => {createDmDialogOpen = true}}
              bind:settings={settings}
-             on:showSettings={showSettings}
+             on:showSettings={() => {settingsDialogOpen = true}}
              on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
