@@ -29,8 +29,8 @@
                 transitionConfig={{ duration: 150 }}
                 class="fixed inset-0 z-50 bg-black/80"
         />
-        <Dialog.Content
-                class="fixed left-[50%] top-[50%] z-50 w-full max-w-[94%] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white dark:bg-slate-800 p-5 shadow-2xl outline-none sm:max-w-[490px] md:w-full">
+       <Dialog.Content
+                class="fixed left-[50%] top-[50%] z-50 w-full max-w-[90%] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white dark:bg-slate-800 p-5 shadow-2xl outline-none">
             <Dialog.Title
                     class="flex w-full items-center justify-center text-lg font-semibold">
                 Create DM
@@ -39,7 +39,9 @@
             <div class="flex flex-col items-start gap-1 pb-11 pt-7">
                 <input name="username" placeholder="Username" id="username" bind:value={username} class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
-            <MemberList bind:channelUsers={users}/>
+           <div class="overflow-y-auto w-full overflow-x-hidden" style="height: 75vh">
+                <MemberList bind:channelUsers={users}/>
+           </div>
             <div class="flex w-full justify-end">
                 <Dialog.Close
                         class="inline-flex items-center justify-center px-4 py-2 text-[15px] rounded-md disabled:bg-gray-100 disabled:dark:bg-slate-700 bg-blue-600 hover:bg-blue-500 font-semibold shadow-sm outline-none" disabled>
