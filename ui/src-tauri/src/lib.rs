@@ -586,6 +586,36 @@ async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError
     Ok(state.tasks.clone())
 }
 
+#[command]
+async fn complete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_id: u64) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+
+    let updated_task = state.client.complete_task(task_id).await?;
+
+    state.tasks.iter_mut().for_each(|task| {
+        if task.id == task_id {
+            *task = updated_task.clone();
+        }
+    });
+
+    let _ = handle.emit("taskListUpdate", ());
+    Ok(())
+}
+
+#[command]
+async fn delete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_id: u64) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+
+    state.client.delete_task(task_id).await?;
+    state.tasks = state.tasks.iter().filter(|task| task.id != task_id).cloned().collect();
+    let _ = handle.emit("taskListUpdate", ());
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
@@ -651,7 +681,9 @@ pub fn run() {
             create_bubble,
             user_search,
             get_announcements,
-            get_tasks
+            get_tasks,
+            complete_task,
+            delete_task
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

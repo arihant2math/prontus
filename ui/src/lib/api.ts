@@ -123,3 +123,11 @@ export async function getAnnouncements() {
 export async function getTasks() {
     return await invoke("get_tasks");
 }
+
+export async function completeTask(taskId: number) {
+    return await invoke("complete_task", {taskId});
+}
+
+export async function deleteTask(taskId: number) {
+    return await invoke("delete_task", {taskId});
+}
