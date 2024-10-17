@@ -177,7 +177,7 @@ pub struct PusherServerAnnouncementRemovedEvent {
 // RawPusherMessage { event: "App\\Events\\MessageTransAdded", data: String("{\"messagetrans\":{\"message_id\":90641824
 // ,\"translation\":\"Lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:51:29\",\"created_at\":\"2024-10-03 04:51:29\",\"id\":910645,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
 // RawPusherMessage { event: "App\\Events\\BubbleChanged", data: String("{\"bubble\":{\"id\":3832006,\"updated_at\":\"2024-10-03 04:45:44\"}}"), channel: Some("private-user.5302428") }
-
+// Received unknown message: RawPusherMessage { event: "App\\Events\\BubbleRemoved", data: String("{\"bubble\":{\"id\":3872909,\"updated_at\":\"2024-10-17 17:42:30\",\"wasHidden\":false}}"), channel: Some("private-user.5302428") }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
     PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),
