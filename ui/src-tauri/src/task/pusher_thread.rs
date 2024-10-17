@@ -236,6 +236,36 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
 
                                 let _ = handle.emit("channelListUpdate", ());
                             }
+                            PusherServerEventType::PusherServerAnnouncementAddedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                state.announcements.insert(0, event.announcement.clone());
+
+                                let _ = handle.emit("announcementListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerAnnouncementRemovedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                state.announcements.retain(|a| a.id != event.announcement_id);
+
+                                let _ = handle.emit("announcementListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerAnnouncementUpdatedEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let announcement = state
+                                    .announcements
+                                    .iter_mut()
+                                    .find(|a| a.id == event.announcement.id);
+                                if let Some(announcement) = announcement {
+                                    *announcement = event.announcement.clone();
+                                }
+
+                                let _ = handle.emit("announcementListUpdate", ());
+                            }
                             // TODO: handle other
                             _ => {}
                         }

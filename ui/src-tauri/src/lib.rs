@@ -506,6 +506,7 @@ async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), Backe
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
     state.channel_list = channel_list;
+    // TODO: Return new channel (id atleast) and emit a channe list changed event
 
     Ok(())
 }
@@ -542,6 +543,7 @@ async fn create_bubble(state: State<'_, AppState>, name: String) -> Result<(), B
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
     state.channel_list = channel_list;
+    // TODO: Return new channel (id atleast) and emit a channe list changed event
 
     Ok(())
 }
