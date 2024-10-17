@@ -7,7 +7,6 @@
 
     export let currentUser;
     export let handleSidebarClick;
-    export let settings;
     let channels = [];
 
     async function updateChannelList() {

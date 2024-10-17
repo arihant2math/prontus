@@ -8,7 +8,6 @@
 </script>
 {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
     <NoCategorySidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
-                       bind:settings={settings}
                        on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
 {:else}
     <CategorySidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
