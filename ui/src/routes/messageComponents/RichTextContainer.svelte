@@ -1,7 +1,7 @@
 <script>
     import {remark} from "remark";
     import remarkGfm from "remark-gfm";
-    import remarkMentions from "../../lib/remark-mentions.js"
+    import remarkMentions from "$lib/remark-mentions.ts"
     import {unified} from 'unified';
     import rehypeSanitize from 'rehype-sanitize'
     import rehypeStringify from 'rehype-stringify'

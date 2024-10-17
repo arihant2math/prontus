@@ -14,7 +14,7 @@ import {schema} from "prosemirror-schema-basic";
 export function buildKeymap(sendFunction) {
     let keys = {}, type
 
-    function bind(key, cmd) {
+    function bind(key: string, cmd) {
         keys[key] = cmd;
     }
 

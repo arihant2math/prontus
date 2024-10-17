@@ -27,6 +27,7 @@ export default function remarkMentions(
 ) {
     // @ts-ignore
     return (tree, _file) => {
+        // @ts-ignore
         findAndReplace(tree, [[mentionRegex, replaceMention]]);
     };
 
@@ -35,7 +36,7 @@ export default function remarkMentions(
      * @param {string} value
      * @param {string} text
      */
-    function replaceMention(value, text) {
+    function replaceMention(value: string, text: string) {
         /** @type {PhrasingContent[]} */
         console.log(value, text);
         let whitespace = [];
@@ -62,8 +63,6 @@ export default function remarkMentions(
                 value: value.substring(0, value.indexOf("<")),
             });
         }
-
-        console.log(user);
 
         return [
             ...whitespace,

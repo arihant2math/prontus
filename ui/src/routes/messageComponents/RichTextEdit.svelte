@@ -25,11 +25,17 @@
 
     export function send() {
         // TODO: temporarily disable editing
+        let rawText = customMarkdownSerializer.serialize(editorState.doc);
+        if (rawText === "") {
+            return;
+        }
         disabled = true;
-        sendMessage(customMarkdownSerializer.serialize(editorState.doc)).then(() => {
+        sendMessage(rawText).then(() => {
             clear();
             disabled = false;
         });
+        clear();
+        return true;
     }
 
     const corePlugins = [
@@ -73,5 +79,4 @@
         placeholder="Message"
         {editorState}
         on:change={handleChange}
-        editorViewProps={props}
 />
