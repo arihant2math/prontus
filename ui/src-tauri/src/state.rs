@@ -1,4 +1,4 @@
-use client::{Bubble, BubbleStats, Membership, Message, ProntoClient, UserInfo};
+use client::{Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, Task, UserInfo};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -26,7 +26,9 @@ pub struct AppData {
     pub channel_users: HashMap<u64, ChannelUsers>,
     pub current_channel: Bubble,
     pub message_list: Vec<Message>,
-    pub parent_messages: Vec<Message>
+    pub parent_messages: Vec<Message>,
+    pub announcements: Vec<Announcement>,
+    pub tasks: Vec<Task>,
 }
 
 pub enum InnerAppState {
