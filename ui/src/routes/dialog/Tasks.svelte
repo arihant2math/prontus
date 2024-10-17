@@ -6,6 +6,18 @@
     import TaskListItem from "../taskComponents/TaskListItem.svelte";
 
     export let tasksDialogOpen = false;
+    export let tasks = null;
+
+    function fetchTasks() {
+        getTasks().then((response) => {
+            tasks = response.data;
+        });
+    }
+
+    fetchTasks();
+    listen('taskListUpdate', async (_event) => {
+        fetchTasks();
+    });
 </script>
 
 <Dialog.Root bind:open={tasksDialogOpen}>
@@ -30,7 +42,7 @@
                     style="height: 75vh"
             >
                 <div class="pt-6">
-                    {#await getTasks()}
+                    {#if tasks == null}
                         <div role="status">
                             <svg
                                     aria-hidden="true"
@@ -50,7 +62,7 @@
                             </svg>
                             <span class="sr-only">Loading...</span>
                         </div>
-                    {:then tasks}
+                    {:else}
                         {#if tasks.length === 0}
                             <Dialog.Description class="text-sm">
                                 No tasks.

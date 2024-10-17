@@ -128,6 +128,10 @@ export async function completeTask(taskId: number) {
     return await invoke("complete_task", {taskId});
 }
 
+export async function uncompleteTask(taskId: number) {
+    return await invoke("uncomplete_task", {taskId});
+}
+
 export async function deleteTask(taskId: number) {
     return await invoke("delete_task", {taskId});
 }

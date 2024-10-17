@@ -7,7 +7,7 @@ use log::debug;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
-use tauri::{command, Manager, State};
+use tauri::{command, Emitter, Manager, State};
 
 mod handler;
 pub use handler::*;
@@ -587,19 +587,47 @@ async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError
 }
 
 #[command]
-async fn complete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_id: u64) -> Result<(), BackendError> {
+pub async fn complete_task(
+    handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    task_id: u64
+) -> Result<(), BackendError> {
+    let updated_task = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.task_complete(task_id).await?
+    };
+
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
+    if let Some(task) = state.tasks.iter_mut().find(|task| task.id == task_id) {
+        *task = updated_task.task.clone();
+    }
+    let _ = handle.emit("taskListUpdate", ());
+    Ok(())
+}
 
-    let updated_task = state.client.complete_task(task_id).await?;
+#[command]
+pub async fn uncomplete_task(
+    handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    task_id: u64
+) -> Result<(), BackendError> {
+    let updated_task = {
+        let state = state.clone().inner().inner();
+        let state = state.read().await;
+        let state = state.try_inner()?;
+        state.client.task_uncomplete(task_id).await?
+    };
 
-    state.tasks.iter_mut().for_each(|task| {
-        if task.id == task_id {
-            *task = updated_task.clone();
-        }
-    });
-
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    if let Some(task) = state.tasks.iter_mut().find(|task| task.id == task_id) {
+        *task = updated_task.task.clone();
+    }
     let _ = handle.emit("taskListUpdate", ());
     Ok(())
 }
@@ -610,7 +638,7 @@ async fn delete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    state.client.delete_task(task_id).await?;
+    state.client.task_delete(task_id).await?;
     state.tasks = state.tasks.iter().filter(|task| task.id != task_id).cloned().collect();
     let _ = handle.emit("taskListUpdate", ());
     Ok(())
@@ -683,6 +711,7 @@ pub fn run() {
             get_announcements,
             get_tasks,
             complete_task,
+            uncomplete_task,
             delete_task
         ])
         .build(tauri::generate_context!())
