@@ -1,6 +1,5 @@
 <script>
     export let task;
-    console.log(task);
 </script>
 {#if task.completed !== null && task.completed}
         <div id="task" class="flex justify-between items-center border-b border-slate-200 py-3 px-2 border-l-4  border-l-transparent w-full">

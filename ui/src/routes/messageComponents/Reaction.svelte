@@ -1,5 +1,5 @@
 <script>
-    import {getCurrentUser, setReactionState} from "$lib/api.ts";
+    import {setReactionState} from "$lib/api.ts";
 
     export let id;
     export let messageId;
@@ -11,7 +11,6 @@
     $: checkBoxId = messageId + "Reaction" + id;
 
     async function clicked() {
-        console.log("Clicked reaction " + id + " on message " + messageId + " to " + document.getElementById(checkBoxId).checked);
         if (document.getElementById(checkBoxId).checked) {
             count += 1;
         } else {
@@ -40,6 +39,8 @@
         {:else}
             ??
         {/if}
-        {count}
+        {#key count}
+            <span>{count}</span>
+        {/key}
     </label>
 </span>

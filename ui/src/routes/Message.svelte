@@ -106,7 +106,6 @@
 
     async function remove() {
         positionPopovers();
-        console.log("Deleting message " + message.id);
         await deleteMessage(message.id);
     }
 

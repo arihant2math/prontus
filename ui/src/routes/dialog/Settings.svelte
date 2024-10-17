@@ -14,13 +14,11 @@
     function loadSettings() {
         loadTheme(settings);
         getSettings().then((newSettings) => {
-            console.log(newSettings);
             settings = newSettings;
         });
     }
 
     function saveSettings() {
-        console.log(settings);
         setSettings(settings);
         loadTheme(settings);
     }
