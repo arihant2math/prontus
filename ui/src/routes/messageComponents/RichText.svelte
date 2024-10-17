@@ -101,7 +101,6 @@
             {/each}
         </a>
     {:else if content.type === "mention"}
-        <p>test</p>
         <Popover.Root>
             <Popover.Trigger>
                 <p class="text-nowrap text-blue-500">{content.user.fullname}</p>

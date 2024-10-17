@@ -6,7 +6,7 @@
 <!--{JSON.stringify(announcement)}-->
 <div class="flex flex-row space-x-2 py-2">
     <div>
-        <InteractiveProfilePicture user={announcement.sender}/>
+        <InteractiveProfilePicture user={announcement.sender} on:createDm/>
     </div>
     <div class="flex flex-col">
         <div class="flex items-center space-x-2 rtl:space-x-reverse">

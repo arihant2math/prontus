@@ -6,7 +6,9 @@
     export let text;
     export let style = "default";
     export let disabled = false;
-    $: colorCls == getColorClasses(style, disabled);
+    export let compact = false;
+    $: colorCls = getColorClasses(style, disabled);
+    $: spacing = compact ? "p-1" : "px-5 py-2.5 me-2 mb-2";
 
     function getColorClasses(buttonStyle, disabled) {
         if (disabled) {
@@ -34,4 +36,4 @@
         }
     }
 </script>
-<button on:click type="button" class="text-white font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700">{text}</button>
+<button on:click type="button" class="text-white font-medium rounded-lg text-sm {spacing} {colorCls}">{text}</button>

@@ -31,6 +31,6 @@
     <Popover.Content
             class="z-50 w-full max-w-max rounded-lg bg-white dark:bg-slate-800 shadow-popover p-4"
             sideOffset={8}>
-        <UserInfo user={user}/>
+        <UserInfo user={user} on:createDm/>
     </Popover.Content>
 </Popover.Root>

@@ -10,7 +10,7 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages, getSettings, readChannel
+        getCurrentUser, getChannelInfo, getParentMessages, getSettings, readChannel, createDm
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
@@ -27,7 +27,7 @@
     let currentUser;
     let messages = [];
     let parentMessages = [];
-    let channelInfo;
+    let channelInfo = null;
     let channelUsers = [];
     let showMemberList = false;
     let showThread = false;
@@ -115,6 +115,12 @@
         // TODO: implement
     }
 
+    async function createDmForUser(user) {
+        createDmDialogOpen = false;
+        await createDm(user.id);
+        // TODO: focus onto that dm
+    }
+
     init().then(() => {
         console.log("Main init complete");
     });
@@ -126,6 +132,7 @@
 </script>
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
     <Sidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
+             bind:channelInfo={channelInfo}
              on:showDmDialog={() => {createDmDialogOpen = true}}
              bind:settings={settings}
              on:showSettings={() => {settingsDialogOpen = true}}
@@ -138,14 +145,14 @@
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
-                             bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings}/>
+                             bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings} on:createDm={createDmForUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     <RichTextEdit bind:this={messageInput}
                                   sendMessage={async (text) => {queuedSendMessage(text, null)}}/>
                 </div>
             </div>
             {#if showMemberList && !showThread}
-                <MemberList bind:channelUsers={channelUsers}/>
+                <MemberList bind:channelUsers={channelUsers} on:createDm={createDmForUser}/>
             {/if}
             {#if showThread}
                 <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
@@ -159,7 +166,7 @@
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
                         <MessageList id="threadMessagesDiv" bind:messages={threadMessages} viewThread={(id) => {}}
                                      bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}
-                                     bind:settings={settings}/>
+                                     bind:settings={settings} on:createDm={createDmForUser}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                             <RichTextEdit sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
                         </div>

@@ -8,12 +8,14 @@
     export let stats;
     export let membership;
     export let buttonClick;
+    export let active = false;
     let listItem = null;
     $: title = membership.alias === null ? info.title : membership.alias;
     $: textColor = membership.mute ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white";
     $: unreadString = stats.unread > 99 ? "99+" : stats.unread;
     $: mentionString = stats.unread_mentions > 99 ? "99+" : stats.unread_mentions;
     $: fontWeight = stats.unread > 0 ? "font-bold" : "font-medium";
+    $: bgColor = active ? "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white" : "hover:bg-gray-100 dark:hover:bg-slate-700";
 
     function btnClick() {
         buttonClick(info.id);
@@ -95,25 +97,25 @@
     addListener();
 </script>
 <li class="select-none" bind:this={listItem} on:load={addListener}>
-        <button on:click={btnClick}
-                class="flex items-start p-2 {textColor} transition duration-75 rounded-lg pl-4 group hover:bg-gray-100 dark:hover:bg-slate-700 w-full text-ellipsis">
-            {#if info.isdm}
-                <div class="relative">
-                    <ProfilePicture user="{info.dmpartner}"/>
-                    {#if !info.dmpartner.isonline}
-                        <span class="bottom-0 left-7 absolute bg-gray-500 dark:bg-gray-600 w-3.5 h-3.5 border-2 border-white dark:border-gray-800 rounded-full"></span>
-                    {:else}
-                        <span class="bottom-0 left-7 absolute w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
-                    {/if}
-                </div>
-            {/if}
-            <span class="text-sm text-left ms-3 flex-1 whitespace-nowrap text-truncate {fontWeight}">{title}</span>
-            { #if stats.unread > 0 && !membership.mute }
-                {#if stats.unread_mentions > 0}
-                    <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>
+    <button on:click={btnClick}
+            class="flex items-start p-2 {textColor} {bgColor} transition duration-75 rounded-lg pl-4 group w-full text-ellipsis">
+        {#if info.isdm}
+            <div class="relative">
+                <ProfilePicture user="{info.dmpartner}"/>
+                {#if !info.dmpartner.isonline}
+                    <span class="bottom-0 left-7 absolute bg-gray-500 dark:bg-gray-600 w-3.5 h-3.5 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 {:else}
-                    <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-600 dark:text-gray-300 w-fit">{unreadString}</span>
+                    <span class="bottom-0 left-7 absolute w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 {/if}
+            </div>
+        {/if}
+        <span class="text-sm text-left ms-3 flex-1 whitespace-nowrap text-truncate {fontWeight}">{title}</span>
+        {#if stats.unread > 0 && !membership.mute}
+            {#if stats.unread_mentions > 0}
+                <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>
+            {:else}
+                <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-600 dark:text-gray-300 w-fit">{unreadString}</span>
             {/if}
-        </button>
+        {/if}
+    </button>
 </li>

@@ -6,6 +6,7 @@
     export let name;
     export let items;
     export let buttonClick;
+    export let channelInfo;
     $: show = true;
 </script>
 
@@ -25,10 +26,14 @@
             <span class="ml-1 flex-1 text-left rtl:text-right whitespace-nowrap truncate text-sm font-medium">{name}</span>
         </Collapsible.Trigger>
         <Collapsible.Content
-            transition={slide}>
+                transition={slide}>
             <ul class="py-2 space-y-2">
                 {#each items as item}
-                    <li><Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/></li>
+                    {#if channelInfo !== null && item[0].id === channelInfo.id}
+                        <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}" active="true"/>
+                    {:else}
+                        <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/>
+                    {/if}
                 {/each}
             </ul>
         </Collapsible.Content>

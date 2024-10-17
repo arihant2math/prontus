@@ -7,6 +7,8 @@
 
     export let currentUser;
     export let handleSidebarClick;
+    export let channelInfo;
+
     let channels = [];
 
     async function updateChannelList() {
@@ -36,7 +38,11 @@
         <CurrentUserCard bind:user={currentUser} on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#each channels as item}
-                <li><Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}"/></li>
+                {#if channelInfo !== null && item[0].id === channelInfo.id}
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}" active="true"/>
+                {:else}
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/>
+                {/if}
             {/each}
         </ul>
     </div>
