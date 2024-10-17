@@ -15,7 +15,6 @@ pub struct Task {
     pub assigneeuser: UserInfo,
     pub user: UserInfo,
     pub taskmedia: Vec<serde_json::Value>,
-    pub user: UserInfo,
     pub completed: Option<String>,
     pub due: String,
     pub reminder_local: Option<String>,
