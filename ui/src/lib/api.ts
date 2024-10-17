@@ -120,6 +120,6 @@ export async function getAnnouncements(query) {
     return await invoke("get_announcements", {query});
 }
 
-export async function getTasks(completed: boolean) {
-    return await invoke("get_tasks", {completed});
+export async function getTasks() {
+    return await invoke("get_tasks");
 }
