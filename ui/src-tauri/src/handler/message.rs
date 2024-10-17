@@ -1,9 +1,10 @@
-use tauri::{command, State};
+use tauri::{command, Emitter, State};
 use client::Message;
 use crate::{AppState, BackendError};
 
 #[command]
 pub async fn send_message(
+    handle: tauri::AppHandle,
     state: State<'_, AppState>,
     message: String,
     thread: Option<u64>
@@ -24,6 +25,7 @@ pub async fn send_message(
         return Ok(());
     }
     state.message_list.insert(0, response.message);
+    let _ = handle.emit("messageListUpdate", ());
     Ok(())
 }
 
@@ -111,6 +113,7 @@ pub async fn get_more_messages(
 
 #[command]
 pub async fn edit_message(
+    handle: tauri::AppHandle,
     state: State<'_, AppState>,
     message_id: u64,
     message: String,
@@ -125,12 +128,13 @@ pub async fn edit_message(
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
     *state.message_list.iter_mut().find(|m| m.id == message_id).unwrap() = message.message;
-
+    let _ = handle.emit("messageListUpdate", ());
     Ok(())
 }
 
 #[command]
 pub async fn delete_message(
+    handle: tauri::AppHandle,
     state: State<'_, AppState>,
     message_id: u64,
 ) -> Result<(), BackendError> {
@@ -144,5 +148,6 @@ pub async fn delete_message(
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
     state.message_list.retain(|message| message.id != message_id);
+    let _ = handle.emit("messageListUpdate", ());
     Ok(())
 }
