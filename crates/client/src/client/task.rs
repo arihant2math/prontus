@@ -21,7 +21,20 @@ impl ProntoClient {
     pub async fn task_complete(
         &self,
         task_id: u64,
-    ) -> Result<task_complete::PostTaskCompleteResponse, ResponseError> {
+    ) -> Result<task_complete::PostTaskResponse, ResponseError> {
+        Ok(task_complete::post(
+            &self.api_base_url,
+            &self.http_client,
+            task_complete::PostTaskCompleteRequest { task_id },
+        )
+        .await?
+        .to_result()?)
+    }
+
+    pub async fn task_uncomplete(
+        &self,
+        task_id: u64,
+    ) -> Result<task_complete::PostTaskResponse, ResponseError> {
         Ok(task_complete::post(
             &self.api_base_url,
             &self.http_client,
