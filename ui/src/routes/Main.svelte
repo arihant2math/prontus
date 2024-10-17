@@ -157,7 +157,7 @@
                         </svg>
                     </button>
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages}
+                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} viewThread={(id) => {}}
                                      bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}
                                      bind:settings={settings}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">

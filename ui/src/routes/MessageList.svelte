@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Message from "./Message.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import {getMessages, getMoreMessages} from "$lib/api.ts";
@@ -7,7 +7,7 @@
 
     export let messages;
     export let parentMessages;
-    export let viewThread;
+    export let viewThread: (id: number) => void;
     export let currentUser;
     export let inThread = false;
     export let id;
