@@ -9,9 +9,9 @@ pub struct Targets {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Announcement {
-    pub id: i64,
+    pub id: u64,
     pub organization_id: u64,
-    pub senderuser_id: i64,
+    pub senderuser_id: u64,
     pub targets: Targets,
     pub announcement: String,
     pub created_at: String,

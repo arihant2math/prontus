@@ -116,8 +116,8 @@ export async function userSearch(query: string) {
     return await invoke("user_search", {query});
 }
 
-export async function getAnnouncements(query) {
-    return await invoke("get_announcements", {query});
+export async function getAnnouncements() {
+    return await invoke("get_announcements");
 }
 
 export async function getTasks() {
