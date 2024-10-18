@@ -587,7 +587,7 @@ async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError
 }
 
 #[command]
-pub async fn complete_task(
+async fn complete_task(
     handle: tauri::AppHandle,
     state: State<'_, AppState>,
     task_id: u64
@@ -610,7 +610,7 @@ pub async fn complete_task(
 }
 
 #[command]
-pub async fn uncomplete_task(
+async fn uncomplete_task(
     handle: tauri::AppHandle,
     state: State<'_, AppState>,
     task_id: u64
@@ -634,11 +634,12 @@ pub async fn uncomplete_task(
 
 #[command]
 async fn delete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_id: u64) -> Result<(), BackendError> {
+    // TODO: Fix
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
-    state.client.task_delete(task_id).await?;
+    // state.client.task_delete(task_id).await?;
     state.tasks = state.tasks.iter().filter(|task| task.id != task_id).cloned().collect();
     let _ = handle.emit("taskListUpdate", ());
     Ok(())

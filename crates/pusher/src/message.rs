@@ -178,6 +178,14 @@ pub struct PusherServerAnnouncementRemovedEvent {
 // ,\"translation\":\"Lol\",\"user_edited_version\":0,\"updated_at\":\"2024-10-03 04:51:29\",\"created_at\":\"2024-10-03 04:51:29\",\"id\":910645,\"lang\":\"en\"}}"), channel: Some("private-bubble.3832006.OAOxiNFFvXM94frhiyO7kAq4wIMNG9Zhz52nNVLW") }
 // RawPusherMessage { event: "App\\Events\\BubbleChanged", data: String("{\"bubble\":{\"id\":3832006,\"updated_at\":\"2024-10-03 04:45:44\"}}"), channel: Some("private-user.5302428") }
 // Received unknown message: RawPusherMessage { event: "App\\Events\\BubbleRemoved", data: String("{\"bubble\":{\"id\":3872909,\"updated_at\":\"2024-10-17 17:42:30\",\"wasHidden\":false}}"), channel: Some("private-user.5302428") }
+// RawPusherMessage { event: "App\\Events\\TaskUpdated", data: String("{\"task\":{\"id\":156087,\"uuid\":\"5112b51a-c92b-4baf
+// -a47a-38124920be6c\",\"organization_id\":2245,\"bubble_id\":null,\"user_id\":5302428,\"title\":\"Completed Task\",\"notes\":\"Random notes\\n\\nNow
+// updated\",\"assigneeuser_id\":5302428,\"due\":\"2025-09-30 00:00:00\",\"reminder_local\":null,\"reminder_utc\":null,\"remindedassignee\":false,\"completed\":null,\"created_at\":\"2024-10-16 00:47:11\",\"updated_at\":\"2024-10-18 00:02:40\"}}"), channel: Some("private-user.5302428") }
+// Received unknown message: RawPusherMessage { event: "App\\Events\\TaskUpdated", data: String("{\"task\":{\"id\":156087,\"uuid\":\"5112b51a-c92b-4baf
+// -a47a-38124920be6c\",\"organization_id\":2245,\"bubble_id\":null,\"user_id\":5302428,\"title\":\"Completed Task\",\"notes\":\"Random notes\\n\\nNow
+// updated\",\"assigneeuser_id\":5302428,\"due\":\"2025-09-30 00:00:00\",\"reminder_local\":null,\"reminder_utc\":null,\"remindedassignee\":false,\"com
+// pleted\":\"2024-10-18 00:02:46\",\"created_at\":\"2024-10-16 00:47:11\",\"updated_at\":\"2024-10-18 00:02:46\"}}"), channel: Some("private-user.5302428") }
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PusherServerEventType {
     PusherServerUserPresenceEvent(PusherServerUserPresenceEvent),

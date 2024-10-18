@@ -11,7 +11,7 @@
 
     function fetchAnnouncements() {
         getAnnouncements().then((response) => {
-            announcements = response.data;
+            announcements = response;
         });
     }
 

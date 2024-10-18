@@ -4,13 +4,14 @@
     import {getTasks} from "$lib/api.ts";
     import CloseButton from "../CloseButton.svelte";
     import TaskListItem from "../taskComponents/TaskListItem.svelte";
+    import {listen} from "@tauri-apps/api/event";
 
     export let tasksDialogOpen = false;
     export let tasks = null;
 
     function fetchTasks() {
         getTasks().then((response) => {
-            tasks = response.data;
+            tasks = response;
         });
     }
 
@@ -74,7 +75,7 @@
                                 {/each}
                             </div>
                         {/if}
-                    {/await}
+                    {/if}
                 </div>
             </div>
             <Dialog.Close
