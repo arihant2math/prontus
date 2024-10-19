@@ -39,9 +39,9 @@
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#each channels as item}
                 {#if channelInfo !== null && item[0].id === channelInfo.id}
-                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}" active="true"/>
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}" active="true"/>
                 {:else}
-                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/>
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}"/>
                 {/if}
             {/each}
         </ul>
