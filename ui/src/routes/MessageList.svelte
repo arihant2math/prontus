@@ -56,9 +56,6 @@
     {#each messages as message, i (message.id)}
         <div animate:flip={{ delay: 200, duration: 250, easing: quintOut }}>
             {#if message !== undefined && memberships !== undefined}
-                {#if message.id === channelInfo[2].mark}
-                    <div class="text-center text-red-500 dark:text-red-400 text-sm">Unread</div>
-                {/if}
                 {#if i < messages.length - 1 && i > 0}
                     <Message message={message} bind:memberships={memberships} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {:else if i === 0}
@@ -68,6 +65,9 @@
                 {:else}
                     <Message message={message} bind:memberships={memberships} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {/if}
+            {/if}
+            {#if message.id === channelInfo[2].mark}
+                <div class="text-center text-red-500 dark:text-red-400 text-sm">Unread</div>
             {/if}
         </div>
     {/each}
