@@ -222,7 +222,6 @@
 <button class="flex flex-row float-end space-x-0.5 rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5">
     {#each memberships as membership}
         {#if membership.mark === message.id}
-            <!--{JSON.stringify(membership)}-->
             <ProfilePicture user={membership.user} small={true}/>
         {/if}
     {/each}

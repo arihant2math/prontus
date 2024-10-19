@@ -145,7 +145,7 @@
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
-                             bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings} on:createDm={createDmForUser}/>
+                             bind:channelInfo={channelInfo} bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings} on:createDm={createDmForUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     <RichTextEdit bind:this={messageInput}
                                   sendMessage={async (text) => {queuedSendMessage(text, null)}}/>
@@ -164,7 +164,7 @@
                         </svg>
                     </button>
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} viewThread={(id) => {}}
+                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:channelInfo={channelInfo} viewThread={(id) => {}}
                                      bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}
                                      bind:settings={settings} on:createDm={createDmForUser}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">

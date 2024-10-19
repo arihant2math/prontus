@@ -7,6 +7,7 @@
 
     export let messages;
     export let parentMessages;
+    export let channelInfo;
     export let viewThread: (id: number) => void;
     export let currentUser;
     export let inThread = false;
@@ -54,7 +55,10 @@
 <div id="{id}" class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse h-full w-full" on:scroll={messageScroll} onload="this.scrollTop=0">
     {#each messages as message, i (message.id)}
         <div animate:flip={{ delay: 200, duration: 250, easing: quintOut }}>
-            {#if message !== undefined}
+            {#if message !== undefined && memberships !== undefined}
+                {#if message.id === channelInfo[2].mark}
+                    <div class="text-center text-red-500 dark:text-red-400 text-sm">Unread</div>
+                {/if}
                 {#if i < messages.length - 1 && i > 0}
                     <Message message={message} bind:memberships={memberships} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {:else if i === 0}
