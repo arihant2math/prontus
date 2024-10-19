@@ -1,7 +1,7 @@
 <script lang="ts">
     import Message from "./Message.svelte";
     import {positionPopovers} from "$lib/popup.js";
-    import {getMessages, getMoreMessages} from "$lib/api.ts";
+    import {getCurrentChannelId, getMessages, getMoreMessages} from "$lib/api.ts";
     import { flip } from 'svelte/animate';
     import { quintOut } from 'svelte/easing';
 
@@ -13,7 +13,15 @@
     export let id;
     export let settings;
 
+    let memberships = [];
+    $: messages, getMemberships();
     let updating = false;
+
+    function getMemberships() {
+        getCurrentChannelId().then((info) => {
+            memberships = info.memberships;
+        });
+    }
 
     function appendMessages(newMessages) {
         messages = messages.concat(newMessages);
@@ -48,13 +56,13 @@
         <div animate:flip={{ delay: 200, duration: 250, easing: quintOut }}>
             {#if message !== undefined}
                 {#if i < messages.length - 1 && i > 0}
-                    <Message message={message} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
+                    <Message message={message} bind:memberships={memberships} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {:else if i === 0}
-                    <Message message={message} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
+                    <Message message={message} bind:memberships={memberships} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {:else if i === message.length - 1}
-                    <Message message={message} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
+                    <Message message={message} bind:memberships={memberships} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {:else}
-                    <Message message={message} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
+                    <Message message={message} bind:memberships={memberships} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {/if}
             {/if}
         </div>

@@ -10,8 +10,10 @@
     import InteractiveProfilePicture from "./user/InteractiveProfilePicture.svelte";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
     import ViewTheadFooter from "./messageComponents/ViewThreadFooter.svelte";
+    import ProfilePicture from "./user/ProfilePicture.svelte";
 
     export let message;
+    export let memberships;
     export let previousMessage = null;
     export let nextMessage = null;
     export let currentUser;
@@ -216,3 +218,12 @@
         </div>
     {/if}
 {/if}
+<!--TODO: onclick-->
+<button class="flex flex-row float-end space-x-0.5 rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5">
+    {#each memberships as membership}
+        {#if membership.mark === message.id}
+            <!--{JSON.stringify(membership)}-->
+            <ProfilePicture user={membership.user} small={true}/>
+        {/if}
+    {/each}
+</button>

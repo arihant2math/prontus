@@ -84,7 +84,7 @@ export async function setSettings(settings: any): Promise<void> {
     return await invoke("set_settings", {settings});
 }
 
-export async function getCurrentChannelId(): Promise<number> {
+export async function getCurrentChannelId(): Promise<any> {
     return await invoke("get_current_channel_id");
 }
 
