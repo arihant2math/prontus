@@ -13,7 +13,6 @@
         lock = true;
         if ((event.srcElement.scrollHeight - event.srcElement.scrollTop) < 900) {
             let id = await getCurrentChannelId().id;
-            console.log(await loadChannelUsers(id));
             channelUsers = await getChannelUsers(id);
         }
         lock = false;
