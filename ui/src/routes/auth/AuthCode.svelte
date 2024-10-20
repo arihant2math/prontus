@@ -1,6 +1,7 @@
 <script>
     import Code from "./Code.svelte";
     import TopLink from "./TopLink.svelte";
+    import {loadTheme} from "$lib/helpers.ts";
 
     export let onCode;
     let password = [];
@@ -15,6 +16,8 @@
             await submit();
         }
     }
+
+    loadTheme();
 </script>
 
 <section class="bg-gray-50 dark:bg-gray-900">
