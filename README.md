@@ -14,9 +14,9 @@ Prontus aims to be faster and more lightweight than the offical Pronto client. T
 Prontus aims to have the following features the offical Pronto client does not. These might not all be implmeneted before the stable release, but they are goals.
 
 - [x] Rich Text (Prontus support markdown and latex, with builtin styling commands in the message box)
-- [x] UI Customizability (Pronto has none, so Prontus is already better in many regards, but it aims to go even further, including custom themes and rearrangement of UI elements)
+- [x] UI Customizability (Pronto has none, so Prontus is already better in many regards, but it aims to go even further, including custom themes and rearrangement of UI elements) #51
 - [ ] Better search via local message storage. (Already implemented in the backend, but the UI is not completed)
-- [ ] Encrypted DMs (Partially implemented, but without any settings or hook to the UI)
+- [ ] Encrypted DMs (Partially implemented, but without any settings or hook to the UI) #44
 - [ ] Scripting Support (Work has already started with probot, a bot scripting crate)
 - [ ] Extensibility via plugins (Using WASM)
 
