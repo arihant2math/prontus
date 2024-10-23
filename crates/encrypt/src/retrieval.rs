@@ -13,13 +13,6 @@ pub struct PublicLookupService {
 }
 
 impl PublicLookupService {
-    fn new() -> Self {
-        let organizations = reqwest::blocking::get(URL).unwrap().json::<ServerResponse>().unwrap().organizations;
-        Self {
-            organizations
-        }
-    }
-
     pub async fn fetch() -> Self {
         let response = reqwest::get(URL).await.unwrap().json::<ServerResponse>().await.unwrap();
         Self {
