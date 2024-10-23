@@ -730,6 +730,7 @@ pub fn run() {
             create_bubble,
             user_search,
             get_announcements,
+            mark_announcement_read,
             get_tasks,
             complete_task,
             uncomplete_task,
