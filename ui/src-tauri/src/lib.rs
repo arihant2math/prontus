@@ -581,12 +581,12 @@ async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announcemen
 #[command]
 async fn mark_announcement_read(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
     let state = state.inner().inner();
-    let mut state = state.read().await;
+    let mut state = state.write().await;
     let state = state.try_inner_mut()?;
     let new_announcement = state.client.mark_read_announcement(id).await?;
     state.announcements.iter_mut().for_each(|announcement| {
         if announcement.id == new_announcement.announcement.id {
-            *announcement = new_announcement.announcement;
+            *announcement = new_announcement.announcement.clone();
         }
     });
     Ok(())
