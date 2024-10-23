@@ -4,10 +4,15 @@ use std::io::stdin;
 use milli::{
     GeoSortStrategy, TermsMatchingStrategy, TimeBudget,
 };
-use search::{message_index_location, Search};
+use search::{Search};
 use std::io::BufRead;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
+
+fn message_index_location() -> PathBuf {
+    PathBuf::from("D:\\temp_message_index")
+}
 
 #[tokio::main]
 async fn indexer_thread() {
