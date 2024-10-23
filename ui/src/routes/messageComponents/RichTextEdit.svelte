@@ -77,6 +77,7 @@
 
 <ProsemirrorEditor
         placeholder="Message"
+        className="rounded-md p-2 bg-grey-100 dark:bg-slate-800"
         {editorState}
         on:change={handleChange}
 />
