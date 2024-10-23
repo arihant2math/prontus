@@ -24,6 +24,7 @@ use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
 use task::run_proxy_thread;
 use task::run_pusher_thread;
+use crate::task::run_search_thread;
 
 #[command]
 async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
@@ -258,7 +259,7 @@ async fn set_reaction_state(
 }
 
 #[command]
-async fn get_current_channel_id(state: State<'_, AppState>) -> Result<Bubble, BackendError> {
+async fn get_current_channel(state: State<'_, AppState>) -> Result<Bubble, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -578,6 +579,20 @@ async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announcemen
 }
 
 #[command]
+async fn mark_announcement_read(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.read().await;
+    let state = state.try_inner_mut()?;
+    let new_announcement = state.client.mark_read_announcement(id).await?;
+    state.announcements.iter_mut().for_each(|announcement| {
+        if announcement.id == new_announcement.announcement.id {
+            *announcement = new_announcement.announcement;
+        }
+    });
+    Ok(())
+}
+
+#[command]
 async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
@@ -663,6 +678,11 @@ pub fn run() {
                     let _ = run_pusher_thread(thread_handle, context);
                 }
             });
+            thread::spawn({
+                move || {
+                    let _ = run_search_thread();
+                }
+            });
 
             app.manage(context);
 
@@ -686,7 +706,7 @@ pub fn run() {
             get_channel_info,
             get_current_user,
             get_user,
-            get_current_channel_id,
+            get_current_channel,
             get_channel_list,
             get_message,
             get_messages,

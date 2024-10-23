@@ -14,10 +14,9 @@ pub enum SearchError {
 #[tokio::main]
 pub async fn run_search_thread() -> Result<(), SearchError> {
     let mut future = None;
-
     loop {
         let settings = Settings::load().await?;
-        if future.is_none() {
+        if future.is_none() && settings.search.messages.is_some() {
             if let Some(ref message_index_settings) = settings.search.messages {
                 let path = PathBuf::from(message_index_settings.path.clone());
                 tokio::fs::create_dir_all(&path).await.unwrap();
