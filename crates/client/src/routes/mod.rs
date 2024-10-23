@@ -8,6 +8,7 @@ pub mod bubble_info;
 pub mod bubble_list;
 pub mod bubble_mark;
 pub mod bubble_membership_search;
+pub mod counts;
 pub mod device_ping;
 pub mod dm_create;
 pub mod files;

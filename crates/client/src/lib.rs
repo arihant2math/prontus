@@ -198,7 +198,7 @@ mod tests {
         let settings = settings::Settings::load().await.unwrap();
         let client = ProntoClient::new(
             "https://stanfordohs.pronto.io/api/".to_string(),
-            &settings.auth.api_key.unwrap(),
+            &settings.auth.unwrap().api_key,
         );
         client.unwrap()
     }
@@ -231,7 +231,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_announcement_list() {
         let client = get_client().await;
-        client.announcement_list().await.unwrap();
+        client.announcement_list("RECEIVED".to_string()).await.unwrap();
     }
 
     #[tokio::test]
