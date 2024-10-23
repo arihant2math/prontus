@@ -131,8 +131,11 @@
     {#if !systemMessage && !settings.appearance.messages.compact}
         <div class="flex flex-col">
             {#if dateSpan}
-                <!--    TODO: Debug and then put a proper date span here-->
-                <p class="text-gray-500 text-center">{messageCreatedatDate}</p>
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-gray-400"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 dark:text-gray-400 select-none">{messageCreatedatDate}</span>
+                    <div class="flex-grow border-t border-gray-400"></div>
+                </div>
             {/if}
             {#if !inThread && parentMessage !== undefined && firstThreadMessage}
                 <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-2 rounded-xl bg-gray-50 dark:bg-slate-700 w-max">
@@ -219,10 +222,12 @@
     {/if}
 {/if}
 <!--TODO: onclick-->
-<button class="flex flex-row float-end space-x-0.5 rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5">
-    {#each memberships as membership}
-        {#if membership.mark === message.id}
-            <ProfilePicture user={membership.user} small={true}/>
-        {/if}
-    {/each}
-</button>
+{#if memberships !== null && memberships !== undefined && memberships.length > 0}
+    <button class="flex flex-row float-end rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5 max-w-[200px] overflow-x-hidden">
+        {#each memberships as membership}
+            {#if membership.mark === message.id}
+                <span class="-ml-1 flex-none"><ProfilePicture user={membership.user} small={true}/></span>
+            {/if}
+        {/each}
+    </button>
+{/if}

@@ -66,8 +66,12 @@
                     <Message message={message} bind:memberships={memberships} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} bind:settings={settings} on:createDm/>
                 {/if}
             {/if}
-            {#if message.id === channelInfo[2].mark}
-                <div class="text-center text-red-500 dark:text-red-400 text-sm">Unread</div>
+            {#if channelInfo !== null && message.id === channelInfo[2].mark}
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-red-500 dark:border-red-400"></div>
+                    <span class="flex-shrink mx-4 text-red-500 dark:text-red-400 select-none">Unread</span>
+                    <div class="flex-grow border-t border-red-500 dark:border-red-400"></div>
+                </div>
             {/if}
         </div>
     {/each}

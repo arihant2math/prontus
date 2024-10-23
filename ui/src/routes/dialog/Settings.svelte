@@ -24,7 +24,7 @@
     }
 
     function logout() {
-        settings.auth.api_key = null;
+        settings.auth = null;
         saveSettings();
     }
 

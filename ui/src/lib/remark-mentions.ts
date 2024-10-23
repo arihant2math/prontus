@@ -37,7 +37,6 @@ export default function remarkMentions(
      */
     function replaceMention(value: string, text: string) {
         /** @type {PhrasingContent[]} */
-        console.log(value, text);
         let whitespace = [];
 
         let id = text.substring(2, text.length - 1);

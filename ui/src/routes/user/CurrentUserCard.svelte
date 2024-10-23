@@ -27,7 +27,7 @@
             <div class="flex flex-col rounded-lg px-2 align-left text-left self-center">
                 <p class="text-sm">{user.fullname}</p>
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap text-ellipsis overflow-x-hidden">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap text-ellipsis overflow-x-hidden flex-none">
                         {user.organizations[0].name}
                     </p>
                 </div>
