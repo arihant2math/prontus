@@ -1,19 +1,19 @@
-use async_trait::async_trait;
 use client::ProntoClient;
+use log::error;
 use pusher::PusherServerEventType;
 use std::error;
 use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 
 pub trait Handler {
     type Error;
-    type Future: Future<Output = Result<(), Self::Error>> + Send;
 
-    fn handle(
+    async fn handle(
         &self,
         pronto_client: Arc<ProntoClient>,
         input: PusherServerEventType,
-    ) -> Self::Future;
+    ) -> Result<(), Self::Error>;
 }
 
 pub struct FunctionHandler<F> {
@@ -22,57 +22,27 @@ pub struct FunctionHandler<F> {
 
 impl<F, E> Handler for FunctionHandler<F>
 where
-    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Result<(), E>,
+    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output=Result<(), E>>>>,
     E: error::Error + Send + Sync + 'static,
 {
     type Error = E;
-    type Future = std::pin::Pin<Box<dyn Future<Output = Result<(), Self::Error>> + Send>>;
 
-    fn handle(
+    async fn handle(
         &self,
         pronto_client: Arc<ProntoClient>,
         input: PusherServerEventType,
     ) -> Result<(), Self::Error> {
-        (self.function)(pronto_client, input)
+        async {
+            (self.function)(pronto_client, input).await
+        }.await
     }
 }
 
 pub fn handler<F, I, E>(function: F) -> FunctionHandler<F>
 where
-    F: Fn(I) -> Result<(), E>,
+    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output=Result<(), E>>>>,
 {
     FunctionHandler { function }
-}
-
-pub(crate) struct HandlerWrapper {
-    handler: Box<
-        dyn Handler<
-            Error = Box<dyn error::Error + Send + Sync>,
-            Future = std::pin::Pin<dyn Future<Output = Result<(), Handler::Error>>>,
-        >,
-    >,
-}
-
-#[async_trait]
-impl HandlerWrapper {
-    pub fn new(
-        handler: impl Handler<
-                Error = Box<dyn error::Error + Send + Sync>,
-                Future = std::pin::Pin<dyn Future<Output = Result<(), Handler::Error>>>,
-            > + 'static,
-    ) -> Self {
-        Self {
-            handler: Box::new(handler),
-        }
-    }
-
-    pub async fn handle(&self, pronto_client: Arc<ProntoClient>, input: PusherServerEventType) {
-        let result = self.handler.handle(pronto_client, input).await;
-        if let Err(err) = result {
-            e
-            !("Error: {}", err);
-        }
-    }
 }
 
 pub trait CommandTrait {
@@ -112,26 +82,23 @@ impl CommandHandler {
 
 impl Handler for CommandHandler {
     type Error = Box<dyn error::Error + Send + Sync>;
-    type Future = std::pin::Pin<Box<dyn Future<Output = Result<(), Self::Error>> + Send>>;
 
     async fn handle(
         &self,
         pronto_client: Arc<ProntoClient>,
         input: PusherServerEventType,
-    ) -> Self::Future {
-        Box::pin(async {
-            let input = match input {
-                PusherServerEventType::PusherServerMessageAddedEvent(message) => message,
-                _ => return Ok(()),
-            };
-            let response = self.handle(input.message.message.clone());
-            let user_info = pronto_client.user_info(None).await.unwrap().user;
-            // TODO: parent message
-            pronto_client
-                .send_message(user_info.id, input.message.bubble_id, response, None)
-                .await?;
-            Ok(())
-        })
+    ) -> Result<(), Self::Error> {
+        let input = match input {
+            PusherServerEventType::PusherServerMessageAddedEvent(message) => message,
+            _ => return Ok(()),
+        };
+        let response = self.handle(input.message.message.clone());
+        let user_info = pronto_client.user_info(None).await.unwrap().user;
+        // TODO: parent message
+        pronto_client
+            .send_message(user_info.id, input.message.bubble_id, response, None)
+            .await?;
+        Ok(())
     }
 }
 
@@ -139,9 +106,8 @@ pub struct NoopHandler;
 
 impl Handler for NoopHandler {
     type Error = Box<dyn error::Error + Send + Sync>;
-    type Future = std::pin::Pin<Box<dyn Future<Output = Result<(), Self::Error>> + Send>>;
 
-    async fn handle(&self, _: Arc<ProntoClient>, _: PusherServerEventType) -> Self::Future {
-        Box::pin(async { Ok(()) })
+    async fn handle(&self, _: Arc<ProntoClient>, _: PusherServerEventType) -> Result<(), Self::Error> {
+        Ok(())
     }
 }

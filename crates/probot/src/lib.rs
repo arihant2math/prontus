@@ -12,6 +12,7 @@
 /// async fn main() {
 ///     let mut bot = BotBuilder::new()
 ///     .load_client("https://stanfordohs.pronto.io/api/".to_string(), "[your token here]".to_string(), 0)
+///     .await
 ///     .handler(NoopHandler)
 ///     .build()
 ///     .await;
@@ -23,6 +24,9 @@
 /// To do anything useful you'll have to implement a handler. Here is an example of a handler that responds messages with the text "hi".
 ///
 /// ```
+/// use std::error;
+/// use std::future::Future;
+/// use std::sync::Arc;
 /// use probot::{ProntoClient, Handler};
 /// use probot::pusher::PusherServerEventType;
 ///
@@ -30,20 +34,17 @@
 ///
 /// impl Handler for HelloHandler {
 ///     type Error = Box<dyn error::Error + Send + Sync>;
-///     type Future = std::pin::Pin<Box<dyn Future<Output=Result<(), Self::Error>> + Send>>;
 ///
-///     async fn handle(&self, pronto_client: ProntoClient, input: PusherServerEventType) -> Self::Future {
-///         Box::pin(async {
-///             let input = match input {
-///                 PusherServerEventType::PusherServerMessageAddedEvent(message) => message,
+///     async fn handle(&self, pronto_client: Arc<ProntoClient>, input: PusherServerEventType) -> Result<(), Self::Error> {
+///         let input = match input {
+///             PusherServerEventType::PusherServerMessageAddedEvent(message) => message,
 ///                 _ => return Ok(()),
 ///             };
-///             if input.message.message.clone().to_lowercase().contains("hi") {
-///                 let user_info = pronto_client.user_info(None).await.unwrap().user;
-///                 pronto_client.send_message(user_info.id, input.message.bubble_id, response, None).await?;
-///             }
-///             Ok(())
-///         })
+///         if input.message.message.clone().to_lowercase().contains("hi") {
+///             let user_info = pronto_client.user_info(None).await.unwrap().user;
+///             pronto_client.send_message(user_info.id, input.message.bubble_id, "hello".to_string(), None).await?;
+///         }
+///         Ok(())
 ///     }
 /// }
 /// ```
@@ -51,11 +52,9 @@
 ///
 mod handler;
 
-pub(crate) use handler::HandlerWrapper;
 pub use handler::{handler, Command, CommandHandler, Handler, NoopHandler};
 use std::collections::HashMap;
 
-use async_trait::async_trait;
 pub use client;
 pub use client::ProntoClient;
 use log::{error, warn};
@@ -63,45 +62,52 @@ pub use pusher;
 use pusher::{
     PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper,
 };
+use std::error;
 use std::future::Future;
 use std::sync::Arc;
 
 pub trait TokenLoader {
-    type Error;
-    type Future: Future<Output = Result<Option<String>, Self::Error>> + Send;
+    type Error: error::Error;
 
-    fn load(&self, user_id: u64) -> Self::Future;
+    async fn load(&self, user_id: u64) -> Result<Option<String>, Self::Error>;
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct Never;
+
+impl error::Error for Never {}
+
+impl std::fmt::Display for Never {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Never")
+    }
 }
 
 impl TokenLoader for String {
-    type Error = Box<dyn error::Error + Send + Sync>;
-    type Future =
-        std::pin::Pin<Box<dyn Future<Output = Result<Option<String>, Self::Error>> + Send>>;
+    type Error = Never;
 
-    fn load(&self, _: u64) -> Self::Future {
-        Box::pin(async { Ok(Some(self.clone())) })
+    async fn load(&self, _: u64) -> Result<Option<String>, Self::Error> {
+        Ok(Some(self.clone()))
     }
 }
 
 impl TokenLoader for HashMap<u64, String> {
-    type Error = Box<dyn error::Error + Send + Sync>;
-    type Future =
-        std::pin::Pin<Box<dyn Future<Output = Result<Option<String>, Self::Error>> + Send>>;
+    type Error = Never;
 
-    fn load(&self, user_id: u64) -> Self::Future {
-        Box::pin(async { Ok(self.get(&user_id).cloned()) })
+    async fn load(&self, user_id: u64) -> Result<Option<String>, Self::Error> {
+        Ok(self.get(&user_id).cloned())
     }
 }
 
-pub struct Bot {
+pub struct Bot<T: Handler> {
     client: Arc<ProntoClient>,
     pusher_client: PusherClient,
-    handler: HandlerWrapper,
+    handler: T,
     inited: bool,
 }
 
-impl Bot {
-    pub async fn new(client: Arc<ProntoClient>, handler: HandlerWrapper) -> Self {
+impl<T: Handler> Bot<T> {
+    pub async fn new(client: Arc<ProntoClient>, handler: T) -> Self {
         let pusher_client = PusherClient::new(client.clone()).await;
         Self {
             client,
@@ -151,12 +157,12 @@ impl Bot {
     }
 }
 
-pub struct BotBuilder {
+pub struct BotBuilder<T: Handler> {
     client: Option<Arc<ProntoClient>>,
-    handler: Option<HandlerWrapper>,
+    handler: Option<T>,
 }
 
-impl BotBuilder {
+impl<T: Handler> BotBuilder<T> {
     pub fn new() -> Self {
         Self {
             client: None,
@@ -169,30 +175,27 @@ impl BotBuilder {
         self
     }
 
-    pub fn load_client(
+    pub async fn load_client(
         mut self,
         base_url: String,
         token_loader: impl TokenLoader,
         user_id: u64,
     ) -> Self {
         self.client = Some(Arc::new(
-            ProntoClient::new(base_url, token_loader.load(user_id).unwrap()).unwrap(),
+            ProntoClient::new(base_url, &token_loader.load(user_id).await.unwrap().unwrap()).unwrap(),
         ));
         self
     }
 
     pub fn handler(
         mut self,
-        handler: impl Handler<
-                Error = Box<dyn error::Error + Send + Sync>,
-                Future = std::pin::Pin<dyn Future<Output = Result<(), Handler::Error>>>,
-            > + 'static,
+        handler: T,
     ) -> Self {
-        self.handler = Some(HandlerWrapper::new(handler));
+        self.handler = Some(handler);
         self
     }
 
-    pub async fn build(self) -> Bot {
+    pub async fn build(self) -> Bot<T> {
         Bot::new(self.client.unwrap(), self.handler.unwrap()).await
     }
 }
