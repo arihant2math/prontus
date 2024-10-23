@@ -1,6 +1,7 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
+use std::collections::HashMap;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{Expr, Ident, Token, Type};
@@ -10,8 +11,8 @@ struct APIEndpoint {
     url: Expr,
     response: Type,
     request: Type,
-    #[allow(dead_code)]
-    extra_args: Vec<Ident>
+    // TODO: don't use Expr here
+    extra_args: HashMap<String, Option<Expr>>
 }
 
 impl Parse for APIEndpoint {
@@ -23,9 +24,16 @@ impl Parse for APIEndpoint {
         let response: Type = input.parse()?;
         input.parse::<Token![,]>()?;
         let request: Type = input.parse()?;
-        let mut extra_args: Vec<Ident> = Vec::new();
-        while input.parse::<Token![,]>().is_ok() {
-            extra_args.push(input.parse()?);
+        let mut extra_args = HashMap::new();
+        while !input.is_empty() {
+            input.parse::<Token![,]>()?;
+            let key: Ident = input.parse()?;
+            if let Ok(_) = input.parse::<Token![=]>() {
+                let value: Expr = input.parse()?;
+                extra_args.insert(key.to_string(), Some(value));
+            } else {
+                extra_args.insert(key.to_string(), None);
+            }
         }
         Ok(Self {
             method,
@@ -60,8 +68,7 @@ pub fn api(input: TokenStream) -> TokenStream {
         url,
         response,
         request,
-        #[allow(unused)]
-        extra_args: _
+        extra_args
     } = syn::parse_macro_input!(input as APIEndpoint);
 
     if method != "get"
@@ -74,8 +81,8 @@ pub fn api(input: TokenStream) -> TokenStream {
             method.span(),
             "Invalid HTTP method. Must be one of: get, post, put, patch, delete",
         )
-        .to_compile_error()
-        .into();
+            .to_compile_error()
+            .into();
     }
 
     let has_request = !matches!(request, Type::Never(_));
@@ -88,8 +95,8 @@ pub fn api(input: TokenStream) -> TokenStream {
                     response.span(),
                     "Response type must be a wrapped Result type",
                 )
-                .to_compile_error()
-                .into();
+                    .to_compile_error()
+                    .into();
             }
             let ident = segments[0].ident.clone();
             // TODO: hack lol
@@ -98,77 +105,96 @@ pub fn api(input: TokenStream) -> TokenStream {
         _ => unimplemented!("response type must be a Path Type"),
     };
 
-    let parse = quote! {
+    let process = quote! {
+        let text = r.text().await?;
         log::trace!("Response: {}", text);
-        let json = serde_json::from_str(&text);
-        match json {
-            Ok(json) => {
-                return Ok(json);
-            }
-            Err(e) => {
-                let json = serde_json::from_str::<#response_name>(&text);
-                let e = json.unwrap_err();
-                log::error!("Error parsing json response: {:?}.", e);
-                let json = serde_json::from_str::<serde_json::Value>(&text);
-                if json.is_err() {
-                    return Err(crate::ResponseError::NotJson(text));
+    };
+
+    let parse = if let Some(parse_expr) = extra_args.get("parse") {
+        quote! {
+            return #parse_expr;
+        }
+    } else {
+        quote! {
+            let json = serde_json::from_str(&text);
+            match json {
+                Ok(json) => {
+                    return Ok(json);
                 }
-                return Err(crate::ResponseError::from(e));
+                Err(e) => {
+                    let json = serde_json::from_str::<#response_name>(&text);
+                    let e = json.unwrap_err();
+                    log::error!("Error parsing json response: {:?}.", e);
+                    let json = serde_json::from_str::<serde_json::Value>(&text);
+                    if json.is_err() {
+                        return Err(crate::ResponseError::NotJson(text));
+                    }
+                    return Err(crate::ResponseError::from(e));
+                }
             }
         }
     };
 
-    // Build the output
-    let expanded = if has_request {
-        if method == "get" {
+    let send_request =
+        if let Some(request_expr) = extra_args.get("request") {
             quote! {
-                pub async fn #method(
-                    pronto_base_url: &str,
-                    client: &reqwest::Client,
-                    request: #request,
-                ) -> Result<#response, crate::ResponseError> {
-                    let r = client
+                #request_expr;
+            }
+        } else if has_request {
+            if method == "get" {
+                quote! {
+                    client
                         .#method(format!("{pronto_base_url}{}", #url))
                         .query(&request)
                         .send()
-                        .await?;
-                    let text = r.text().await?;
-                    #parse
+                        .await?
+                }
+            } else {
+                quote! {
+                    client
+                        .#method(format!("{pronto_base_url}{}", #url))
+                        .json(&request)
+                        .send()
+                        .await?
                 }
             }
         } else {
             quote! {
-                pub async fn #method(
-                    pronto_base_url: &str,
-                    client: &reqwest::Client,
-                    request: #request,
-                ) -> Result<#response, crate::ResponseError> {
-                    let r = client
-                        .#method(format!("{pronto_base_url}{}", #url))
-                        .json(&request)
-                        .send()
-                        .await?;
-                    let text = r.text().await?;
-                    #parse
-                }
+                client
+                    .#method(format!("{pronto_base_url}{}", #url))
+                    .send()
+                    .await?
             }
+        };
+
+    let function_name = quote! {
+        #method
+    };
+
+    let types = if has_request {
+        quote! {
+            pronto_base_url: &str,
+            client: &reqwest::Client,
+            request: #request,
         }
     } else {
         quote! {
-            /// Sends a #method request to #url.
-            pub async fn #method(
-                pronto_base_url: &str,
-                client: &reqwest::Client,
-            ) -> Result<#response, crate::ResponseError> {
-                let r = client
-                    .#method(format!("{pronto_base_url}{}", #url))
-                    .send()
-                    .await?;
-                let text = r.text().await?;
-                #parse
-            }
+            pronto_base_url: &str,
+            client: &reqwest::Client,
         }
     };
+
+    // Build the output
+    let expanded = quote! {
+            /// Sends a #method request to #url.
+            pub async fn #function_name(
+                #types
+            ) -> Result<#response, crate::ResponseError> {
+                let r = #send_request;
+                #process
+                #parse
+            }
+        };
 
     TokenStream::from(expanded)
 }
