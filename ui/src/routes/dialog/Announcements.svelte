@@ -5,6 +5,9 @@
     import AnnouncementListItem from "../announcementComponents/AnnouncementListItem.svelte";
     import CloseButton from "../CloseButton.svelte";
     import {listen} from "@tauri-apps/api/event";
+    import DialogContent from "../bitsHead/DialogContent.svelte";
+    import DialogClose from "../bitsHead/DialogClose.svelte";
+    import SeparatorRoot from "../bitsHead/SeparatorRoot.svelte";
 
     export let announcementsDialogOpen = false;
     let announcements = null;
@@ -29,13 +32,12 @@
                 transitionConfig={{ duration: 150 }}
                 class="fixed inset-0 z-50 bg-black/80"
         />
-        <Dialog.Content
-                class="fixed left-[50%] top-[50%] z-50 w-full max-w-[90%] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white dark:bg-slate-800 p-5 shadow-2xl outline-none">
+        <DialogContent>
             <Dialog.Title
                     class="flex w-full items-center justify-center text-lg font-semibold">
                 Announcements
             </Dialog.Title>
-            <Separator.Root class="-mx-5 mb-6 mt-5 block h-px bg-gray-500"/>
+            <SeparatorRoot/>
             <div class="overflow-y-auto w-full overflow-x-hidden" style="height: 75vh">
                 {#if announcements == null}
                     <div role="status">
@@ -71,10 +73,7 @@
                     {/if}
                 {/if}
             </div>
-            <Dialog.Close
-                    class="absolute right-5 top-5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-98">
-                <CloseButton/>
-            </Dialog.Close>
-        </Dialog.Content>
+            <DialogClose/>
+        </DialogContent>
     </Dialog.Portal>
 </Dialog.Root>
