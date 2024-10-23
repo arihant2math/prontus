@@ -92,6 +92,7 @@
         messageInput.clear();
         // TODO: Below doesn't work for dms
         positionPopovers();
+        console.log(channelInfo)
     }
 
     async function init() {
@@ -147,8 +148,15 @@
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
                              bind:channelInfo={channelInfo} bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings} on:createDm={createDmForUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                    <RichTextEdit bind:this={messageInput}
-                                  sendMessage={async (text) => {queuedSendMessage(text, null)}}/>
+                    {#if channelInfo !== null && channelInfo[0].grant_create_message}
+                        <RichTextEdit bind:this={messageInput}
+                                      sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                      disabled={false}/>
+                    {:else}
+                        <RichTextEdit bind:this={messageInput}
+                                      sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                      disabled={true}/>
+                    {/if}
                 </div>
             </div>
             {#if showMemberList && !showThread}

@@ -12,10 +12,12 @@
 
     export let text = "";
     export let sendMessage;
-    let disabled = false;
+    export let disabled;
+    let enabled = false;
+
     let props = {
         editable() {
-            return !disabled;
+            return enabled && !disabled;
         },
     };
 
@@ -29,10 +31,10 @@
         if (rawText === "") {
             return;
         }
-        disabled = true;
+        enabled = false;
         sendMessage(rawText).then(() => {
             clear();
-            disabled = false;
+            enabled = true;
         });
         clear();
         return true;
@@ -73,11 +75,14 @@
             ]
         });
     }
+
+    $: placeholder = disabled ? "You are not allowed to send messages" : "Message";
+    $: bgColor = enabled ? "bg-grey-100 dark:bg-slate-800" : "bg-grey-200 dark:bg-slate-700";
 </script>
 
 <ProsemirrorEditor
-        placeholder="Message"
-        className="rounded-md p-2 bg-grey-100 dark:bg-slate-800"
+        placeholder="{placeholder}"
+        className="rounded-md p-2 {bgColor}"
         {editorState}
         on:change={handleChange}
 />
