@@ -29,8 +29,8 @@
                 transition={slide}>
             <ul class="py-2 space-y-2">
                 {#each items as item}
-                    {#if channelInfo !== null && item[0].id === channelInfo.id}
-                        <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}" active="true"/>
+                    {#if channelInfo !== null && item[0].id === channelInfo[0].id}
+                        <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}" active={true}/>
                     {:else}
                         <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{buttonClick}"/>
                     {/if}
