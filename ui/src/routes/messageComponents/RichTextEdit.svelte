@@ -10,12 +10,11 @@
     import customMarkdownSerializer from "$lib/prosemirror-setup/markdown.ts";
     import {buildKeymap} from "$lib/prosemirror-setup/keymap.ts";
 
-    export let text = "";
-    export let sendMessage;
-    export let disabled;
-    let enabled = false;
+    /** @type {{text?: string, sendMessage: any, disabled: any}} */
+    let {text = "", sendMessage, disabled = false} = $props();
+    let enabled = $state(false);
 
-    let props = {
+    let editorProps = {
         editable() {
             return enabled && !disabled;
         },
@@ -46,7 +45,7 @@
         keymap(baseKeymap),
     ];
 
-    let editorState = EditorState.create({
+    let editorState = $state(EditorState.create({
         schema: customSchema,
         doc,
         selection,
@@ -54,7 +53,7 @@
             mentionPlugin,
             ...corePlugins,
         ]
-    });
+    }));
 
     function handleChange(event) {
         // get the new editor state from event.detail
@@ -76,8 +75,8 @@
         });
     }
 
-    $: placeholder = disabled ? "You are not allowed to send messages" : "Message";
-    $: bgColor = enabled ? "bg-grey-100 dark:bg-slate-800" : "bg-grey-200 dark:bg-slate-700";
+    let placeholder = $derived(disabled ? "You are not allowed to send messages" : "Message");
+    let bgColor = $derived(enabled ? "bg-grey-100 dark:bg-slate-800" : "bg-grey-200 dark:bg-slate-700");
 </script>
 
 <ProsemirrorEditor

@@ -3,8 +3,9 @@
     import TopLink from "./TopLink.svelte";
     import {loadTheme} from "$lib/helpers.ts";
 
-    export let onCode;
-    let password = [];
+    /** @type {{onCode: any}} */
+    let { onCode } = $props();
+    let password = $state([]);
 
     async function submit() {
         console.log(password.join(""));
@@ -33,7 +34,7 @@
                         <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Code</label>
                         <Code bind:value={password} on:change={trySubmit}/>
                     </div>
-                    <button type="button" on:click={submit} class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Sign in</button>
+                    <button type="button" onclick={submit} class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Sign in</button>
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                         Pronto has emailed you a one-time 6-digit code to use. It may take a few minutes to arrive.
                     </p>

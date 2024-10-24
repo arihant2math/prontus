@@ -12,17 +12,20 @@
     import ViewTheadFooter from "./messageComponents/ViewThreadFooter.svelte";
     import ProfilePicture from "./user/ProfilePicture.svelte";
 
-    export let message;
-    export let memberships;
-    export let previousMessage = null;
-    export let nextMessage = null;
-    export let currentUser;
-    export let viewThread;
-    export let inThread;
-    export let messages;
-    export let settings;
+    /** @type {{message: any, memberships: any, previousMessage?: any, nextMessage?: any, currentUser: any, viewThread: any, inThread: any, messages: any, settings: any}} */
+    let {
+        message = $bindable(),
+        memberships,
+        previousMessage = null,
+        nextMessage = null,
+        currentUser,
+        viewThread,
+        inThread,
+        messages,
+        settings
+    } = $props();
 
-    let editing = false;
+    let editing = $state(false);
 
     function strft(date) {
         return date.toLocaleString('en-US', {
@@ -36,22 +39,6 @@
         });
     }
 
-    $: unsent = message.hasOwnProperty("unsent");
-    $: dateSpan = spanDate(message, previousMessage);
-    $: repeat = isRepeat(message, previousMessage);
-    $: firstThreadMessage = isFirstThreadMessage(message, previousMessage);
-    $: lastThreadMessage = isLastThreadMessage(message, nextMessage);
-    $: isCurrentUser = currentUser.id === message.user.id;
-    $: systemMessage = message.systemevent != null;
-    $: user = message.user;
-    $: media = message.messagemedia;
-    $: embed = message.resource;
-    $: reactions = message.reactionsummary;
-    $: messageCreatedAtDatetime = strft(parseDatetime(message.created_at));
-    $: messageCreatedatDate = parseDatetime(message.created_at).toDateString();
-    $: ml = repeat ? "ml-10" : "ml-0";
-    $: py = repeat ? "py-1" : "py-3";
-    $: border = parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400";
 
 
     function formatTime(date) {
@@ -111,7 +98,6 @@
         await deleteMessage(message.id);
     }
 
-    $: parentMessage = getParentMessage(message, messages);
 
     function getParentMessage(message, messages) {
         if (message.parentmessage_id === null) {
@@ -124,6 +110,23 @@
         }
         return null;
     }
+    let unsent = $derived(message.hasOwnProperty("unsent"));
+    let dateSpan = $derived(spanDate(message, previousMessage));
+    let repeat = $derived(isRepeat(message, previousMessage));
+    let firstThreadMessage = $derived(isFirstThreadMessage(message, previousMessage));
+    let lastThreadMessage = $derived(isLastThreadMessage(message, nextMessage));
+    let isCurrentUser = $derived(currentUser.id === message.user.id);
+    let systemMessage = $derived(message.systemevent != null);
+    let user = $derived(message.user);
+    let media = $derived(message.messagemedia);
+    let embed = $derived(message.resource);
+    let reactions = $derived(message.reactionsummary);
+    let messageCreatedAtDatetime = $derived(strft(parseDatetime(message.created_at)));
+    let messageCreatedatDate = $derived(parseDatetime(message.created_at).toDateString());
+    let ml = $derived(repeat ? "ml-10" : "ml-0");
+    let py = $derived(repeat ? "py-1" : "py-3");
+    let parentMessage = $derived(getParentMessage(message, messages));
+    let border = $derived(parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400");
 </script>
 {#if editing}
     <RichTextEdit bind:text={message.message} sendMessage={sendEditMessage}/>
@@ -138,7 +141,7 @@
                 </div>
             {/if}
             {#if !inThread && parentMessage !== undefined && firstThreadMessage}
-                <button on:click={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-2 rounded-xl bg-gray-50 dark:bg-slate-700 w-max">
+                <button onclick={() => {viewThread(parentMessage.id)}} class="max-w-[500px] p-2 rounded-xl bg-gray-50 dark:bg-slate-700 w-max">
                     {#if parentMessage !== null}
                         <p class="text-xs line-clamp-1"><b>{parentMessage.user.fullname}</b> {parentMessage.message}</p>
                     {:else}
@@ -174,7 +177,7 @@
                 <ul class="fixed hidden flex flex-row text-sm bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 rounded-lg shadow-md" data-popover data-popover-target-parent data-popover-configure data-popover-show-method="hover" data-popover-position="right" data-popover-offset="-150">
                     {#if !inThread}
                         <li>
-                            <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={() => {viewThread(message.id)}}>
+                            <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onclick={() => {viewThread(message.id)}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5" />
                                 </svg>
@@ -191,7 +194,7 @@
                     </li>
                     {#if isCurrentUser}
                         <li>
-                            <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={edit}>
+                            <button class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onclick={edit}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                 </svg>
@@ -199,7 +202,7 @@
                         </li>
                         <li>
                             <button
-                                    class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" on:click={remove}>
+                                    class="block w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onclick={remove}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                 </svg>

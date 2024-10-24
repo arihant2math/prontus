@@ -3,14 +3,15 @@
     import ActionButton from "../ActionButton.svelte";
     import {createEventDispatcher} from "svelte";
 
-    export let user = null;
+    /** @type {{user?: any}} */
+    let { user = null } = $props();
 
     const dispatch = createEventDispatcher();
 </script>
 
 {#if user !== null}
     <div class="flex items-center justify-between mb-2 space-x-4">
-        <ProfilePicture user="{user}"/>
+        <ProfilePicture user={user}/>
         <div>
             <ActionButton on:click={() => {dispatch("createDm", user)}} text="Message" compact={true}/>
         </div>

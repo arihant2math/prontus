@@ -3,7 +3,8 @@
     import { Popover, Separator, Toggle } from "bits-ui";
     import UserInfo from "./UserInfo.svelte";
 
-    export let user = {
+    /** @type {{user?: any}} */
+    let { user = {
         id: 0,
         fullname: "User",
         profilepicurl: "https://cdn.discordapp.com/embed/avatars/0.png",
@@ -12,7 +13,7 @@
                 name: "Organization"
             }
         ]
-    };
+    } } = $props();
 </script>
 
 <Popover.Root>

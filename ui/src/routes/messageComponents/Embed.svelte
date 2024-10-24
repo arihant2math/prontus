@@ -1,9 +1,12 @@
 <script>
-    export let title = "";
-    export let description = "";
-    export let url = "";
-    export let shortUrl = "";
-    export let image = "";
+    /** @type {{title?: string, description?: string, url?: string, shortUrl?: string, image?: string}} */
+    let {
+        title = "",
+        description = "",
+        url = "",
+        shortUrl = "",
+        image = ""
+    } = $props();
 </script>
 
 <a target="_blank" href="{url}" class="bg-gray-50 dark:bg-slate-700 rounded-xl p-4 mb-2 hover:bg-gray-200 dark:hover:bg-slate-600 flex flex-row space-x-2">

@@ -1,4 +1,6 @@
 <script>
+    import { run } from 'svelte/legacy';
+
     import {remark} from "remark";
     import remarkGfm from "remark-gfm";
     import remarkMentions from "$lib/remark-mentions.ts"
@@ -12,9 +14,9 @@
     import {removePosition} from 'unist-util-remove-position'
     import RichText from "./RichText.svelte";
 
-    export let message;
-    let richContent;
-    $: message, init();
+    /** @type {{message: any}} */
+    let { message } = $props();
+    let richContent = $state();
 
     function init() {
         let processor = unified()
@@ -34,6 +36,9 @@
     }
 
     init();
+    run(() => {
+        message, init();
+    });
 </script>
 {#if richContent === undefined}
     <p>Loading...</p>

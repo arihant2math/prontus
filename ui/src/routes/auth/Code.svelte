@@ -1,7 +1,8 @@
 <script>
     import { PinInput, Toggle } from "bits-ui";
 
-    export let value = [];
+    /** @type {{value?: any}} */
+    let { value = $bindable([]) } = $props();
 
 </script>
 

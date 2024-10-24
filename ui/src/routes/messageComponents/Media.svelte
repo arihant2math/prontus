@@ -1,10 +1,9 @@
 <script>
-    export let url;
-    export let mimetype;
-    export let type;
+    /** @type {{url: any, mimetype: any, type: any}} */
+    let { url, mimetype, type } = $props();
 
     // TODO: hardcoded
-    $: realUrl = url.replace("https://files.chat.trypronto.com/", "http://localhost:10521/");
+    let realUrl = $derived(url.replace("https://files.chat.trypronto.com/", "http://localhost:10521/"));
 
     console.warn("MEDIA", type)
 </script>

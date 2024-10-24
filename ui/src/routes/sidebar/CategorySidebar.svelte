@@ -4,13 +4,16 @@
     import {listen} from "@tauri-apps/api/event";
     import {getChannelList} from "$lib/api.ts";
 
-    export let currentUser;
-    export let handleSidebarClick;
-    export let settings;
-    export let channelInfo;
+    /** @type {{currentUser: any, handleSidebarClick: any, settings: any, channelInfo: any}} */
+    let {
+        currentUser = $bindable(),
+        handleSidebarClick,
+        settings = $bindable(),
+        channelInfo = $bindable()
+    } = $props();
 
-    let sidebarCategoriesInfo = {};
-    let sidebarCategories = {}
+    let sidebarCategoriesInfo = $state({});
+    let sidebarCategories = $state({})
 
     async function updateChannelList() {
         let channels = await getChannelList();

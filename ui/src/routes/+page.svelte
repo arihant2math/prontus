@@ -10,7 +10,7 @@
 
     let pages = [Main, AuthEmail, AuthCode]
 
-    let page;
+    let page = $state();
     let savedEmail;
 
     async function init() {
@@ -60,10 +60,11 @@
     }
 
     init();
+
+    const SvelteComponent = $derived(pages[page]);
 </script>
 
-<svelte:component
-        this={pages[page]}
+<SvelteComponent
         onEmail={onEmail}
         onCode={onCode}
 />

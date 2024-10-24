@@ -3,10 +3,10 @@
     import {Popover} from "bits-ui";
     import {setChannelMute, setChannelNotifications} from "$lib/api.ts";
 
-    export let info = null;
-    export let memberListActive = false;
+    /** @type {{info?: any, memberListActive?: boolean}} */
+    let { info = $bindable(null), memberListActive = $bindable(false) } = $props();
 
-    $: memberListFill = memberListActive ? "currentColor" : "none";
+    let memberListFill = $derived(memberListActive ? "currentColor" : "none");
 
     function toggleMemberList() {
         memberListActive = !memberListActive;
@@ -47,7 +47,7 @@
                         class="z-30 w-full max-w-[328px] rounded-lg bg-white dark:bg-slate-800 p-4 shadow-lg flex-col"
                         sideOffset={8}>
                     <label class="inline-flex items-center cursor-pointer p-3">
-                        <input type="checkbox" value="{info[2].mute}" class="sr-only peer" on:click={updateMute}>
+                        <input type="checkbox" value={info[2].mute} class="sr-only peer" onclick={updateMute}>
                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Mute Channel</span>
                     </label>
@@ -55,7 +55,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="ALL" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-4" name="helper-radio" type="radio" value="ALL" bind:group={info[2].notificationpreference} onclick={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-4" class="font-medium text-gray-900 dark:text-gray-300">
@@ -68,7 +68,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="MENTIONS" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-5" name="helper-radio" type="radio" value="MENTIONS" bind:group={info[2].notificationpreference} onclick={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-5" class="font-medium text-gray-900 dark:text-gray-300">
@@ -81,7 +81,7 @@
                         <li>
                             <div class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center h-5">
-                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="NONE" bind:group={info[2].notificationpreference} on:click={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <input id="helper-radio-6" name="helper-radio" type="radio" value="NONE" bind:group={info[2].notificationpreference} onclick={updateNotificationPreference} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 </div>
                                 <div class="ms-2 text-sm">
                                     <label for="helper-radio-6" class="font-medium text-gray-900 dark:text-gray-300">
@@ -96,7 +96,7 @@
             </Popover.Root>
             <button class="hover:bg-gray-300 dark:hover:bg-slate-700 px-1 py-2 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="{memberListFill}" viewBox="0 0 24 24" stroke-width="1.5"
-                     stroke="currentColor" class="size-6" on:click={toggleMemberList}>
+                     stroke="currentColor" class="size-6" onclick={toggleMemberList}>
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
                 </svg>

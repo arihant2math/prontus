@@ -4,18 +4,21 @@
     import {MenuItem} from "@tauri-apps/api/menu/menuItem";
     import {Menu} from "@tauri-apps/api/menu/menu";
 
-    export let info;
-    export let stats;
-    export let membership;
-    export let buttonClick;
-    export let active = false;
-    let listItem = null;
-    $: title = membership.alias === null ? info.title : membership.alias;
-    $: textColor = membership.mute ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white";
-    $: unreadString = stats.unread > 99 ? "99+" : stats.unread;
-    $: mentionString = stats.unread_mentions > 99 ? "99+" : stats.unread_mentions;
-    $: fontWeight = stats.unread > 0 ? "font-bold" : "font-medium";
-    $: bgColor = active ? "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white" : "hover:bg-gray-100 dark:hover:bg-slate-700";
+    /** @type {{info: any, stats: any, membership: any, buttonClick: any, active?: boolean}} */
+    let {
+        info,
+        stats,
+        membership,
+        buttonClick,
+        active = false
+    } = $props();
+    let listItem = $state(null);
+    let title = $derived(membership.alias === null ? info.title : membership.alias);
+    let textColor = $derived(membership.mute ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white");
+    let unreadString = $derived(stats.unread > 99 ? "99+" : stats.unread);
+    let mentionString = $derived(stats.unread_mentions > 99 ? "99+" : stats.unread_mentions);
+    let fontWeight = $derived(stats.unread > 0 ? "font-bold" : "font-medium");
+    let bgColor = $derived(active ? "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white" : "hover:bg-gray-100 dark:hover:bg-slate-700");
 
     function btnClick() {
         buttonClick(info.id);
@@ -96,8 +99,8 @@
 
     addListener();
 </script>
-<li class="select-none" bind:this={listItem} on:load={addListener}>
-    <button on:click={btnClick}
+<li class="select-none" bind:this={listItem} onload={addListener}>
+    <button onclick={btnClick}
             class="flex-0 flex items-start p-2 {textColor} {bgColor} transition duration-75 rounded-lg pl-4 group w-full text-ellipsis">
         {#if info.isdm}
             <div class="relative">
