@@ -151,7 +151,7 @@
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
-                             bind:channelInfo={channelInfo} bind:currentUser={currentUser} viewThread={viewThread} bind:settings={settings} on:createDm={createDmForUser}/>
+                             channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread} settings={settings} on:createDm={createDmForUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     {#if channelInfo !== null && channelInfo[0].grant_create_message}
                         <RichTextEdit bind:this={messageInput}
@@ -177,9 +177,9 @@
                         </svg>
                     </button>
                     <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} bind:channelInfo={channelInfo} viewThread={(id) => {}}
-                                     bind:parentMessages={parentMessages} bind:currentUser={currentUser} inThread={true}
-                                     bind:settings={settings} on:createDm={createDmForUser}/>
+                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} channelInfo={channelInfo} viewThread={(id) => {}}
+                                     bind:parentMessages={parentMessages} currentUser={currentUser} inThread={true}
+                                     settings={settings} on:createDm={createDmForUser}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                             <RichTextEdit sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
                         </div>

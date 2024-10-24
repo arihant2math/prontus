@@ -8,7 +8,7 @@
     let {
         currentUser = $bindable(),
         handleSidebarClick,
-        settings,
+        settings = $bindable(),
         channelInfo = $bindable()
     } = $props();
 

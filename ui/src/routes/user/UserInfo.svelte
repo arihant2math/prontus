@@ -11,7 +11,7 @@
 
 {#if user !== null}
     <div class="flex items-center justify-between mb-2 space-x-4">
-        <ProfilePicture user="{user}"/>
+        <ProfilePicture user={user}/>
         <div>
             <ActionButton on:click={() => {dispatch("createDm", user)}} text="Message" compact={true}/>
         </div>

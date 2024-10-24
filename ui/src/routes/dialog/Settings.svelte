@@ -20,6 +20,9 @@
     let { settings = $bindable(), showSettings = $bindable(false) } = $props();
     let maxSizeValue;
     run(() => {
+        if (settings === null || settings.search.messages === null) {
+            return;
+        }
         maxSizeValue = settings.search.messages.max_size / 1024 / 1024;
     });
 

@@ -11,10 +11,10 @@
     import {buildKeymap} from "$lib/prosemirror-setup/keymap.ts";
 
     /** @type {{text?: string, sendMessage: any, disabled: any}} */
-    let { text = $bindable(""), sendMessage, disabled } = $props();
+    let {text = "", sendMessage, disabled = false} = $props();
     let enabled = $state(false);
 
-    let props = {
+    let editorProps = {
         editable() {
             return enabled && !disabled;
         },

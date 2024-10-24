@@ -8,7 +8,7 @@
         name,
         items,
         buttonClick,
-        channelInfo
+        channelInfo = $bindable()
     } = $props();
     let show = $state(true);
     
