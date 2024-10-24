@@ -1,5 +1,5 @@
-use tauri::ipc::InvokeError;
 use crate::state;
+use tauri::ipc::InvokeError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum BackendError {
@@ -14,7 +14,7 @@ pub enum BackendError {
     #[error("I/O error: {0}")]
     IoError(#[from] std::io::Error),
     #[error("Settings error: {0}")]
-    SettingsError(#[from] settings::SettingsError)
+    SettingsError(#[from] settings::SettingsError),
 }
 
 impl Into<InvokeError> for BackendError {

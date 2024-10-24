@@ -1,4 +1,6 @@
-use client::{Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, Task, UserInfo};
+use client::{
+    Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, Task, UserInfo,
+};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;

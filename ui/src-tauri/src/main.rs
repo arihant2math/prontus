@@ -1,18 +1,21 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use log::LevelFilter;
 use log4rs::append::console::{ConsoleAppender, Target};
 use log4rs::append::file::FileAppender;
-use log4rs::{Config, Handle};
 use log4rs::config::{Appender, Logger, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::filter::threshold::ThresholdFilter;
-use log::LevelFilter;
+use log4rs::{Config, Handle};
 
 fn init_logging() -> Handle {
     let level = LevelFilter::Info;
     let mut file_path = settings::prontus_dir().join("logs");
-    file_path.push(format!("{}.log", chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")));
+    file_path.push(format!(
+        "{}.log",
+        chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")
+    ));
     // Build a stderr logger.
     let stderr = ConsoleAppender::builder()
         .target(Target::Stderr)
@@ -40,6 +43,7 @@ fn init_logging() -> Handle {
         .appender(stderr_appender)
         .logger(Logger::builder().build("reqwest", LevelFilter::Info))
         .logger(Logger::builder().build("rustls", LevelFilter::Info))
+        .logger(Logger::builder().build("tokio-tungstenite", LevelFilter::Info))
         .build(builder)
         .unwrap();
 

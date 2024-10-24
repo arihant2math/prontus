@@ -5,10 +5,10 @@ use hyper::server::conn::http1;
 use hyper::service::Service;
 use hyper::{Request, Response};
 use hyper_util::rt::TokioIo;
+use log::error;
 use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use log::error;
 use tokio::net::TcpListener;
 
 pub struct ServiceHandler {
@@ -24,13 +24,21 @@ impl ServiceHandler {
 impl Service<Request<Incoming>> for ServiceHandler {
     type Response = Response<reqwest::Body>;
     type Error = reqwest::Error;
-    type Future = std::pin::Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
+    type Future =
+        std::pin::Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn call(&self, req: Request<Incoming>) -> Self::Future {
         let client = self.client.clone();
         Box::pin(async move {
-            let response = client.http_client
-                .request(req.method().clone(), format!("https://stanfordohs.pronto.io{}", req.uri().clone().to_string()))
+            let response = client
+                .http_client
+                .request(
+                    req.method().clone(),
+                    format!(
+                        "https://stanfordohs.pronto.io{}",
+                        req.uri().clone().to_string()
+                    ),
+                )
                 .send()
                 .await?;
             Ok(response.into())
@@ -38,9 +46,10 @@ impl Service<Request<Incoming>> for ServiceHandler {
     }
 }
 
-
 #[tokio::main]
-pub async fn run_proxy_thread(context: AppState) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn run_proxy_thread(
+    context: AppState,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     loop {
         if context.is_loaded().await {
             break;

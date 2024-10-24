@@ -19,12 +19,12 @@ mod task;
 mod tray;
 
 use crate::state::ChannelUsers;
+use crate::task::run_search_thread;
 pub use error::BackendError;
 use settings::Settings;
 pub use state::{AppData, AppState, InnerAppState};
 use task::run_proxy_thread;
 use task::run_pusher_thread;
-use crate::task::run_search_thread;
 
 #[command]
 async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
@@ -605,7 +605,7 @@ async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError
 async fn complete_task(
     handle: tauri::AppHandle,
     state: State<'_, AppState>,
-    task_id: u64
+    task_id: u64,
 ) -> Result<(), BackendError> {
     let updated_task = {
         let state = state.clone().inner().inner();
@@ -628,7 +628,7 @@ async fn complete_task(
 async fn uncomplete_task(
     handle: tauri::AppHandle,
     state: State<'_, AppState>,
-    task_id: u64
+    task_id: u64,
 ) -> Result<(), BackendError> {
     let updated_task = {
         let state = state.clone().inner().inner();
@@ -648,14 +648,23 @@ async fn uncomplete_task(
 }
 
 #[command]
-async fn delete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_id: u64) -> Result<(), BackendError> {
+async fn delete_task(
+    handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    task_id: u64,
+) -> Result<(), BackendError> {
     // TODO: Fix
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
 
     // state.client.task_delete(task_id).await?;
-    state.tasks = state.tasks.iter().filter(|task| task.id != task_id).cloned().collect();
+    state.tasks = state
+        .tasks
+        .iter()
+        .filter(|task| task.id != task_id)
+        .cloned()
+        .collect();
     let _ = handle.emit("taskListUpdate", ());
     Ok(())
 }
@@ -663,6 +672,7 @@ async fn delete_task(handle: tauri::AppHandle, state: State<'_, AppState>, task_
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let context = AppState::unloaded();
             let thread_handle = app.handle().clone();

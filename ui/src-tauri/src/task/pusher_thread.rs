@@ -1,11 +1,13 @@
-use futures::future::join_all;
-use log::{info, warn, error};
-use notify_rust::{Notification, Timeout};
-use tauri::{AppHandle, Emitter};
-use client::Reactions;
-use pusher::{PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper};
-use settings::{Settings, SettingsError};
 use crate::{state, AppState};
+use client::Reactions;
+use futures::future::join_all;
+use log::{error, info, warn};
+use notify_rust::{Notification, Timeout};
+use pusher::{
+    PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper,
+};
+use settings::{Settings, SettingsError};
+use tauri::{AppHandle, Emitter};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -17,7 +19,10 @@ pub enum PusherThreadError {
 }
 
 #[tokio::main]
-pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(), PusherThreadError> {
+pub async fn run_pusher_thread(
+    handle: AppHandle,
+    context: AppState,
+) -> Result<(), PusherThreadError> {
     loop {
         if context.is_loaded().await {
             break;
@@ -38,7 +43,10 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
         let state = state_.try_inner_mut()?;
 
         pusher_client
-            .subscribe(format!("private-organization.{}", state.user_info.organizations[0].id))
+            .subscribe(format!(
+                "private-organization.{}",
+                state.user_info.organizations[0].id
+            ))
             .await;
         pusher_client
             .subscribe(format!("private-user.{}", state.user_info.id))
@@ -61,7 +69,10 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
         let state = context.inner();
         let state = state.read().await;
         let state = state.try_inner()?;
-        ["<@everyone>".to_string(), format!("<@{}>", state.user_info.id)]
+        [
+            "<@everyone>".to_string(),
+            format!("<@{}>", state.user_info.id),
+        ]
     };
 
     loop {
@@ -77,7 +88,10 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                     let state = context.inner();
                                     let state = state.read().await;
                                     let state = state.try_inner()?;
-                                    let channel = state.channel_list.iter().find(|c| c.0.id == event.message.bubble_id);
+                                    let channel = state
+                                        .channel_list
+                                        .iter()
+                                        .find(|c| c.0.id == event.message.bubble_id);
                                     let mut show_notification = true;
                                     if let Some((_, _, membership)) = channel {
                                         if let Some(membership) = membership {
@@ -97,20 +111,24 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                     }
                                     if show_notification {
                                         Notification::new()
-                                            .summary(&format!("New message from {user}",
-                                                              user = event.message.user.fullname))
+                                            .summary(&format!(
+                                                "New message from {user}",
+                                                user = event.message.user.fullname
+                                            ))
                                             .body(&event.message.message)
                                             .appname("Prontus")
                                             .icon("thunderbird")
                                             .timeout(Timeout::Milliseconds(6000))
-                                            .show().unwrap();
+                                            .show()
+                                            .unwrap();
                                     }
                                 }
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
                                 if event.message.bubble_id == state.current_channel.id {
-                                    if !state.message_list.iter().any(|m| m.id == event.message.id) {
+                                    if !state.message_list.iter().any(|m| m.id == event.message.id)
+                                    {
                                         state.message_list.insert(0, event.message);
                                     }
                                 }
@@ -191,10 +209,16 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                     .iter_mut()
                                     .find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
-                                    if message.reactions.iter_mut().find(|r| r.id == event.reactiontype_id).map(|r| {
-                                        r.users.push(event.user_id);
-                                        r.count = event.count;
-                                    }).is_none() {
+                                    if message
+                                        .reactions
+                                        .iter_mut()
+                                        .find(|r| r.id == event.reactiontype_id)
+                                        .map(|r| {
+                                            r.users.push(event.user_id);
+                                            r.count = event.count;
+                                        })
+                                        .is_none()
+                                    {
                                         message.reactions.push(Reactions {
                                             id: event.reactiontype_id,
                                             count: event.count,
@@ -213,7 +237,11 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                     .iter_mut()
                                     .find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
-                                    if let Some(reaction) = message.reactions.iter_mut().find(|r| r.id == event.reactiontype_id) {
+                                    if let Some(reaction) = message
+                                        .reactions
+                                        .iter_mut()
+                                        .find(|r| r.id == event.reactiontype_id)
+                                    {
                                         reaction.users.retain(|u| u != &event.user_id);
                                         reaction.count = event.count;
                                     }
@@ -248,7 +276,9 @@ pub async fn run_pusher_thread(handle: AppHandle, context: AppState) -> Result<(
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
-                                state.announcements.retain(|a| a.id != event.announcement_id);
+                                state
+                                    .announcements
+                                    .retain(|a| a.id != event.announcement_id);
 
                                 let _ = handle.emit("announcementListUpdate", ());
                             }
