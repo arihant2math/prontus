@@ -1,7 +1,8 @@
 <script>
     import InteractiveProfilePicture from "../user/InteractiveProfilePicture.svelte";
 
-    export let announcement;
+    /** @type {{announcement: any}} */
+    let { announcement } = $props();
 </script>
 <!--{JSON.stringify(announcement)}-->
 <div class="flex flex-row space-x-2 py-2">

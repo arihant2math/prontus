@@ -1,4 +1,6 @@
 <script>
+    import { run } from 'svelte/legacy';
+
     import {fade} from "svelte/transition";
     import {Dialog, Separator} from "bits-ui";
     import CloseButton from "../CloseButton.svelte";
@@ -8,10 +10,10 @@
     import DialogClose from "../bitsHead/DialogClose.svelte";
     import SeparatorRoot from "../bitsHead/SeparatorRoot.svelte";
 
-    export let createDmDialogOpen = false;
-    let username = "";
-    let users = [];
-    $: username, updateUsers(username);
+    /** @type {{createDmDialogOpen?: boolean}} */
+    let { createDmDialogOpen = $bindable(false) } = $props();
+    let username = $state("");
+    let users = $state([]);
 
     function updateUsers(username) {
         if (username.length > 0) {
@@ -22,6 +24,9 @@
             });
         }
     }
+    run(() => {
+        username, updateUsers(username);
+    });
 </script>
 
 <Dialog.Root bind:open={createDmDialogOpen}>

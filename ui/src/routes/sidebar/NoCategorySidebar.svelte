@@ -5,11 +5,10 @@
     import {parseDatetime} from "$lib/helpers.ts";
     import Sideitem from "./ChannelListItem.svelte";
 
-    export let currentUser;
-    export let handleSidebarClick;
-    export let channelInfo;
+    /** @type {{currentUser: any, handleSidebarClick: any, channelInfo: any}} */
+    let { currentUser = $bindable(), handleSidebarClick, channelInfo } = $props();
 
-    let channels = [];
+    let channels = $state([]);
 
     async function updateChannelList() {
         let unsortedChannels = await getChannelList();

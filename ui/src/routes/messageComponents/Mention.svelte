@@ -1,9 +1,9 @@
 <script>
     import {getUser} from "$lib/api.ts";
 
-    export let id;
+    /** @type {{id: any}} */
+    let { id } = $props();
 
-    $: user = getUserConditional(id);
 
     function getUserConditional(id) {
         if (id !== 0) {
@@ -12,6 +12,7 @@
 
         return null;
     }
+    let user = $derived(getUserConditional(id));
 </script>
 
 <span>

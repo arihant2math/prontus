@@ -3,7 +3,8 @@
     import ActionButton from "../ActionButton.svelte";
     import {createEventDispatcher} from "svelte";
 
-    export let user = null;
+    /** @type {{user?: any}} */
+    let { user = null } = $props();
 
     const dispatch = createEventDispatcher();
 </script>

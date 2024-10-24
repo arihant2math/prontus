@@ -1,4 +1,6 @@
 <script>
+    import { run } from 'svelte/legacy';
+
     import ChannelCard from "./CurrentChannelCard.svelte";
     import Settings from "./dialog/Settings.svelte";
     import MemberList from "./MemberList.svelte";
@@ -24,21 +26,21 @@
     import Announcements from "./dialog/Announcements.svelte";
     import Tasks from "./dialog/Tasks.svelte";
 
-    let currentUser;
-    let messages = [];
-    let parentMessages = [];
-    let channelInfo = null;
-    let channelUsers = [];
-    let showMemberList = false;
-    let showThread = false;
-    let threadParent = null;
-    let messageInput;
-    let settings = null;
+    let currentUser = $state();
+    let messages = $state([]);
+    let parentMessages = $state([]);
+    let channelInfo = $state(null);
+    let channelUsers = $state([]);
+    let showMemberList = $state(false);
+    let showThread = $state(false);
+    let threadParent = $state(null);
+    let messageInput = $state();
+    let settings = $state(null);
 
-    let createDmDialogOpen = false;
-    let settingsDialogOpen = false;
-    let announcementsDialogOpen = false;
-    let tasksDialogOpen = false;
+    let createDmDialogOpen = $state(false);
+    let settingsDialogOpen = $state(false);
+    let announcementsDialogOpen = $state(false);
+    let tasksDialogOpen = $state(false);
 
     const getThreadMessages = () => {
         if (threadParent === null) {
@@ -60,7 +62,10 @@
         return msgs;
     }
 
-    $: threadMessages = getThreadMessages(messages, threadParent);
+    let threadMessages;
+    run(() => {
+        threadMessages = getThreadMessages(messages, threadParent);
+    });
 
 
     // TODO: progress bar on the top or smth
@@ -165,7 +170,7 @@
             {#if showThread}
                 <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
                     <button class="fixed top-16 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg"
-                            on:click={() => {showThread = false}}>
+                            onclick={() => {showThread = false}}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                              stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>

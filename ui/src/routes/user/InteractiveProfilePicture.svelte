@@ -3,8 +3,8 @@
     import { Popover, Separator, Toggle } from "bits-ui";
     import UserInfo from "./UserInfo.svelte";
 
-    export let user;
-    export let id;
+    /** @type {{user: any, id: any}} */
+    let { user, id } = $props();
 </script>
 
 <Popover.Root>

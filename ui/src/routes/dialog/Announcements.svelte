@@ -9,8 +9,9 @@
     import DialogClose from "../bitsHead/DialogClose.svelte";
     import SeparatorRoot from "../bitsHead/SeparatorRoot.svelte";
 
-    export let announcementsDialogOpen = false;
-    let announcements = null;
+    /** @type {{announcementsDialogOpen?: boolean}} */
+    let { announcementsDialogOpen = $bindable(false) } = $props();
+    let announcements = $state(null);
 
     function fetchAnnouncements() {
         getAnnouncements().then((response) => {

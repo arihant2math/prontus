@@ -3,11 +3,15 @@
     import {Collapsible} from "bits-ui";
     import {slide} from "svelte/transition";
 
-    export let name;
-    export let items;
-    export let buttonClick;
-    export let channelInfo;
-    $: show = true;
+    /** @type {{name: any, items: any, buttonClick: any, channelInfo: any}} */
+    let {
+        name,
+        items,
+        buttonClick,
+        channelInfo
+    } = $props();
+    let show = $state(true);
+    
 </script>
 
 <li class="select-none">

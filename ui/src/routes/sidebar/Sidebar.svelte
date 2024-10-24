@@ -2,10 +2,13 @@
     import CategorySidebar from "./CategorySidebar.svelte";
     import NoCategorySidebar from "./NoCategorySidebar.svelte";
 
-    export let currentUser;
-    export let handleSidebarClick;
-    export let settings;
-    export let channelInfo;
+    /** @type {{currentUser: any, handleSidebarClick: any, settings: any, channelInfo: any}} */
+    let {
+        currentUser = $bindable(),
+        handleSidebarClick,
+        settings = $bindable(),
+        channelInfo = $bindable()
+    } = $props();
 </script>
 {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
     <NoCategorySidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}

@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Event attribute must be a JavaScript expression, not a string -->
 <script lang="ts">
     import Message from "./Message.svelte";
     import {positionPopovers} from "$lib/popup.js";

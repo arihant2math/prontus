@@ -9,8 +9,8 @@
     import DialogClose from "../bitsHead/DialogClose.svelte";
     import SeparatorRoot from "../bitsHead/SeparatorRoot.svelte";
 
-    export let tasksDialogOpen = false;
-    export let tasks = null;
+    /** @type {{tasksDialogOpen?: boolean, tasks?: any}} */
+    let { tasksDialogOpen = $bindable(false), tasks = $bindable(null) } = $props();
 
     function fetchTasks() {
         getTasks().then((response) => {
