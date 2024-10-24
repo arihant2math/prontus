@@ -43,7 +43,10 @@ fn init_logging() -> Handle {
         .appender(stderr_appender)
         .logger(Logger::builder().build("reqwest", LevelFilter::Info))
         .logger(Logger::builder().build("rustls", LevelFilter::Info))
-        .logger(Logger::builder().build("tokio-tungstenite", LevelFilter::Info))
+        .logger(Logger::builder().build("tokio_tungstenite", LevelFilter::Debug))
+        .logger(Logger::builder().build("tungstenite", LevelFilter::Debug))
+        .logger(Logger::builder().build("settings", LevelFilter::Info))
+        .logger(Logger::builder().build("cookie_store", LevelFilter::Info))
         .build(builder)
         .unwrap();
 
