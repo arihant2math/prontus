@@ -37,3 +37,4 @@ sentry = "0.34"
 hyper = { version = "1", features = ["full"] }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
+tauri-plugin-dialog = "2.0.0-rc"

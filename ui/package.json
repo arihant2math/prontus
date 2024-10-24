@@ -16,6 +16,7 @@
     "@floating-ui/core": "^1.6",
     "@sentry/sveltekit": "^8.30",
     "@tauri-apps/api": ">=2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.1",
     "@tauri-apps/plugin-shell": ">=2.0.0",
     "bits-ui": "^0.21",
     "fuse.js": "^7.0",

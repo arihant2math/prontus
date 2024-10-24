@@ -1,5 +1,6 @@
 <!--TODO: Add ability to log out-->
 <script>
+    import { open } from '@tauri-apps/plugin-dialog';
     import RadioLabel from "../settingsComponents/RadioLabel.svelte";
     import OptionsLabel from "../settingsComponents/options/OptionsLabel.svelte";
     import {getSettings, setSettings} from "$lib/api.ts";
@@ -11,9 +12,11 @@
     import DialogContent from "../bitsHead/DialogContent.svelte";
     import DialogClose from "../bitsHead/DialogClose.svelte";
     import SeparatorRoot from "../bitsHead/SeparatorRoot.svelte";
+    import ActionButton from "../ActionButton.svelte";
 
     export let settings;
     export let showSettings = false;
+    $: maxSizeValue = settings.search.messages.max_size / 1024 / 1024;
 
     function loadSettings() {
         loadTheme(settings);
@@ -29,6 +32,29 @@
 
     function logout() {
         settings.auth = null;
+        saveSettings();
+    }
+
+    async function selectFolder() {
+        let path = await open({
+            multiple: false,
+            directory: true,
+        });
+
+        console.log(path);
+        if (path === null) {
+            return;
+        }
+
+        settings.search.messages = {
+            path: path,
+            max_size: 200 * 1024 * 1024
+        };
+        saveSettings();
+    }
+
+    function disableFolder() {
+        settings.search.messages = null;
         saveSettings();
     }
 
@@ -60,7 +86,7 @@
                             >
                                 <TabsTrigger value="general">General</TabsTrigger>
                                 <TabsTrigger value="appearance">Appearance</TabsTrigger>
-                                <TabsTrigger value="other">Other</TabsTrigger>
+                                <TabsTrigger value="search">Search</TabsTrigger>
                                 <TabsTrigger value="about">About</TabsTrigger>
                             </Tabs.List>
                             <Tabs.Content value="general" class="pt-3">
@@ -140,6 +166,9 @@
                                         </OptionsLabel>
                                     </li>
                                 </ul>
+                                <button type="button" class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700" on:click={logout}>
+                                    Logout
+                                </button>
                             </Tabs.Content>
                             <Tabs.Content value="appearance" class="pt-3">
                                 <div>
@@ -275,10 +304,25 @@
                                     </div>
                                 </div>
                             </Tabs.Content>
-                            <Tabs.Content value="other" class="pt-3">
-                                <button type="button" class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700" on:click={logout}>
-                                    Logout
-                                </button>
+                            <Tabs.Content value="search" class="pt-3">
+                                {#if settings.search.messages !== null && settings.search.messages.path !== undefined}
+                                    <div>
+                                        <b>Max Size</b> <input type="number" bind:value={maxSizeValue} class="w-20" on:change={() => {
+                                            settings.search.messages.max_size = maxSizeValue * 1024 * 1024
+                                            saveSettings()
+                                        }
+                                        }> mb
+                                    </div>
+                                    <div>
+                                        <b>Folder</b> {settings.search.messages.path}
+                                    </div>
+                                    <ActionButton text="Disable" on:click={disableFolder}/>
+                                {:else}
+                                    <ActionButton text="Select Folder" on:click={selectFolder}/>
+                                {/if}
+                            </Tabs.Content>
+                            <Tabs.Content value="about" class="pt-3">
+                                <p>Prontus, an alternative Pronto client.</p>
                             </Tabs.Content>
                         </Tabs.Root>
                     </div>
