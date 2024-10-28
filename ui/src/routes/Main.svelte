@@ -1,5 +1,6 @@
 <script>
     import { run } from 'svelte/legacy';
+	import { PaneGroup, Pane, PaneResizer } from "paneforge";
 
     import ChannelCard from "./CurrentChannelCard.svelte";
     import Settings from "./dialog/Settings.svelte";
@@ -62,7 +63,7 @@
         return msgs;
     }
 
-    let threadMessages;
+    let threadMessages = $state();
     run(() => {
         threadMessages = getThreadMessages(messages, threadParent);
     });
@@ -136,60 +137,72 @@
         parentMessages = await getParentMessages();
     });
 </script>
-<div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    <Sidebar bind:currentUser={currentUser}
-             bind:channelInfo={channelInfo}
-             bind:settings={settings}
-             onSidebarClick={async (id) => {await handleSidebarClick(id)}}
-             onShowDmDialog={() => {createDmDialogOpen = true}}
-             onShowSettings={() => {settingsDialogOpen = true}}
-             onShowAnnouncements={() => {announcementsDialogOpen=true}}
-             onShowTasks={() => {tasksDialogOpen = true}}/>
-    <div id="content"
-         class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
-        <div>
-            <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
-        </div>
-        <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
-            <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
-                <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
-                             channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread} settings={settings} onCreateDm={createDmForUser}/>
-                <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                    {#if channelInfo !== null && channelInfo[0].grant_create_message}
-                        <RichTextEdit bind:this={messageInput}
-                                      sendMessage={async (text) => {queuedSendMessage(text, null)}}
-                                      disabled={false}/>
-                    {:else}
-                        <RichTextEdit bind:this={messageInput}
-                                      sendMessage={async (text) => {queuedSendMessage(text, null)}}
-                                      disabled={true}/>
+<div style="height: 100vh">
+    <PaneGroup direction="horizontal" class="w-full flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
+        <Pane defaultSize={25}>
+            <Sidebar bind:currentUser={currentUser}
+                     bind:channelInfo={channelInfo}
+                     bind:settings={settings}
+                     onSidebarClick={async (id) => {await handleSidebarClick(id)}}
+                     onShowDmDialog={() => {createDmDialogOpen = true}}
+                     onShowSettings={() => {settingsDialogOpen = true}}
+                     onShowAnnouncements={() => {announcementsDialogOpen=true}}
+                     onShowTasks={() => {tasksDialogOpen = true}}/>
+        </Pane>
+        <PaneResizer class="relative flex w-2 items-center justify-center bg-background">
+    <!--		<div class="z-10 flex h-7 w-5 items-center justify-center rounded-sm border bg-brand">-->
+    <!--			<DotsSixVertical class="size-4 text-black" weight="bold" />-->
+    <!--		</div>-->
+        </PaneResizer>
+        <Pane defaultSize={75}>
+            <div id="content" style="height: 100vh"
+                 class="w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
+                <div>
+                    <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
+                </div>
+                <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
+                    <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
+                        <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
+                                     channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread} settings={settings} onCreateDm={createDmForUser}/>
+                        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
+                            {#if channelInfo !== null && channelInfo[0].grant_create_message}
+                                <RichTextEdit bind:this={messageInput}
+                                              sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                              disabled={false}/>
+                            {:else}
+                                <RichTextEdit bind:this={messageInput}
+                                              sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                              disabled={true}/>
+                            {/if}
+                        </div>
+                    </div>
+                    {#if showMemberList && !showThread}
+                        <MemberList bind:channelUsers={channelUsers} on:createDm={createDmForUser}/>
+                    {/if}
+                    {#if showThread}
+                        <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
+                            <button class="fixed top-16 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg"
+                                    onclick={() => {showThread = false}} aria-label="Close Thread">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                     stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                            <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
+                                <MessageList id="threadMessagesDiv" bind:messages={threadMessages} channelInfo={channelInfo} viewThread={(id) => {}}
+                                             bind:parentMessages={parentMessages} currentUser={currentUser} inThread={true}
+                                             settings={settings} on:createDm={createDmForUser}/>
+                                <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
+                                    <RichTextEdit sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
+                                </div>
+                            </div>
+                        </div>
                     {/if}
                 </div>
             </div>
-            {#if showMemberList && !showThread}
-                <MemberList bind:channelUsers={channelUsers} on:createDm={createDmForUser}/>
-            {/if}
-            {#if showThread}
-                <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
-                    <button class="fixed top-16 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg"
-                            onclick={() => {showThread = false}} aria-label="Close Thread">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                             stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                    <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="threadMessagesDiv" bind:messages={threadMessages} channelInfo={channelInfo} viewThread={(id) => {}}
-                                     bind:parentMessages={parentMessages} currentUser={currentUser} inThread={true}
-                                     settings={settings} on:createDm={createDmForUser}/>
-                        <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
-                            <RichTextEdit sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
-                        </div>
-                    </div>
-                </div>
-            {/if}
-        </div>
-    </div>
+        </Pane>
+    </PaneGroup>
+
     <Settings bind:settings={settings} bind:showSettings={settingsDialogOpen}/>
     <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
     <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
