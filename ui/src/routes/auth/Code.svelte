@@ -3,6 +3,7 @@
 
     /** @type {{value?: any}} */
     let { value = $bindable([]) } = $props();
+    // TODO: onchange prop
 
 </script>
 

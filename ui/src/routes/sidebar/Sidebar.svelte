@@ -5,17 +5,18 @@
     /** @type {{currentUser: any, handleSidebarClick: any, settings: any, channelInfo: any}} */
     let {
         currentUser = $bindable(),
-        handleSidebarClick,
         settings = $bindable(),
-        channelInfo = $bindable()
+        channelInfo = $bindable(),
+        ...on
     } = $props();
 </script>
 {#if settings !== null && settings.appearance.sidebar.category_display_level === "None"}
-    <NoCategorySidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
+    <NoCategorySidebar bind:currentUser={currentUser}
                        bind:channelInfo={channelInfo}
-                       on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
+                       {...on}/>
 {:else}
-    <CategorySidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
-                     bind:settings={settings} bind:channelInfo={channelInfo}
-                     on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
+    <CategorySidebar bind:currentUser={currentUser}
+                     bind:settings={settings}
+                     bind:channelInfo={channelInfo}
+                     {...on}/>
 {/if}

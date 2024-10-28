@@ -137,12 +137,14 @@
     });
 </script>
 <div class="flex flex-row font-sans h-dvh bg-white dark:bg-slate-900 text-gray-900 dark:text-white overflow-x-hidden overflow-y-hidden">
-    <Sidebar bind:currentUser={currentUser} handleSidebarClick={handleSidebarClick}
+    <Sidebar bind:currentUser={currentUser}
              bind:channelInfo={channelInfo}
-             on:showDmDialog={() => {createDmDialogOpen = true}}
              bind:settings={settings}
-             on:showSettings={() => {settingsDialogOpen = true}}
-             on:showAnnouncements={() => {announcementsDialogOpen=true}} on:showTasks={() => {tasksDialogOpen = true}}/>
+             onSidebarClick={async (id) => {await handleSidebarClick(id)}}
+             onShowDmDialog={() => {createDmDialogOpen = true}}
+             onShowSettings={() => {settingsDialogOpen = true}}
+             onShowAnnouncements={() => {announcementsDialogOpen=true}}
+             onShowTasks={() => {tasksDialogOpen = true}}/>
     <div id="content"
          class="h-full w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
         <div>
@@ -151,7 +153,7 @@
         <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
             <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
                 <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
-                             channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread} settings={settings} on:createDm={createDmForUser}/>
+                             channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread} settings={settings} onCreateDm={createDmForUser}/>
                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                     {#if channelInfo !== null && channelInfo[0].grant_create_message}
                         <RichTextEdit bind:this={messageInput}

@@ -100,11 +100,11 @@
     addListener();
 </script>
 <li class="select-none" bind:this={listItem} onload={addListener}>
-    <button onclick={btnClick}
+    <button onclick={() => {btnClick()}}
             class="flex-0 flex items-start p-2 {textColor} {bgColor} transition duration-75 rounded-lg pl-4 group w-full text-ellipsis">
         {#if info.isdm}
             <div class="relative">
-                <ProfilePicture user="{info.dmpartner}"/>
+                <ProfilePicture user={info.dmpartner}/>
                 {#if !info.dmpartner.isonline}
                     <span class="bottom-0 left-7 absolute bg-gray-500 dark:bg-gray-600 w-3.5 h-3.5 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 {:else}
@@ -112,7 +112,7 @@
                 {/if}
             </div>
         {/if}
-        <span class="flex-1 text-sm text-left rtl:text-right ms-3 flex-1 whitespace-nowrap text-truncate truncate {fontWeight}">{title}</span>
+        <span class="flex-1 text-sm text-left rtl:text-right ms-3 whitespace-nowrap text-truncate truncate {fontWeight}">{title}</span>
         {#if stats.unread > 0 && !membership.mute}
             {#if stats.unread_mentions > 0}
                 <span class="inline-flex items-center justify-center px-2 ms-3 text-xs font-medium text-white bg-red-600 rounded-full dark:text-white w-fit">{mentionString}</span>

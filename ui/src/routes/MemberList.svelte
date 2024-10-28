@@ -1,9 +1,9 @@
 <script>
     import UserCard from "./user/UserListItem.svelte";
-    import {getChannelUsers, getCurrentChannelId, loadChannelUsers} from "$lib/api.ts";
+    import {getChannelUsers, getCurrentChannelId} from "$lib/api.ts";
 
     /** @type {{channelUsers: any}} */
-    let { channelUsers = $bindable() } = $props();
+    let { channelUsers = $bindable(), onCreateDm } = $props();
 
     let lock = false;
 
@@ -23,7 +23,7 @@
 <div class="w-max h-full overflow-y-scroll no-scrollbar" onscroll={onScroll}>
     <ul class="flex flex-col w-max">
         {#each channelUsers as user}
-            <UserCard user={user} on:createDm/>
+            <UserCard user={user} onCreateDm/>
         {/each}
     </ul>
 </div>

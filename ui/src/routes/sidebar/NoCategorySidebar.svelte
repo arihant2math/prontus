@@ -6,7 +6,7 @@
     import Sideitem from "./ChannelListItem.svelte";
 
     /** @type {{currentUser: any, handleSidebarClick: any, channelInfo: any}} */
-    let { currentUser = $bindable(), handleSidebarClick, channelInfo } = $props();
+    let { currentUser = $bindable(), onSidebarClick, channelInfo, ...on} = $props();
 
     let channels = $state([]);
 
@@ -34,13 +34,13 @@
        class="h-full">
     <div class="w-[375px] h-full z-40 bg-gray-50 dark:bg-slate-950">
         <!--TODO: maybe move this to the bottom-->
-        <CurrentUserCard bind:user={currentUser} on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
+        <CurrentUserCard bind:user={currentUser} {...on}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#each channels as item}
                 {#if channelInfo !== null && item[0].id === channelInfo.id}
-                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}" active="true"/>
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick={onSidebarClick} active={true}/>
                 {:else}
-                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick="{handleSidebarClick}"/>
+                    <Sideitem info={item[0]} stats={item[1]} membership={item[2]} buttonClick={onSidebarClick}/>
                 {/if}
             {/each}
         </ul>

@@ -1,19 +1,16 @@
 <script>
     import ProfilePicture from "./ProfilePicture.svelte";
     import ActionButton from "../ActionButton.svelte";
-    import {createEventDispatcher} from "svelte";
 
     /** @type {{user?: any}} */
-    let { user = null } = $props();
-
-    const dispatch = createEventDispatcher();
+    let { user = null, onCreateDm } = $props();
 </script>
 
 {#if user !== null}
     <div class="flex items-center justify-between mb-2 space-x-4">
         <ProfilePicture user={user}/>
         <div>
-            <ActionButton on:click={() => {dispatch("createDm", user)}} text="Message" compact={true}/>
+            <ActionButton on:click={onCreateDm} text="Message" compact={true}/>
         </div>
     </div>
     <p class="text-base font-semibold leading-none text-gray-900 dark:text-white">

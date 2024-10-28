@@ -4,16 +4,19 @@
     import UserInfo from "./UserInfo.svelte";
 
     /** @type {{user?: any}} */
-    let { user = {
-        id: 0,
-        fullname: "User",
-        profilepicurl: "https://cdn.discordapp.com/embed/avatars/0.png",
-        organizations: [
-            {
-                name: "Organization"
-            }
-        ]
-    } } = $props();
+    let {
+        user = {
+            id: 0,
+            fullname: "User",
+            profilepicurl: "https://cdn.discordapp.com/embed/avatars/0.png",
+            organizations: [
+                {
+                    name: "Organization"
+                }
+            ]
+        },
+        onCreateDm
+    } = $props();
 </script>
 
 <Popover.Root>
@@ -32,6 +35,6 @@
     <Popover.Content
             class="z-50 w-full max-w-max rounded-lg bg-white dark:bg-slate-800 shadow-popover p-4"
             sideOffset={8}>
-        <UserInfo user={user} on:createDm/>
+        <UserInfo user={user} onCreateDm/>
     </Popover.Content>
 </Popover.Root>

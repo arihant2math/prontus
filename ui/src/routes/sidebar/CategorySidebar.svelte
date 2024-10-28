@@ -7,9 +7,10 @@
     /** @type {{currentUser: any, handleSidebarClick: any, settings: any, channelInfo: any}} */
     let {
         currentUser = $bindable(),
-        handleSidebarClick,
+        onSidebarClick,
         settings = $bindable(),
-        channelInfo = $bindable()
+        channelInfo = $bindable(),
+        ...on
     } = $props();
 
     let sidebarCategoriesInfo = $state({});
@@ -85,21 +86,21 @@
        class="h-full">
     <div class="w-[375px] h-full z-40 bg-gray-50 dark:bg-slate-950">
         <!--TODO: maybe move this to the bottom-->
-        <CurrentUserCard bind:user={currentUser} on:showAnnouncements on:showTasks on:showDmDialog on:showSettings/>
+        <CurrentUserCard bind:user={currentUser} {...on}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#if sidebarCategories.hasOwnProperty(-4) && sidebarCategories[-4].length > 0}
-                <SideCategory name="Pinned" items={sidebarCategories[-4]} buttonClick={handleSidebarClick} bind:channelInfo={channelInfo}/>
+                <SideCategory name="Pinned" items={sidebarCategories[-4]} buttonClick={onSidebarClick} bind:channelInfo={channelInfo}/>
             {/if}
             {#if sidebarCategories.hasOwnProperty(-3) && sidebarCategories[-3].length > 0}
-                <SideCategory name="Recents" items={sidebarCategories[-3]} buttonClick={handleSidebarClick} bind:channelInfo={channelInfo}/>
+                <SideCategory name="Recents" items={sidebarCategories[-3]} buttonClick={onSidebarClick} bind:channelInfo={channelInfo}/>
             {/if}
             {#each Object.keys(sidebarCategories) as category}
                 {#if sidebarCategoriesInfo[category].id !== -3 && sidebarCategoriesInfo[category].id !== -4}
                     {#if sidebarCategoriesInfo[category].hasOwnProperty("user_category")}
                         <!--TODO: Fix alias not displaying properly (issue with json parsing it seems)-->
-                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick} bind:channelInfo={channelInfo}/>
+                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={onSidebarClick} bind:channelInfo={channelInfo}/>
                     {:else}
-                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={handleSidebarClick} bind:channelInfo={channelInfo}/>
+                        <SideCategory name={sidebarCategoriesInfo[category].title} items={sidebarCategories[category]} buttonClick={onSidebarClick} bind:channelInfo={channelInfo}/>
                     {/if}
                 {/if}
             {/each}
