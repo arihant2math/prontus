@@ -10,6 +10,6 @@
     let { value, disabled = false, children }: Props = $props();
 </script>
 <Tabs.Trigger value={value} disabled={disabled}
-              class="h-8 rounded-[7px] py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-mini dark:data-[state=active]:bg-muted">
+              class="h-8 rounded-[7px] py-2 data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-mini dark:data-[state=active]:bg-muted">
     {@render children?.()}
 </Tabs.Trigger>

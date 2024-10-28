@@ -22,7 +22,8 @@
         viewThread,
         inThread,
         messages,
-        settings
+        settings,
+        createDm
     } = $props();
 
     let editing = $state(false);
@@ -38,8 +39,6 @@
             hour12: true
         });
     }
-
-
 
     function formatTime(date) {
         let datetime = parseDatetime(date);
@@ -151,7 +150,7 @@
             {/if}
             <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 {border}" role="listitem">
                 {#if !repeat}
-                    <InteractiveProfilePicture user={message.user} on:createDm/>
+                    <InteractiveProfilePicture user={message.user} on:createDm={createDm}/>
                 {/if}
                 <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5 space-y-2">
                     {#if !repeat}

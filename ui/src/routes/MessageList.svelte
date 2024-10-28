@@ -12,7 +12,9 @@
         currentUser,
         inThread = false,
         viewThread,
-        settings
+        settings,
+        createDm,
+        pulsing = false
     } = $props();
 
     let memberships = [];
@@ -20,6 +22,7 @@
         getMemberships()
     });
     let updating = false;
+    const pulsingClass = $derived(pulsing ? "animate-pulse" : "");
 
     function getMemberships() {
         getCurrentChannelId().then((info) => {
@@ -55,18 +58,18 @@
     positionPopovers();
 </script>
 
-<div class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse h-full w-full" onscroll={messageScroll} onload={() => {this.scrollTop=0}}>
+<div class="overflow-y-scroll bg-white dark:bg-slate-900 flex flex-col-reverse h-full w-full {pulsingClass}" onscroll={messageScroll} onload={() => {this.scrollTop=0}}>
     {#each messages as message, i (message.id)}
         <div animate:flip={{ delay: 200, duration: 250, easing: quintOut }}>
             {#if message !== undefined && memberships !== undefined}
                 {#if i < messages.length - 1 && i > 0}
-                    <Message message={message} memberships={memberships} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} on:createDm/>
+                    <Message message={message} memberships={memberships} previousMessage={messages[i+1]} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} createDm={createDm}/>
                 {:else if i === 0}
-                    <Message message={message} memberships={memberships} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} on:createDm/>
+                    <Message message={message} memberships={memberships} previousMessage={messages[i+1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} createDm={createDm}/>
                 {:else if i === message.length - 1}
-                    <Message message={message} memberships={memberships} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} on:createDm/>
+                    <Message message={message} memberships={memberships} nextMessage={messages[i-1]} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} createDm={createDm}/>
                 {:else}
-                    <Message message={message} memberships={memberships} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} on:createDm/>
+                    <Message message={message} memberships={memberships} currentUser={currentUser} viewThread={viewThread} inThread={inThread} messages={parentMessages} settings={settings} createDm={createDm}/>
                 {/if}
             {/if}
             {#if channelInfo !== null && message.id === channelInfo[2].mark && i !== 0}

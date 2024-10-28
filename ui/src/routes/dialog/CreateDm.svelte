@@ -1,6 +1,4 @@
 <script>
-    import {run} from 'svelte/legacy';
-
     import {fade} from "svelte/transition";
     import {Dialog, Separator} from "bits-ui";
     import CloseButton from "../CloseButton.svelte";
@@ -15,7 +13,12 @@
     let username = $state("");
     let users = $state([]);
 
+    $effect(() => {
+        updateUsers(username)
+    });
+
     function updateUsers(username) {
+        console.log(username);
         if (username.length > 0) {
             console.log(username);
             userSearch(username).then((res) => {
@@ -24,10 +27,6 @@
             });
         }
     }
-
-    run(() => {
-        username, updateUsers(username);
-    });
 </script>
 
 <Dialog.Root bind:open={createDmDialogOpen}>
@@ -49,7 +48,7 @@
                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
             <div class="overflow-y-auto w-full overflow-x-hidden" style="height: 75vh">
-                <MemberList bind:channelUsers={users} onCreateDm/>
+                <MemberList bind:channelUsers={users} onCreateDm={onCreateDm}/>
             </div>
             <DialogClose/>
         </DialogContent>
