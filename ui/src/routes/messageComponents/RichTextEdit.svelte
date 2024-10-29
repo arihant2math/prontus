@@ -25,7 +25,6 @@
     const selection = doc ? TextSelection.atEnd(doc) : undefined;
 
     export function send() {
-        // TODO: temporarily disable editing
         let rawText = customMarkdownSerializer.serialize(editorState.doc);
         if (rawText === "") {
             return;

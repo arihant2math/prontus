@@ -1,4 +1,4 @@
 <script>
 </script>
 
-<!--TODO: Finish-->
+<div>Open a channel to get started</div>

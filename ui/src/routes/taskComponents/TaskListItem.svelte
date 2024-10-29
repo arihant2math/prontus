@@ -2,7 +2,7 @@
     import {completeTask, deleteTask, uncompleteTask} from "$lib/api.ts";
 
     /** @type {{task: any}} */
-    let { task } = $props();
+    let {task} = $props();
 </script>
 {#if task.completed !== null && task.completed}
     <div id="task" class="flex justify-between items-center border-b border-slate-200 py-3 px-2 border-l-4 border-l-transparent bg-gradient-to-r from-transparent to-transparent hover:from-slate-100 transition ease-linear duration-150 rounded-lg w-full">
