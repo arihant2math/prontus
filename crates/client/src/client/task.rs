@@ -1,4 +1,4 @@
-use crate::{task_complete, task_list, ProntoClient, ResponseError};
+use crate::{task_complete, task_list, task_uncomplete, ProntoClient, ResponseError};
 
 impl ProntoClient {
     pub async fn task_list(
@@ -34,11 +34,11 @@ impl ProntoClient {
     pub async fn task_uncomplete(
         &self,
         task_id: u64,
-    ) -> Result<task_complete::PostTaskResponse, ResponseError> {
-        Ok(task_complete::post(
+    ) -> Result<task_uncomplete::PostTaskResponse, ResponseError> {
+        Ok(task_uncomplete::post(
             &self.api_base_url,
             &self.http_client,
-            task_complete::PostTaskCompleteRequest { task_id },
+            task_uncomplete::PostTaskCompleteRequest { task_id },
         )
         .await?
         .to_result()?)
