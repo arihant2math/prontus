@@ -9,6 +9,7 @@
     let showSettings = $state(false);
 
     let memberListFill = $derived(memberListActive ? "currentColor" : "none");
+    let title = $derived(info[2].alias === null ? info[0].title : info[2].alias);
 
     function toggleMemberList() {
         memberListActive = !memberListActive;
@@ -25,7 +26,7 @@
 <div class="flex-none h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
     {#if info !== null && info[0] !== undefined}
         <div class="flex flex-col">
-            <span class="text-nowrap">{info[0].title}</span>
+            <span class="text-nowrap">{title}</span>
             {#if info[0].category !== null}
                 <span class="text-sm text-gray-500 dark:text-gray-400">{info[0].category.title}</span>
             {:else if info[0].isdm}
