@@ -1,5 +1,4 @@
 use client::ProntoClient;
-use log::error;
 use pusher::PusherServerEventType;
 use std::error;
 use std::future::Future;

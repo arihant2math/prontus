@@ -60,10 +60,9 @@ pub use client::ProntoClient;
 use log::{error, warn};
 pub use pusher;
 use pusher::{
-    PusherClient, PusherServerEventType, PusherServerMessage, PusherServerMessageWrapper,
+    PusherClient, PusherServerMessage, PusherServerMessageWrapper,
 };
 use std::error;
-use std::future::Future;
 use std::sync::Arc;
 
 pub trait TokenLoader {
