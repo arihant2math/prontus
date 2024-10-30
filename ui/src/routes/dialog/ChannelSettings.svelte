@@ -5,7 +5,7 @@
     import { open } from '@tauri-apps/plugin-dialog';
     import RadioLabel from "../settingsComponents/RadioLabel.svelte";
     import OptionsLabel from "../settingsComponents/options/OptionsLabel.svelte";
-    import {getSettings, setSettings} from "$lib/api.ts";
+    import {getSettings, setChannelAlias, setSettings} from "$lib/api.ts";
     import {loadTheme} from "$lib/helpers.ts";
     import {fade} from "svelte/transition";
     import {Dialog, Separator, Tabs} from "bits-ui";
@@ -19,9 +19,18 @@
     let { info = $bindable(), stats = $bindable(), membership = $bindable(), showSettings = $bindable(false) } = $props();
 
     const role = $derived(membership.role);
+    let alias = $state();
 
     function hasPermission(permission) {
         return info[permission] !== null && (info[permission] === "member" || role === "owner");
+    }
+
+    function aliasChange() {
+        if (alias === "") {
+            setChannelAlias(info.id, null);
+        } else {
+            setChannelAlias(info.id, alias);
+        }
     }
 
     $effect(() => {
@@ -58,13 +67,13 @@
                             </Tabs.List>
                             <Tabs.Content value="general" class="pt-3">
                                 <div class="max-w-lg">
-                                    {#if info.dmpartner !== null}
+                                    {#if !info.isdm}
                                         <div class="relative z-0 w-full mb-5 group">
                                             <input name="floating_name" id="floating_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " bind:value={info.title} disabled={!hasPermission("changetitle")}/>
                                             <label for="floating_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Channel Name</label>
                                         </div>
                                         <div class="relative z-0 w-full mb-5 group">
-                                            <input name="floating_alias" id="floating_alias" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " disabled/>
+                                            <input name="floating_alias" id="floating_alias" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " bind:value={alias} onchange={aliasChange}/>
                                             <label for="floating_alias" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Alias</label>
                                         </div>
                                     {/if}
