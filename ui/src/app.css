@@ -20,7 +20,7 @@
 }
 
 .no-scrollbar::-webkit-scrollbar { /* WebKit */
-    width: 0px;
+    width: 0;
 }
 
 .no-scrollbar {
