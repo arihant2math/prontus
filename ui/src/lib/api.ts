@@ -100,6 +100,18 @@ export async function setChannelAlias(channelId: number, alias?: string) {
     return await invoke("set_channel_alias", {channelId, alias});
 }
 
+export async function setChannelTitle(channelId: number, title: string) {
+    return await invoke("set_channel_title", {channelId, title});
+}
+
+export async function setChannelCategory(channelId: number, categoryId: number) {
+    return await invoke("set_channel_category", {channelId, categoryId});
+}
+
+export async function deleteChannel(channelId: number) {
+    return await invoke("delete_channel", {channelId});
+}
+
 export async function setChannelNotifications(channelId: number, level: string) {
     return await invoke("set_channel_notifications", {channelId, level});
 }
@@ -134,4 +146,12 @@ export async function uncompleteTask(taskId: number) {
 
 export async function deleteTask(taskId: number) {
     return await invoke("delete_task", {taskId});
+}
+
+export async function setTyping(state: boolean) {
+    return await invoke("set_typing", {state});
+}
+
+export async function getTypingUsers() {
+    return await invoke("get_typing_users");
 }

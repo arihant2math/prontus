@@ -64,6 +64,9 @@ pub fn run() {
             set_channel_pin,
             set_channel_alias,
             set_channel_notifications,
+            set_channel_title,
+            set_channel_category,
+            delete_channel,
             read_channel,
             create_dm,
             create_bubble,
@@ -73,7 +76,9 @@ pub fn run() {
             get_tasks,
             complete_task,
             uncomplete_task,
-            delete_task
+            delete_task,
+            set_typing,
+            get_typing_users
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
