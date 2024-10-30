@@ -79,7 +79,7 @@
 </script>
 
 <ProsemirrorEditor
-        placeholder="{placeholder}"
+        placeholder={placeholder}
         className="rounded-md p-2 {bgColor}"
         {editorState}
         on:change={handleChange}

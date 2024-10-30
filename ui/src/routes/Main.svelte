@@ -4,7 +4,7 @@
 
     import ChannelCard from "./CurrentChannelCard.svelte";
     import Settings from "./dialog/Settings.svelte";
-    import MemberList from "./MemberList.svelte";
+    import UserList from "./UserList.svelte";
 
     import {
         loadChannel,
@@ -170,33 +170,33 @@
         <Pane defaultSize={75}>
             <div id="content" style="height: 100vh"
                  class="w-full bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden overflow-y-hidden">
+                <div>
+                    <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
+                </div>
                 {#if loadingMessages !== -1}
                     <div class="w-full h-1">
                         <div class="bg-blue-600 h-1" style="width: {loadingMessages}%"></div>
                     </div>
                 {/if}
-                <div>
-                    <ChannelCard bind:info={channelInfo} bind:memberListActive={showMemberList}/>
-                </div>
                 <div class="flex flex-row overflow-x-hidden overflow-y-hidden h-full bg-white dark:bg-slate-900">
                     <div class="flex flex-col w-full overflow-x-hidden overflow-y-hidden ml-4">
-                        <MessageList id="messagesDiv" bind:messages={messages} bind:parentMessages={parentMessages}
+                        <MessageList bind:messages={messages} bind:parentMessages={parentMessages}
                                      channelInfo={channelInfo} currentUser={currentUser} viewThread={viewThread}
                                      settings={settings} onCreateDm={createDmForUser} pulsing={loadingMessages !== -1}/>
                         <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                             {#if channelInfo !== null && channelInfo[0].grant_create_message && loadingMessages === -1}
                                 <RichTextEdit bind:this={messageInput}
-                                              sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                              sendMessage={async (text) => {await queuedSendMessage(text, null)}}
                                               disabled={false}/>
                             {:else}
                                 <RichTextEdit bind:this={messageInput}
-                                              sendMessage={async (text) => {queuedSendMessage(text, null)}}
+                                              sendMessage={async (text) => {await queuedSendMessage(text, null)}}
                                               disabled={true}/>
                             {/if}
                         </div>
                     </div>
                     {#if showMemberList && !showThread}
-                        <MemberList bind:channelUsers={channelUsers} on:createDm={createDmForUser}/>
+                        <UserList bind:channelUsers={channelUsers} onCreateDm={createDmForUser}/>
                     {/if}
                     {#if showThread}
                         <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
@@ -209,14 +209,14 @@
                                 </svg>
                             </button>
                             <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
-                                <MessageList id="threadMessagesDiv" bind:messages={threadMessages}
+                                <MessageList bind:messages={threadMessages}
                                              channelInfo={channelInfo} viewThread={(id) => {}}
                                              bind:parentMessages={parentMessages} currentUser={currentUser}
                                              inThread={true}
-                                             settings={settings} on:createDm={createDmForUser}/>
+                                             settings={settings} onCreateDm={createDmForUser}/>
                                 <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
                                     <RichTextEdit
-                                            sendMessage={async (text) => {queuedSendMessage(text, threadParent)}}/>
+                                            sendMessage={async (text) => {await queuedSendMessage(text, threadParent)}}/>
                                 </div>
                             </div>
                         </div>
