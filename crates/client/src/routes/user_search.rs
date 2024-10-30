@@ -1,6 +1,5 @@
 use crate::UserInfo;
 use serde::{Deserialize, Serialize};
-use client_macros::api;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GetUserSearchResponse {
