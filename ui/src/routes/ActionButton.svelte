@@ -1,17 +1,10 @@
 <script>
-    import { createBubbler } from 'svelte/legacy';
-
-    const bubble = createBubbler();
-    import { createEventDispatcher } from 'svelte';
-
-    const dispatch = createEventDispatcher();
-
     /** @type {{text: any, style?: string, disabled?: boolean, compact?: boolean}} */
     let {
-        text,
         style = "default",
         disabled = false,
-        compact = false
+        compact = false,
+        ...props
     } = $props();
 
     function getColorClasses(buttonStyle, disabled) {
@@ -42,4 +35,4 @@
     let colorCls = $derived(getColorClasses(style, disabled));
     let spacing = $derived(compact ? "p-1" : "px-5 py-2.5 me-2 mb-2");
 </script>
-<button onclick={bubble('click')} type="button" class="text-white font-medium rounded-lg text-sm {spacing} {colorCls}">{text}</button>
+<button type="button" class="text-white font-medium rounded-lg text-sm {spacing} {colorCls}" {...props}><slot></slot></button>

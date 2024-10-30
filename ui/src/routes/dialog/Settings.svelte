@@ -383,9 +383,9 @@
                                     <div>
                                         <b>Folder</b> {settings.search.messages.path}
                                     </div>
-                                    <ActionButton text="Disable" on:click={disableFolder}/>
+                                    <ActionButton onclick={disableFolder}>Disable</ActionButton>
                                 {:else}
-                                    <ActionButton text="Select Folder" on:click={selectFolder}/>
+                                    <ActionButton onclick={selectFolder}>Select Folder</ActionButton>
                                 {/if}
                             </Tabs.Content>
                             <Tabs.Content value="about" class="pt-3">

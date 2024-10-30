@@ -11,7 +11,7 @@
         <div class="flex items-center justify-between mb-2 space-x-4">
             <ProfilePicture user={user}/>
             <div>
-                <ActionButton on:click={() => {onCreateDm()}} text="Message" compact={true}/>
+                <ActionButton onclick={() => {onCreateDm()}} compact={true}>Message</ActionButton>
             </div>
         </div>
         <p class="text-base font-semibold leading-none text-gray-900 dark:text-white">
