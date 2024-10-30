@@ -67,6 +67,8 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
             .chain(tasks_list_complete?.tasks.iter())
             .cloned()
             .collect(),
+        is_typing: false,
+        typing_users: HashMap::new()
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
@@ -359,4 +361,22 @@ pub async fn delete_task(
         .collect();
     let _ = handle.emit("taskListUpdate", ());
     Ok(())
+}
+
+#[command]
+pub async fn set_typing(state: State<'_, AppState>, typing: bool) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let mut state = state.write().await;
+    let state = state.try_inner_mut()?;
+    state.is_typing = typing;
+    // TODO: send pusher message
+    Ok(())
+}
+
+#[command]
+pub async fn get_typing_users(state: State<'_, AppState>) -> Result<HashMap<u64, Vec<u64>>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+    Ok(state.typing_users.clone())
 }

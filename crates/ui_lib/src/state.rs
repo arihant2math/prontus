@@ -31,6 +31,9 @@ pub struct AppData {
     pub parent_messages: Vec<Message>,
     pub announcements: Vec<Announcement>,
     pub tasks: Vec<Task>,
+    // TODO: include thread id too
+    pub typing_users: HashMap<u64, Vec<u64>>,
+    pub is_typing: bool,
 }
 
 pub enum InnerAppState {

@@ -79,8 +79,8 @@ pub async fn run(
         match message {
             Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => {
                 match message {
-                    PusherServerMessage::Event(event) => {
-                        match event.event {
+                    PusherServerMessage::Event(ev) => {
+                        match ev.event {
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
                                 // TODO: Make sure app in not in foreground
                                 if settings.options.notifications {
@@ -294,6 +294,28 @@ pub async fn run(
                                 }
 
                                 let _ = handle.emit("announcementListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerUserTypingEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
+                                let users = state.typing_users.entry(channel_id).or_default();
+                                if !users.contains(&event.user_id) {
+                                    users.push(event.user_id);
+                                }
+
+                                let _ = handle.emit("typingListUpdate", ());
+                            }
+                            PusherServerEventType::PusherServerUserStoppedTypingEvent(event) => {
+                                let state = context.inner();
+                                let mut state = state.write().await;
+                                let state = state.try_inner_mut()?;
+                                let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
+                                let users = state.typing_users.entry(channel_id).or_default();
+                                users.retain(|u| u != &event.user_id);
+
+                                let _ = handle.emit("typingListUpdate", ());
                             }
                             // TODO: handle other
                             _ => {}
