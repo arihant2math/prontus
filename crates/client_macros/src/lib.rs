@@ -138,7 +138,7 @@ pub fn api(input: TokenStream) -> TokenStream {
     let send_request =
         if let Some(request_expr) = extra_args.get("request") {
             quote! {
-                #request_expr;
+                #request_expr
             }
         } else if has_request {
             if method == "get" {
