@@ -6,6 +6,7 @@ pub struct UserInfo {
     pub id: u64,
     pub firstname: String,
     pub lastname: String,
+    pub pronouns: Option<String>,
     #[serde(rename = "profilepicurl")]
     pub profile_picture_url: Option<String>,
     #[serde(rename = "profilepicpath")]
