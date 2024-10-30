@@ -256,3 +256,36 @@ pub async fn read_channel(state: State<'_, AppState>, channel_id: u64) -> Result
     // TODO: update bubble stats
     Ok(())
 }
+
+#[command]
+pub async fn set_channel_title(state: State<'_, AppState>, channel_id: u64, title: String) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    state.client.set_bubble_title(channel_id, title).await?;
+    // TODO: update bubble
+    Ok(())
+}
+
+#[command]
+pub async fn set_channel_category(state: State<'_, AppState>, channel_id: u64, category_id: Option<u64>) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    state.client.set_bubble_category(channel_id, category_id).await?;
+    // TODO: update bubble
+    Ok(())
+}
+
+#[command]
+pub async fn delete_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    state.client.delete_bubble(channel_id).await?;
+    // TODO: update bubble
+    Ok(())
+}
