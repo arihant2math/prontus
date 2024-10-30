@@ -40,7 +40,8 @@
         }
         // TODO: Fix hack, this should be global
         positionPopovers();
-        if (event.target.scrollTop + event.target.scrollHeight < 1000) {
+        console.log(event.target.scrollTop, event.target.scrollHeight);
+        if (event.target.scrollTop + event.target.scrollHeight < 2500) {
             if (updating) {
                 return;
             }
