@@ -2,9 +2,11 @@
     import {DropdownMenu} from "bits-ui";
     import {Popover} from "bits-ui";
     import {setChannelMute, setChannelNotifications} from "$lib/api.ts";
+    import ChannelSettings from "./dialog/ChannelSettings.svelte";
 
     /** @type {{info?: any, memberListActive?: boolean}} */
     let { info = $bindable(null), memberListActive = $bindable(false) } = $props();
+    let showSettings = $state(false);
 
     let memberListFill = $derived(memberListActive ? "currentColor" : "none");
 
@@ -20,8 +22,8 @@
         await setChannelNotifications(info[0].id, info[2].notificationpreference);
     }
 </script>
-{#if info !== null && info[0] !== undefined}
-    <div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
+<div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
+    {#if info !== null && info[0] !== undefined}
         <div class="flex flex-col">
             <span class="text-nowrap">{info[0].title}</span>
             {#if info[0].category !== null}
@@ -143,7 +145,7 @@
                     {#if !info[0].isdm}
                         <DropdownMenu.Item
                                 class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium !ring-0 !ring-transparent data-[highlighted]:bg-muted"
-                        >
+                                onclick={() => {showSettings = true}}>
                             <div class="flex items-center">
                                 Settings
                             </div>
@@ -152,5 +154,9 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </div>
-    </div>
+    {/if}
+</div>
+
+{#if info !== null && info[0] !== undefined}
+    <ChannelSettings bind:showSettings={showSettings} bind:info={info[0]} stats={info[1]} membership={info[2]}/>
 {/if}
