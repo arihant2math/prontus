@@ -22,7 +22,7 @@
         await setChannelNotifications(info[0].id, info[2].notificationpreference);
     }
 </script>
-<div class="h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
+<div class="flex-none h-[60px] border-b border-gray-500 flex w-full items-center text-gray-900 dark:text-white text-lg my-auto px-5 flex-row dark:bg-slate-900">
     {#if info !== null && info[0] !== undefined}
         <div class="flex flex-col">
             <span class="text-nowrap">{info[0].title}</span>
@@ -155,8 +155,7 @@
             </DropdownMenu.Root>
         </div>
     {/if}
+    {#if info !== null && info[0] !== undefined}
+        <ChannelSettings bind:showSettings={showSettings} bind:info={info[0]} stats={info[1]} membership={info[2]}/>
+    {/if}
 </div>
-
-{#if info !== null && info[0] !== undefined}
-    <ChannelSettings bind:showSettings={showSettings} bind:info={info[0]} stats={info[1]} membership={info[2]}/>
-{/if}
