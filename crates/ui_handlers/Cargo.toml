@@ -1,0 +1,12 @@
+[package]
+name = "ui_handlers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+client = { path = "../client" }
+futures = "0.3"
+log = "0.4"
+settings = { path = "../settings" }
+tauri = { version = "2.0", features = ["tray-icon", "unstable"] }
+ui_lib = { path = "../ui_lib" }

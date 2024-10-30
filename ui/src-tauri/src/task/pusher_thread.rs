@@ -1,4 +1,4 @@
-use crate::{state, AppState};
+use ui_lib::{state::UnlockError, AppState};
 use client::Reactions;
 use futures::future::join_all;
 use log::{error, info, warn};
@@ -15,7 +15,7 @@ pub enum PusherThreadError {
     #[error("Settings error: {0}")]
     SettingsError(#[from] SettingsError),
     #[error("Unlock error: {0}")]
-    UnlockError(#[from] state::UnlockError),
+    UnlockError(#[from] UnlockError),
 }
 
 #[tokio::main]

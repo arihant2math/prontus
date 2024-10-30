@@ -1,4 +1,4 @@
-use crate::BackendError;
+use ui_lib::BackendError;
 use client::user_login::{DeviceInfo, UserLoginRequest};
 use client::ProntoClient;
 use log::info;

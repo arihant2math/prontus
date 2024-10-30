@@ -1,4 +1,4 @@
-use crate::{AppState, BackendError};
+use ui_lib::{AppState, BackendError};
 use client::Message;
 use tauri::{command, Emitter, State};
 

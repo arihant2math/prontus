@@ -1,4 +1,4 @@
-use crate::AppState;
+use ui_lib::AppState;
 use client::ProntoClient;
 use hyper::body::Incoming;
 use hyper::server::conn::http1;

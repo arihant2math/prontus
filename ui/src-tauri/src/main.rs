@@ -63,5 +63,5 @@ fn main() {
         release: sentry::release_name!(),
         ..Default::default()
     }));
-    ui_lib::run()
+    ui_core::run()
 }
