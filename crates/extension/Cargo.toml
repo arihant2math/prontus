@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wasmer = "4.4.0"
+wasmer = { version = "4.4.0" }
