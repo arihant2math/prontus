@@ -6,9 +6,6 @@ mod task;
 mod tray;
 
 pub use ui_lib::{AppState, BackendError};
-use task::run_search_thread;
-use task::run_proxy_thread;
-use task::run_pusher_thread;
 
 use ui_handlers::*;
 
@@ -22,18 +19,7 @@ pub fn run() {
             thread::spawn({
                 let context = context.clone();
                 move || {
-                    let _ = run_proxy_thread(context);
-                }
-            });
-            thread::spawn({
-                let context = context.clone();
-                move || {
-                    let _ = run_pusher_thread(thread_handle, context);
-                }
-            });
-            thread::spawn({
-                move || {
-                    let _ = run_search_thread();
+                    task::task_thread(thread_handle, context);
                 }
             });
 

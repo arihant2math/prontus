@@ -18,8 +18,7 @@ pub enum PusherThreadError {
     UnlockError(#[from] UnlockError),
 }
 
-#[tokio::main]
-pub async fn run_pusher_thread(
+pub async fn run(
     handle: AppHandle,
     context: AppState,
 ) -> Result<(), PusherThreadError> {

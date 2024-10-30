@@ -11,8 +11,7 @@ pub enum SearchError {
 }
 
 // TODO: handle changes in settings like path changing
-#[tokio::main]
-pub async fn run_search_thread() -> Result<(), SearchError> {
+pub async fn run() -> Result<(), SearchError> {
     let mut future = None;
     loop {
         let settings = Settings::load().await?;

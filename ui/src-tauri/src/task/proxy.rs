@@ -46,8 +46,7 @@ impl Service<Request<Incoming>> for ServiceHandler {
     }
 }
 
-#[tokio::main]
-pub async fn run_proxy_thread(
+pub async fn run(
     context: AppState,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     loop {

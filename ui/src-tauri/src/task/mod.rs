@@ -1,7 +1,32 @@
-mod proxy_thread;
-mod pusher_thread;
-mod search_thread;
+mod proxy;
+mod pusher;
+mod search;
 
-pub use proxy_thread::run_proxy_thread;
-pub use pusher_thread::run_pusher_thread;
-pub use search_thread::run_search_thread;
+use futures::join;
+use log::error;
+use tauri::AppHandle;
+use ui_lib::AppState;
+
+#[tokio::main]
+pub async fn task_thread(handle: AppHandle, context: AppState) {
+    // spawn tasks
+    let f1 = tokio::task::spawn({
+        let context = context.clone();
+        async move {
+            if let Err(e) = pusher::run(handle, context).await {
+                error!("Pusher Task Error: {:?}", e);
+            }
+        }
+    });
+    let f2 = tokio::task::spawn(async move {
+        if let Err(e) = search::run().await {
+            error!("Search Task Error: {:?}", e);
+        }
+    });
+    let f3 = tokio::task::spawn(async move {
+        if let Err(e) = proxy::run(context).await {
+            error!("Proxy Task Error: {:?}", e);
+        }
+    });
+    let _ = join!(f1, f2, f3);
+}
