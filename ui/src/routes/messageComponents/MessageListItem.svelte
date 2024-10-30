@@ -1,16 +1,16 @@
 <script>
-    import Embed from "./messageComponents/Embed.svelte";
-    import Media from "./messageComponents/Media.svelte";
-    import Reaction from "./messageComponents/Reaction.svelte";
+    import Embed from "./Embed.svelte";
+    import Media from "./Media.svelte";
+    import Reaction from "./Reaction.svelte";
     import {deleteMessage, editMessage} from "$lib/api.ts";
-    import RichTextContainer from "./messageComponents/RichTextContainer.svelte";
+    import RichTextContainer from "./RichTextContainer.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import {parseDatetime} from "$lib/helpers.ts";
-    import ReactionPanel from "./messageComponents/ReactionPanel.svelte";
-    import InteractiveProfilePicture from "./user/InteractiveProfilePicture.svelte";
-    import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
-    import ViewTheadFooter from "./messageComponents/ViewThreadFooter.svelte";
-    import ProfilePicture from "./user/ProfilePicture.svelte";
+    import ReactionPanel from "./ReactionPanel.svelte";
+    import InteractiveProfilePicture from "../user/InteractiveProfilePicture.svelte";
+    import RichTextEdit from "./RichTextEdit.svelte";
+    import ViewTheadFooter from "./ViewThreadFooter.svelte";
+    import ProfilePicture from "../user/ProfilePicture.svelte";
 
     /** @type {{message: any, memberships: any, previousMessage?: any, nextMessage?: any, currentUser: any, viewThread: any, inThread: any, messages: any, settings: any}} */
     let {
@@ -23,7 +23,7 @@
         inThread,
         messages,
         settings,
-        createDm
+        onCreateDm
     } = $props();
 
     let editing = $state(false);
@@ -150,7 +150,7 @@
             {/if}
             <div class="pl-5 {py} flex items-start gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 {border}" role="listitem">
                 {#if !repeat}
-                    <InteractiveProfilePicture user={message.user} on:createDm={createDm}/>
+                    <InteractiveProfilePicture user={message.user} onCreateDm={onCreateDm}/>
                 {/if}
                 <div class="{ml} flex flex-col w-full max-w-[500px] leading-1.5 space-y-2">
                     {#if !repeat}
@@ -159,7 +159,7 @@
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400 text-nowrap">{messageCreatedAtDatetime}</span>
                         </div>
                     {/if}
-                    <RichTextContainer message="{message.message}"/>
+                    <RichTextContainer message={message.message}/>
                     {#each media as mediaItem}
                         <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>
                     {/each}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Message from "./Message.svelte";
+    import Message from "./messageComponents/MessageListItem.svelte";
     import {positionPopovers} from "$lib/popup.js";
     import {getCurrentChannelId, getMessages, getMoreMessages} from "$lib/api.ts";
     import { flip } from 'svelte/animate';
