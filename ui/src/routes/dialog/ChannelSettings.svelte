@@ -1,6 +1,13 @@
 <!--TODO: Add ability to log out-->
 <script>
-    import {getSettings, setChannelAlias, setChannelMute, setChannelNotifications, setSettings} from "$lib/api.ts";
+    import {
+        getSettings,
+        modifyChannelPermission,
+        setChannelAlias,
+        setChannelMute,
+        setChannelNotifications,
+        setSettings
+    } from "$lib/api.ts";
     import {fade} from "svelte/transition";
     import {Dialog, Separator, Tabs} from "bits-ui";
     import TabsTrigger from "../bitsHead/TabsTrigger.svelte";
@@ -95,68 +102,68 @@ async function updateMute() {
                                                     <Label.Root>
                                                         Change group name
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.changetitle)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.changetitle)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "changetitle", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Change group category
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.changecategory)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.changecategory)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "changecategory", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Add New Members
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.addmember)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.addmember)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "addmember", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Remove Members
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.removemember)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.removemember)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "removemember", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Leave Group
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.leavegroup)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.leavegroup)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "leavegroup", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Start Meetings
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.create_videosession)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.create_videosession)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "create_videosession", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Send Messages
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.create_message)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.create_message)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "create_message", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                <div>
                                                     <Label.Root>
-<!--                                                        TODO: do cloud recording later-->
+                                                        <!-- TODO: do cloud recording later -->
                                                         Record Meetings Locally
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.grantvideosessionrecordlocal)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.grantvideosessionrecordlocal)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "grantvideosessionrecordlocal", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Assign Tasks
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.assign_task)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.assign_task)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "assign_task", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Send Announcements
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.create_announcement)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.create_announcement)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "create_announcement", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                                 <div>
                                                     <Label.Root>
                                                         Pin a message
                                                     </Label.Root>
-                                                    <Select options={permissionOptions} selected={getSelected(info.pin_message)} disabled={role === "member"}/>
+                                                    <Select options={permissionOptions} selected={getSelected(info.pin_message)} onSelectedChange={(value) => {modifyChannelPermission(info.id, "pin_message", value.value)}} disabled={role === "member"}/>
                                                 </div>
                                             </div>
                                     {/if}
