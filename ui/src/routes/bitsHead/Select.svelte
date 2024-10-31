@@ -2,10 +2,10 @@
     import {Select} from "bits-ui";
     import Icon from "@krowten/svelte-heroicons/Icon.svelte";
 
-    let { options = $bindable([]), label = "", selected = $bindable(), onSelectedChange } = $props();
+    let { options = $bindable([]), label = "", selected = $bindable(), onSelectedChange, disabled = false } = $props();
 </script>
 
-<Select.Root bind:items={options} bind:selected={selected} onSelectedChange={onSelectedChange}>
+<Select.Root bind:items={options} bind:selected={selected} onSelectedChange={onSelectedChange} disabled={disabled}>
     <Select.Trigger
             class="rounded-lg py-2 inline-flex h-input w-[296px] items-center px-[11px] text-sm transition-colors placeholder:text-foreground-alt/50  focus:outline-none border border-gray-100 dark:border-gray-700"
             aria-label={label}
