@@ -230,5 +230,5 @@
     <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
     <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
     <Tasks bind:tasksDialogOpen={tasksDialogOpen}/>
-    <Toaster/>
+    <Toaster richColors/>
 </div>
