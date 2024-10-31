@@ -66,6 +66,7 @@ pub fn run() {
             set_channel_notifications,
             set_channel_title,
             set_channel_category,
+            modify_channel_permission,
             delete_channel,
             read_channel,
             create_dm,

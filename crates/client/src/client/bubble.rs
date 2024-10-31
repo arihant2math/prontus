@@ -285,8 +285,29 @@ impl ProntoClient {
                 modification: bubble_update::BubbleUpdateModification::SetCategory(category_id),
             },
         )
-                           .await?
-                .to_result()?)
+            .await?
+            .to_result()?)
+    }
+
+    pub async fn modify_bubble_permission(
+        &self,
+        bubble_id: u64,
+        name: String,
+        value: String
+    ) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
+        Ok(bubble_update::post(
+            &self.api_base_url,
+            &self.http_client,
+            bubble_update::PostBubbleUpdateRequest {
+                bubble_id,
+                modification: bubble_update::BubbleUpdateModification::ModifyPermission(crate::Property {
+                    key: name,
+                    value: serde_json::Value::String(value)
+                }),
+            },
+        )
+            .await?
+            .to_result()?)
     }
 
     pub async fn delete_bubble(&self, bubble_id: u64) -> Result<bubble_delete::PostBubbleDeleteResponse, ResponseError> {

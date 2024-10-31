@@ -280,6 +280,16 @@ pub async fn set_channel_category(state: State<'_, AppState>, channel_id: u64, c
 }
 
 #[command]
+pub async fn modify_channel_permission(state: State<'_, AppState>, channel_id: u64, key: String, value: String) -> Result<(), BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+
+    state.client.modify_bubble_permission(channel_id, key, value).await?;
+    Ok(())
+}
+
+#[command]
 pub async fn delete_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
