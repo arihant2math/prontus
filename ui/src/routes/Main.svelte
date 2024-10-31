@@ -20,7 +20,7 @@
     import MessageList from "./MessageList.svelte";
     import {listen} from "@tauri-apps/api/event";
     import Sidebar from "./sidebar/Sidebar.svelte";
-    import {loadTheme} from "$lib/helpers.ts";
+    import {getThemeClass, loadTheme} from "$lib/helpers.ts";
     import {Dialog, Label, Separator} from "bits-ui";
     import {fade} from "svelte/transition";
     import CreateDm from "./dialog/CreateDm.svelte";
@@ -230,5 +230,5 @@
     <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
     <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
     <Tasks bind:tasksDialogOpen={tasksDialogOpen}/>
-    <Toaster richColors/>
+    <Toaster richColors theme={getThemeClass(settings)}/>
 </div>

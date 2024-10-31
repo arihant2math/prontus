@@ -1,3 +1,18 @@
+export function getThemeClass(settings) {
+    if (settings === undefined || settings === null) {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+        } else {
+            return 'light'
+        }
+    }
+    if (settings.appearance.theme === 'Dark' || (settings.appearance.theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        return 'dark'
+    } else {
+        return 'light'
+    }
+}
+
 export function loadTheme(settings) {
     if (settings === undefined || settings === null) {
         if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
