@@ -32,7 +32,7 @@
         return info[permission] !== null && (info[permission] === "member" || role === "owner");
     }
 
-    async function titleChange(ev) {
+    function titleChange(ev) {
         if (ev.key !== "Enter") return;
         setChannelTitle(info.id, title);
     }
