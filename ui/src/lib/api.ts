@@ -108,8 +108,8 @@ export async function setChannelCategory(channelId: number, categoryId: number) 
     return await invoke("set_channel_category", {channelId, categoryId});
 }
 
-export async function modifyChannelPermission(channelId: number, permission: string, value: string) {
-    return await invoke("modify_channel_permission", {channelId, permission, value});
+export async function modifyChannelPermission(channelId: number, key: string, value: string) {
+    return await invoke("modify_channel_permission", {channelId, key, value});
 }
 
 export async function deleteChannel(channelId: number) {

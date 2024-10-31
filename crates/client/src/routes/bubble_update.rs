@@ -78,7 +78,7 @@ pub type BubbleUpdateResult = crate::APIResult<BubbleUpdateResponse>;
 
 api!(
     post,
-    "v1/membership.update",
+    "v1/bubble.update",
     BubbleUpdateResult,
     PostBubbleUpdateRequest
 );
