@@ -17,30 +17,30 @@ fn init_logging() -> Handle {
         chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")
     ));
     // Build a stderr logger.
-    let stderr = ConsoleAppender::builder()
-        .target(Target::Stderr)
-        .encoder(Box::new(PatternEncoder::new("{m}\n")))
+    let stdout = ConsoleAppender::builder()
+        .target(Target::Stdout)
+        .encoder(Box::new(PatternEncoder::new("[{h({l})} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}")))
         .build();
     // Logging to log file.
     let logfile = FileAppender::builder()
         // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html
-        .encoder(Box::new(PatternEncoder::new("[{l} {M} {d}] {m}\n")))
+        .encoder(Box::new(PatternEncoder::new("[{l} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}")))
         .build(file_path.as_os_str().to_str().unwrap())
         .unwrap();
     let logfile_appender = Appender::builder().build("logfile", Box::new(logfile));
-    let stderr_appender = Appender::builder()
+    let stdout_appender = Appender::builder()
         .filter(Box::new(ThresholdFilter::new(level)))
-        .build("stderr", Box::new(stderr));
+        .build("stdout", Box::new(stdout));
     // Create builder for log file and stderr with Trace level.
     let builder = Root::builder()
         .appender("logfile")
-        .appender("stderr")
+        .appender("stdout")
         .build(LevelFilter::Trace);
     // Log Trace level output to file where trace is the default level
     // and the programmatically specified level to stderr.
     let config = Config::builder()
         .appender(logfile_appender)
-        .appender(stderr_appender)
+        .appender(stdout_appender)
         .logger(Logger::builder().build("reqwest", LevelFilter::Info))
         .logger(Logger::builder().build("rustls", LevelFilter::Info))
         .logger(Logger::builder().build("tokio_tungstenite", LevelFilter::Debug))
