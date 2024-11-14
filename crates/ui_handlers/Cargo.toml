@@ -8,5 +8,5 @@ client = { path = "../client" }
 futures = "0.3"
 log = "0.4"
 settings = { path = "../settings" }
-tauri = { version = "2.0", features = ["tray-icon", "unstable"] }
+tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
 ui_lib = { path = "../ui_lib" }
