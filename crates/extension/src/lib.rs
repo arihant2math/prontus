@@ -10,9 +10,11 @@
 //!
 //! Ready?
 
+use rayon::ThreadPool;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 use std::string::FromUtf8Error;
+use std::sync::Mutex;
 use thiserror::Error;
 use wasmer::{
     imports, wat2wasm, Cranelift, ExportError, Instance, Module, RuntimeError, Store, Value,
@@ -201,66 +203,77 @@ pub struct Extension {
     pub info: ExtensionInfo,
     pub permissions: ExtensionPermissions,
     pub instance: Instance,
+    pub store: Store
 }
 
 impl Extension {
-    fn load(store: &mut Store, path: impl AsRef<Path>) -> Self {
+    fn load(path: impl AsRef<Path>) -> Self {
         let bytes = std::fs::read(path).unwrap();
         let instance = load(bytes).unwrap();
+        let compiler = Cranelift::default();
+        let mut store = Store::new(compiler);
         let info = ExtensionInfo {
-            name: call_fn(&instance, store, "info_name", &[]).unwrap(),
-            version: call_fn(&instance, store, "info_version", &[]).unwrap(),
-            description: call_fn(&instance, store, "info_description", &[]).unwrap(),
-            authors: call_fn(&instance, store, "info_authors", &[]).unwrap(),
+            name: call_fn(&instance, &mut store, "info_name", &[]).unwrap(),
+            version: call_fn(&instance, &mut store, "info_version", &[]).unwrap(),
+            description: call_fn(&instance, &mut store, "info_description", &[]).unwrap(),
+            authors: call_fn(&instance, &mut store, "info_authors", &[]).unwrap(),
         };
         // TODO: split later
         let permissions = ExtensionPermissions {
-            network: call_fn(&instance, store, "permissions_network", &[]).unwrap(),
-            filesystem: call_fn(&instance, store, "permissions_filesystem", &[]).unwrap(),
-            full_settings: call_fn(&instance, store, "permissions_full_settings", &[]).unwrap(),
-            extension_settings: call_fn(&instance, store, "permissions_extension_settings", &[])
+            network: call_fn(&instance, &mut store, "permissions_network", &[]).unwrap(),
+            filesystem: call_fn(&instance, &mut store, "permissions_filesystem", &[]).unwrap(),
+            full_settings: call_fn(&instance, &mut store, "permissions_full_settings", &[]).unwrap(),
+            extension_settings: call_fn(&instance, &mut store, "permissions_extension_settings", &[])
                 .unwrap(),
-            extension_hooks: call_fn(&instance, store, "permissions_extension_hooks", &[]).unwrap(),
+            extension_hooks: call_fn(&instance, &mut store, "permissions_extension_hooks", &[]).unwrap(),
         };
         Self {
             info,
             permissions,
             instance,
+            store
         }
+    }
+
+    pub fn call_fn_raw(&mut self, name: &str, params: &[Value]) -> Result<Box<[Value]>, WasmFunctionError> {
+        call_fn_raw(&self.instance, &mut self.store, name, params)
+    }
+
+    pub fn call_fn<T: WasmOutput>(&mut self, name: &str, params: &[Value]) -> Result<T, WasmFunctionError> {
+        call_fn(&self.instance, &mut self.store, name, params)
     }
 }
 
-#[derive(Default)]
 pub struct ExtensionManager {
-    extensions: Vec<Extension>,
-    store: Store,
+    extensions: Vec<Extension>
 }
 
 impl ExtensionManager {
     pub fn load(paths: Vec<PathBuf>) -> Self {
-        let compiler = Cranelift::default();
-        let mut store = Store::new(compiler);
         let extensions: Vec<Extension> = paths
             .iter()
-            .map(|path| Extension::load(&mut store, path))
+            .map(|path| Extension::load(path))
             .collect();
-        Self { extensions, store }
+        Self {
+            extensions
+        }
     }
 
     pub fn frontend_text(&mut self) -> Vec<String> {
         // Over allocate, but it doesn't matter too much
         let mut text = Vec::with_capacity(self.extensions.len());
-        for extension in &self.extensions {
+        for extension in self.extensions.iter_mut() {
             if extension
                 .permissions
                 .extension_hooks
                 .contains(&"frontend_text".to_string())
             {
-                let inject_text =
-                    call_fn(&extension.instance, &mut self.store, "frontend_text", &[]).unwrap();
+                let inject_text = extension.call_fn("frontend_text", &[]).unwrap();
                 text.push(inject_text);
             }
         }
         text
     }
+
+    pub async fn spawn_extension_tasks(&mut self) {}
 }
