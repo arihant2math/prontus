@@ -34,7 +34,7 @@ As the app is not signed, you will have to go through some hoops with gatekeeper
 ## Advantages
 
 The official Pronto client is bloated (taking up over 300 mb of RAM), leaks memory, and has poor user interface design.
-Prontus aims to fix this by rewriting the pronto client from the ground up.
+Prontus aims to fix this by rewriting the Pronto client from the ground up.
 
 ### Performance
 
