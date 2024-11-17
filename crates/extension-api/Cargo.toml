@@ -1,0 +1,13 @@
+[package]
+name = "extension-api"
+# this is the version of the extension api crate
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+wit-bindgen = "0.35"
+
+[package.metadata.component]
+target = { path = "wit" }

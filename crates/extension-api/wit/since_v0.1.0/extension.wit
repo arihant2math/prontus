@@ -1,0 +1,37 @@
+package prontus:extension;
+
+world extension {
+    record settings {
+    }
+
+    record permissions {
+        network: bool,
+        read-file-system: bool,
+        write-file-system: bool,
+        read-full-settings: bool,
+        write-full-settings: bool,
+        extension-settings: bool,
+        frontend-injection: bool,
+        websockets-hook: bool,
+    }
+
+    record network-response {
+        status: u32,
+        body: string,
+    }
+
+    import get-settings: func() -> result<settings>;
+    import set-settings: func(settings: settings) -> result;
+    import request-url: func(method: string, url: string) -> result<network-response>;
+    import get-file: func(path: string) -> result<string>;
+    import set-file: func(path: string, content: string) -> result;
+
+    import log-trace: func(message: string);
+    import log-debug: func(message: string);
+    import log-info: func(message: string);
+    import log-warning: func(message: string);
+    import log-error: func(message: string);
+
+    export init-extension: func();
+    export get-permissions: func() -> permissions;
+}
