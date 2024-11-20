@@ -17,6 +17,7 @@ tauri-build = { version = "2.0", features = [] }
 [dependencies]
 chrono = "0.4"
 client = { path = "../../crates/client" }
+extension = { path = "../../crates/extension" }
 futures = "0.3"
 http = "1.1"
 log = "0.4"
