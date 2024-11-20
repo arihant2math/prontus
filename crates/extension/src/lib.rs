@@ -39,4 +39,10 @@ impl ExtensionManager {
         }
         Ok(())
     }
+
+    pub async fn run_tasks(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let tasks = self.extensions.iter().map(|extension| extension.run_task());
+        futures::future::join_all(tasks).await?;
+        Ok(())
+    }
 }

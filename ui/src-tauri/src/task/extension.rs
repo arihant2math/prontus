@@ -14,7 +14,6 @@ pub async fn run() -> Result<(), ExtensionThreadError> {
         extension_manager.load_extensions(extensions_dir).await?;
         extension_manager
     };
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-    }
+    extension_manager.run_tasks().await;
+    Ok(())
 }
