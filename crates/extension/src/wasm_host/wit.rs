@@ -28,7 +28,7 @@ impl Extension {
     pub async fn instantiate_async(
         store: &mut Store<WasmState>,
         component: &Component,
-    ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> anyhow::Result<Self> {
         Ok(latest::Extension::instantiate_async(store, component, latest::linker())
             .await
             .map(Extension::V010)?)
@@ -37,6 +37,18 @@ impl Extension {
     pub async fn init_extension(&self, store: &mut Store<WasmState>) -> anyhow::Result<()> {
         match self {
             Extension::V010(ext) => ext.call_init_extension(store).await,
+        }
+    }
+
+    pub async fn run_task(&self, store: &mut Store<WasmState>) -> anyhow::Result<()> {
+        match self {
+            Extension::V010(ext) => ext.call_run_task(store).await,
+        }
+    }
+
+    pub async fn shutdown_extension(&self, store: &mut Store<WasmState>) -> anyhow::Result<()> {
+        match self {
+            Extension::V010(ext) => ext.call_shutdown_extension(store).await,
         }
     }
 }
