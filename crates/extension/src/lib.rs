@@ -2,10 +2,21 @@ use std::{error, fs};
 use std::path::PathBuf;
 use std::sync::Arc;
 use log::warn;
+use thiserror::Error;
 use crate::wasm_host::WasmExtension;
 
 mod wasm_host;
 mod info;
+
+#[derive(Debug, Error)]
+pub enum LoadExtensionsError {
+    #[error("IO Error: {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("Extension Error: {0}")]
+    ExtensionError(#[from] wasm_host::WasmExtensionError),
+    #[error("Extension Info Error: {0}")]
+    ExtensionInfoError(#[from] info::ExtensionInfoCreationError),
+}
 
 #[derive(Default)]
 pub struct ExtensionManager {
@@ -13,7 +24,7 @@ pub struct ExtensionManager {
 }
 
 impl ExtensionManager {
-    pub async fn load_extensions(&mut self, extensions_parent_dir: PathBuf) -> Result<(), Box<dyn error::Error + Send + Sync>> {
+    pub async fn load_extensions(&mut self, extensions_parent_dir: PathBuf) -> Result<(), LoadExtensionsError> {
         // Every extension is a directory in the extensions_parent_dir
         for entry in fs::read_dir(&extensions_parent_dir)? {
             let entry = entry?;

@@ -25,12 +25,22 @@ pub struct ExtensionInfo {
     pub permissions: Permissions
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ExtensionInfoCreationError {
+    #[error("ExtensionInfo must be a file")]
+    NotAFile,
+    #[error("IO Error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("TOML Error: {0}")]
+    Toml(#[from] toml::de::Error),
+}
+
 impl TryFrom<PathBuf> for ExtensionInfo {
-    type Error = Box<dyn error::Error + Send + Sync>;
+    type Error = ExtensionInfoCreationError;
 
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
         if !value.is_file() {
-            return Err("ExtensionInfo must be a file".into());
+            return Err(ExtensionInfoCreationError::NotAFile);
         }
         let file = File::open(value)?;
         let mut buf = String::new();

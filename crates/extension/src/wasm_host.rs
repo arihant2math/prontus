@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
+use thiserror::Error;
 use wasmtime::component::{Component, ResourceTable};
 use wasmtime_wasi::WasiCtxBuilder;
 use crate::info::ExtensionInfo;
@@ -28,6 +29,14 @@ pub struct WasmState {
     table: ResourceTable,
 }
 
+#[derive(Debug, Error)]
+pub enum WasmExtensionError {
+    #[error("I/O Error: {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("Wasmtime Error: {0}")]
+    WasmtimeError(#[from] wasmtime::Error)
+}
+
 pub struct WasmExtension {
     engine: wasmtime::Engine,
     extension: wit::Extension,
@@ -38,7 +47,7 @@ impl WasmExtension {
     pub async fn load(
         extension_dir: PathBuf,
         info: Arc<ExtensionInfo>,
-    ) -> Result<Self, Box<dyn error::Error + Send + Sync>> {
+    ) -> Result<Self, WasmExtensionError> {
         let path = extension_dir.join("extension.wasm");
 
         let mut wasm_file = File::open(path)?;
