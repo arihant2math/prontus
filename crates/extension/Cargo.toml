@@ -4,10 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cranelift-codegen = { version = "*", features = ["isle-in-source-tree"]}
+client = { path = "../client" }
+log = { workspace = true }
+rayon = "1.10.0"
+serde = { workspace = true }
+settings = { path = "../settings" }
 thiserror = { workspace = true }
-wasmer = { version = "5", default-features = false, features = ["sys", "wat"] }
-
-[features]
-default = ["cranelift"]
-cranelift = ["wasmer/cranelift"]
+toml = "0.8"
+wasmtime = "26"
+wasmtime-wasi = "26"
+wit-bindgen = "0.35"

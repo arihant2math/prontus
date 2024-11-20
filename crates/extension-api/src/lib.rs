@@ -9,7 +9,6 @@ mod wit {
 }
 
 use wit::*;
-pub use wit::Permissions;
 
 pub trait Extension: Send + Sync {
     /// Returns a new instance of the extension.
@@ -18,8 +17,8 @@ pub trait Extension: Send + Sync {
         Self: Sized;
 
     fn init_extension(&mut self) {}
-
-    fn get_permissions(&mut self) -> Permissions;
+    fn run_task(&mut self) {}
+    fn shutdown_extension(&mut self) {}
 }
 
 /// Registers the provided type as a Zed extension.
@@ -63,7 +62,11 @@ impl wit::Guest for Component {
         extension().init_extension();
     }
 
-    fn get_permissions() -> Permissions {
-        extension().get_permissions();
+    fn run_task() {
+        extension().run_task();
+    }
+
+    fn shutdown_extension() {
+        extension().shutdown_extension();
     }
 }

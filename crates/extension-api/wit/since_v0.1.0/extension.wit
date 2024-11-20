@@ -4,17 +4,6 @@ world extension {
     record settings {
     }
 
-    record permissions {
-        network: bool,
-        read-file-system: bool,
-        write-file-system: bool,
-        read-full-settings: bool,
-        write-full-settings: bool,
-        extension-settings: bool,
-        frontend-injection: bool,
-        websockets-hook: bool,
-    }
-
     record network-response {
         status: u32,
         body: string,
@@ -23,8 +12,6 @@ world extension {
     import get-settings: func() -> result<settings>;
     import set-settings: func(settings: settings) -> result;
     import request-url: func(method: string, url: string) -> result<network-response>;
-    import get-file: func(path: string) -> result<string>;
-    import set-file: func(path: string, content: string) -> result;
 
     import log-trace: func(message: string);
     import log-debug: func(message: string);
@@ -32,6 +19,12 @@ world extension {
     import log-warning: func(message: string);
     import log-error: func(message: string);
 
+    // import create-announcement: func(target-bubbles: list<u64>, content: string) -> result<announcement>;
+    // import get-announcements: func() -> result<list<announcement>>;
+    // import mark-read-announcement: func(announcement-id: u64) -> result;
+
+
     export init-extension: func();
-    export get-permissions: func() -> permissions;
+    export run-task: func();
+    export shutdown-extension: func();
 }
