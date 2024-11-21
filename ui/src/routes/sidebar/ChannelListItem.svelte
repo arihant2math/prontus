@@ -30,7 +30,7 @@
             await new Promise(r => setTimeout(r, 50));
         }
         window.addEventListener("auxclick", (e) => {
-            if (e !== null) {
+            if (e !== null && listItem !== null) {
                 if (!listItem.contains(e.target)) {
                     contextMenuOpen = false;
                 }
