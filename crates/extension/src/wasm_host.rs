@@ -79,6 +79,17 @@ impl WasmExtension {
             store
         })
     }
+
+    pub async fn run_task(&mut self) -> Result<(), Box<dyn error::Error + Send + Sync>> {
+        Ok(self.extension.run_task(&mut self.store).await?)
+    }
+}
+
+impl Drop for WasmExtension {
+    fn drop(&mut self) {
+        // TODO: Wait for async drop to be stabilized
+        // let _ = self.extension.shutdown_extension(&mut self.store);
+    }
 }
 
 impl wasmtime_wasi::WasiView for WasmState {

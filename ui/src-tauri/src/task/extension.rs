@@ -9,7 +9,7 @@ pub enum ExtensionThreadError {
 
 pub async fn run() -> Result<(), ExtensionThreadError> {
     let extensions_dir = settings::prontus_dir().join("extensions");
-    let extension_manager = {
+    let mut extension_manager = {
         let mut extension_manager = ExtensionManager::default();
         extension_manager.load_extensions(extensions_dir).await?;
         extension_manager
