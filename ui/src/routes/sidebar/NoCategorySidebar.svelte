@@ -28,6 +28,38 @@
     listen('channelListUpdate', async (_event) => {
         await updateChannelList();
     });
+
+    function doc_keyUp(e) {
+        let altMod = e.altKey;
+        let ctrlMod = e.ctrlKey || e.metaKey;
+        if (altMod && e.code === 'ArrowDown') {
+            // Find index
+            let index = channels.findIndex((channel) => channel[0].id === channelInfo.id);
+            if (index === -1) {
+                index = 0;
+            } else {
+                index++;
+            }
+            if (index >= channels.length) {
+                index = 0;
+            }
+            onSidebarClick(channels[index][0].id);
+        } else if (altMod && e.code === 'ArrowUp') {
+            // Find index
+            let index = channels.findIndex((channel) => channel[0].id === channelInfo.id);
+            if (index === -1) {
+                index = 0;
+            } else {
+                index--;
+            }
+            if (index < 0) {
+                index = channels.length - 1;
+            }
+            onSidebarClick(channels[index][0].id);
+        }
+    }
+
+    document.addEventListener('keyup', doc_keyUp, false);
 </script>
 <aside id="default-sidebar"
        aria-label="Sidebar"

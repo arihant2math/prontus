@@ -80,6 +80,53 @@
     listen('channelListUpdate', async (_event) => {
         await updateChannelList();
     });
+
+    function doc_keyUp(e) {
+        let altMod = e.altKey;
+        let ctrlMod = e.ctrlKey || e.metaKey;
+        if (altMod && e.code === 'ArrowDown') {
+            // Find category index and channel index
+            let categoryIndex = Object.keys(sidebarCategories).findIndex((category) => {
+                console.log(channelInfo);
+                return sidebarCategoriesInfo[category].id === channelInfo[0].category.id;
+            });
+            let channelIndex = sidebarCategories[channelInfo[0].category.id].findIndex((channel) => channel[0].id === channelInfo[0].id);
+            if (channelIndex === -1) {
+                channelIndex = 0;
+            } else {
+                channelIndex++;
+            }
+            if (channelIndex >= sidebarCategories[channelInfo[0].category.id].length) {
+                channelIndex = 0;
+                categoryIndex++;
+            }
+            if (categoryIndex >= Object.keys(sidebarCategories).length || categoryIndex < 0) {
+                categoryIndex = 0;
+            }
+            onSidebarClick(sidebarCategories[Object.keys(sidebarCategories)[categoryIndex]][channelIndex][0].id);
+        } else if (altMod && e.code === 'ArrowUp') {
+            // Find category index and channel index
+            let categoryIndex = Object.keys(sidebarCategories).findIndex((category) => {
+                return sidebarCategoriesInfo[category].id === channelInfo[0].category.id;
+            });
+            let channelIndex = sidebarCategories[channelInfo[0].category.id].findIndex((channel) => channel[0].id === channelInfo[0].id);
+            if (channelIndex === -1) {
+                channelIndex = 0;
+            } else {
+                channelIndex--;
+            }
+            if (channelIndex < 0) {
+                channelIndex = sidebarCategories[channelInfo[0].category.id].length - 1;
+                categoryIndex--;
+            }
+            if (categoryIndex < 0) {
+                categoryIndex = Object.keys(sidebarCategories).length - 1;
+            }
+            onSidebarClick(sidebarCategories[Object.keys(sidebarCategories)[categoryIndex]][channelIndex][0].id);
+        }
+    }
+
+    document.addEventListener('keyup', doc_keyUp, false);
 </script>
 <aside id="default-sidebar"
        aria-label="Sidebar"
