@@ -126,6 +126,12 @@
     let py = $derived(repeat ? "py-1" : "py-3");
     let parentMessage = $derived(getParentMessage(message, messages));
     let border = $derived(parentMessage === undefined ? "" : "border-l border-blue-500 dark:border-blue-400");
+
+    function crop(array, size) {
+        let cropped = array;
+        cropped.lengthh = Math.min(cropped.length, size);
+        return cropped;
+    }
 </script>
 {#if editing}
     <RichTextEdit bind:text={message.message} sendMessage={sendEditMessage}/>
@@ -226,7 +232,7 @@
 <!--TODO: onclick-->
 {#if memberships !== null && memberships !== undefined && memberships.length > 0}
     <button class="flex flex-row float-end rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5 max-w-[200px] overflow-x-hidden">
-        {#each memberships as membership}
+        {#each crop(memberships, 10) as membership}
             {#if membership.mark === message.id}
                 <span class="-ml-1 flex-none"><ProfilePicture user={membership.user} small={true}/></span>
             {/if}
