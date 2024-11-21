@@ -11,7 +11,7 @@
     import {buildKeymap} from "$lib/prosemirror-setup/keymap.ts";
 
     /** @type {{text?: string, sendMessage: any, disabled: any}} */
-    let {text = "", sendMessage, disabled = false} = $props();
+    let {text = $bindable(""), sendMessage, disabled = false} = $props();
     let enabled = $state(false);
 
     let editorProps = {
