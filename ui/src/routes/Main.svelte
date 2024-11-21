@@ -1,5 +1,4 @@
 <script>
-    import {run} from 'svelte/legacy';
     import {PaneGroup, Pane, PaneResizer} from "paneforge";
 
     import ChannelCard from "./CurrentChannelCard.svelte";
@@ -28,6 +27,7 @@
     import Tasks from "./dialog/Tasks.svelte";
     import {toast, Toaster} from "svelte-sonner";
     import MessagePlaceholder from "./MessagePlaceholder.svelte";
+    import CreateGroup from "./dialog/CreateGroup.svelte";
 
     let currentUser = $state();
     let messages = $state([]);
@@ -42,6 +42,7 @@
     let loadingMessages = $state(-1);
 
     let createDmDialogOpen = $state(false);
+    let createGroupDialogOpen = $state(false);
     let settingsDialogOpen = $state(false);
     let announcementsDialogOpen = $state(false);
     let tasksDialogOpen = $state(false);
@@ -158,6 +159,7 @@
                      bind:settings={settings}
                      onSidebarClick={async (id) => {await handleSidebarClick(id)}}
                      onShowDmDialog={() => {createDmDialogOpen = true}}
+                     onShowGroupDialog={() => {createGroupDialogOpen = true}}
                      onShowSettings={() => {settingsDialogOpen = true}}
                      onShowAnnouncements={() => {announcementsDialogOpen=true}}
                      onShowTasks={() => {tasksDialogOpen = true}}/>
@@ -228,6 +230,7 @@
 
     <Settings bind:settings={settings} bind:showSettings={settingsDialogOpen}/>
     <CreateDm bind:createDmDialogOpen={createDmDialogOpen}/>
+    <CreateGroup bind:createGroupDialogOpen={createGroupDialogOpen}/>
     <Announcements bind:announcementsDialogOpen={announcementsDialogOpen}/>
     <Tasks bind:tasksDialogOpen={tasksDialogOpen}/>
     <Toaster richColors theme={getThemeClass(settings)}/>
