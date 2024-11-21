@@ -230,7 +230,7 @@
     {/if}
 {/if}
 <!--TODO: onclick-->
-{#if memberships !== null && memberships !== undefined && memberships.length > 0}
+{#if memberships !== null && memberships !== undefined && memberships.length > 0 && !inThread}
     <button class="flex flex-row float-end rounded-md hover:bg-gray-100 hover:dark:bg-slate-800 p-0.5 max-w-[200px] overflow-x-hidden">
         {#each crop(memberships, 10) as membership}
             {#if membership.mark === message.id}
