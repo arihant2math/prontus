@@ -5,7 +5,7 @@
     let {task} = $props();
 </script>
 {#if task.completed !== null && task.completed}
-    <div id="task" class="flex justify-between items-center border-b border-slate-200 py-3 px-2 border-l-4 border-l-transparent bg-gradient-to-r from-transparent to-transparent hover:from-slate-100 transition ease-linear duration-150 rounded-lg w-full">
+    <div id="task" class="flex justify-between items-center border-b border-slate-200 dark:border-slate-900 py-3 px-2 border-l-4 border-l-transparent bg-gradient-to-r from-transparent to-transparent hover:from-slate-100 dark:hover:from-slate-700 transition ease-linear duration-150 rounded-lg w-full">
         <button class="inline-flex items-center space-x-2" onclick={() => {uncompleteTask(task.id)}}>
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-500">
@@ -21,7 +21,7 @@
         </button>
     </div>
 {:else}
-    <div id="task" class="flex justify-between items-center border-b border-slate-200 py-3 px-2 border-l-4 border-l-transparent bg-gradient-to-r from-transparent to-transparent hover:from-slate-100 transition ease-linear duration-150 rounded-lg w-full">
+    <div id="task" class="flex justify-between items-center border-b border-slate-200 dark:border-slate-900 py-3 px-2 border-l-4 border-l-transparent bg-gradient-to-r from-transparent to-transparent hover:from-slate-100 dark:hover:from-slate-700 transition ease-linear duration-150 rounded-lg w-full">
         <button class="inline-flex items-center space-x-2" onclick={() => {completeTask(task.id)}}>
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-500 hover:text-indigo-600 hover:cursor-pointer">
