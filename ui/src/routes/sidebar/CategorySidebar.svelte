@@ -81,7 +81,7 @@
         await updateChannelList();
     });
 
-    function doc_keyUp(e) {
+    function shortcutHandler(e) {
         let altMod = e.altKey;
         let ctrlMod = e.ctrlKey || e.metaKey;
         if (altMod && e.code === 'ArrowDown') {
@@ -126,7 +126,7 @@
         }
     }
 
-    document.addEventListener('keyup', doc_keyUp, false);
+    document.addEventListener('keyup', shortcutHandler, false);
 </script>
 <aside id="default-sidebar"
        aria-label="Sidebar"
