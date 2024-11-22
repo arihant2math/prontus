@@ -11,7 +11,7 @@ wasmtime::component::bindgen!({
 });
 
 impl From<settings::Settings> for Settings {
-    fn from(value: settings::Settings) -> Self {
+    fn from(_value: settings::Settings) -> Self {
         Settings {}
     }
 }
@@ -31,16 +31,15 @@ impl ExtensionImports for WasmState {
         }
     }
 
-    async fn set_settings(&mut self, settings: Settings) -> wasmtime::Result<Result<(), ()>> {
+    async fn set_settings(&mut self, _settings: Settings) -> wasmtime::Result<Result<(), ()>> {
         if self.extension_info.permissions.write_settings {
             todo!("set_settings");
-            Ok(Ok(()))
         } else {
             Ok(Err(()))
         }
     }
 
-    async fn request_url(&mut self, method: wasmtime::component::__internal::String, url: wasmtime::component::__internal::String) -> wasmtime::Result<Result<NetworkResponse, ()>> {
+    async fn request_url(&mut self, _method: wasmtime::component::__internal::String, _url: wasmtime::component::__internal::String) -> wasmtime::Result<Result<NetworkResponse, ()>> {
         if self.extension_info.permissions.full_network {
             todo!()
         } else {

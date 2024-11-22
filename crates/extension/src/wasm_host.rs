@@ -38,6 +38,7 @@ pub enum WasmExtensionError {
 }
 
 pub struct WasmExtension {
+    #[allow(dead_code)]
     engine: wasmtime::Engine,
     extension: wit::Extension,
     store: wasmtime::Store<WasmState>

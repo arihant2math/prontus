@@ -46,6 +46,7 @@ impl Extension {
         }
     }
 
+    #[allow(unused)]
     pub async fn shutdown_extension(&self, store: &mut Store<WasmState>) -> anyhow::Result<()> {
         match self {
             Extension::V010(ext) => ext.call_shutdown_extension(store).await,
