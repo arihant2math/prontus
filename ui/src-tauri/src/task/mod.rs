@@ -34,5 +34,5 @@ pub async fn task_thread(handle: AppHandle, context: AppState) {
             error!("Extension Task Error: {:?}", e);
         }
     });
-    let _ = join!(f1, f2, f3);
+    let _ = join!(f1, f2, f3, f4);
 }

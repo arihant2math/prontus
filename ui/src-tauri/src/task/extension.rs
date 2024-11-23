@@ -3,8 +3,10 @@ use extension::ExtensionManager;
 
 #[derive(Debug, Error)]
 pub enum ExtensionThreadError {
-    #[error("Extension Error: {0}")]
-    ExtensionError(#[from] extension::LoadExtensionsError)
+    #[error("Extension Load Error: {0}")]
+    ExtensionLoadError(#[from] extension::LoadExtensionsError),
+    #[error("Extension Runtime Error: {0}")]
+    ExtensionRuntimeError(Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub async fn run() -> Result<(), ExtensionThreadError> {
@@ -14,6 +16,6 @@ pub async fn run() -> Result<(), ExtensionThreadError> {
         extension_manager.load_extensions(extensions_dir).await?;
         extension_manager
     };
-    extension_manager.run_tasks().await;
+    extension_manager.run_tasks().await.map_err(|e| ExtensionThreadError::ExtensionRuntimeError(e))?;
     Ok(())
 }
