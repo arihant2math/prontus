@@ -8,6 +8,7 @@ use std::sync::Arc;
 pub trait Handler {
     type Error;
 
+    #[allow(async_fn_in_trait)]
     async fn handle(
         &self,
         pronto_client: Arc<ProntoClient>,

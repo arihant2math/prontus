@@ -68,6 +68,7 @@ use std::sync::Arc;
 pub trait TokenLoader {
     type Error: error::Error;
 
+    #[allow(async_fn_in_trait)]
     async fn load(&self, user_id: u64) -> Result<Option<String>, Self::Error>;
 }
 
