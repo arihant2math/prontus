@@ -3,12 +3,30 @@ use crate::UserInfo;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
+struct MessageMediaFile {
+    pub thumbnail: String,
+    pub duration: i64,
+
+    pub external: bool,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageMedia {
     pub id: u64,
+    pub message_id: i64,
+    pub uuid: String,
     pub url: String,
+    pub title: String,
     pub mediatype: String,
-    pub urlmimetype: String,
+    #[serde(rename = "urlmimetype")]
+    pub url_mimetype: String,
+    pub width: u64,
+    pub height: u64,
+    pub filesize: u64,
+    pub path: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

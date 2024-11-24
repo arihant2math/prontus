@@ -154,6 +154,11 @@ pub struct PusherServerAnnouncementRemovedEvent {
     pub announcement_id: u64,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PusherServerTaskUpdatedEvent {
+    pub task: client::Task,
+}
+
 // RawPusherMessage { event: "App\\Events\\CategoryUpdated", data: String("{\"category\":{\"id\":679345,\"organization_
 // id\":2245,\"created_at\":\"2023-08-13 04:44:16\",\"updated_at\":\"2023-08-13 04:44:16\",\"sortorder\":149,\"title\":\"Clubs\",\"externalid\":null,\"usercategory\":{\"id\":9689,\"user_id\":5302428,\"category_id\":679345,\"alias\":\"test\",\"created_at\":\"2024-10-03 03:35:32\",\"updated_at\":\"2024-10-03 03:35:32\"}}}"), channel: Some("private-user.5302428") }
 
@@ -203,6 +208,7 @@ pub enum PusherServerEventType {
     PusherServerAnnouncementAddedEvent(PusherServerAnnouncementAddedEvent),
     PusherServerAnnouncementUpdatedEvent(PusherServerAnnouncementUpdatedEvent),
     PusherServerAnnouncementRemovedEvent(PusherServerAnnouncementRemovedEvent),
+    PusherServerTaskUpdatedEvent(PusherServerTaskUpdatedEvent),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -350,6 +356,13 @@ impl From<String> for PusherServerMessage {
                     raw,
                     PusherServerAnnouncementRemovedEvent,
                     PusherServerAnnouncementRemovedEvent
+                )
+            }
+            "App\\Events\\TaskUpdated" => {
+                create_event!(
+                    raw,
+                    PusherServerTaskUpdatedEvent,
+                    PusherServerTaskUpdatedEvent
                 )
             }
             _ => Self::Other(raw),
