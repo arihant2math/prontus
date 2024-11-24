@@ -21,6 +21,10 @@ pub enum Theme {
     Auto,
 }
 
+const fn _true() -> bool {
+    true
+}
+
 #[derive(Copy, Clone, Debug, Default, Serialize, Deserialize)]
 pub enum CategoryDisplayLevel {
     #[default]
@@ -40,10 +44,6 @@ pub struct SidebarAppearance {
     /// Hide aggregation categories like "Recents"
     #[serde(default)]
     pub hide_super_categories: bool,
-}
-
-const fn _true() -> bool {
-    true
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

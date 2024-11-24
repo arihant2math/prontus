@@ -1,0 +1,10 @@
+[package]
+name = "wit-gen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+convert_case = "0.6"
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }
