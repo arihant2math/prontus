@@ -138,7 +138,7 @@ impl<T: Handler> Bot<T> {
             match message {
                 Ok(PusherServerMessageWrapper::PusherServerMessage(message)) => match message {
                     PusherServerMessage::Event(event) => {
-                        self.handler.handle(self.client.clone(), event.event).await;
+                        let _ = self.handler.handle(self.client.clone(), event.event).await;
                     }
                     PusherServerMessage::Error(e) => {
                         error!("Received error: {:?}", e);
