@@ -167,10 +167,10 @@
                     {/if}
                     <RichTextContainer message={message.message}/>
                     {#each media as mediaItem}
-                        <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype="{mediaItem.urlmimetype}"/>
+                        <Media url={mediaItem.url} type={mediaItem.mediatype} mimetype={mediaItem.urlmimetype}/>
                     {/each}
                     {#if embed && !settings.appearance.messages.hide_embeds}
-                        <Embed title="{embed.title}" shortUrl="{embed.providerurl}" description="{embed.snippet}" image="{embed.thumbnailurl}"/>
+                        <Embed title={embed.title} shortUrl={embed.providerurl} description={embed.snippet} image={embed.thumbnailurl}/>
                     {/if}
                     <div class="flex items-center space-x-2">
                         {#each reactions as reaction}
