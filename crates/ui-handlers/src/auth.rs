@@ -11,9 +11,9 @@ pub async fn get_code(email: String) -> Result<(), BackendError> {
         client::routes::user_verify::UserVerifyRequest::Email(email),
     )
     .await
-    .unwrap()
-    .to_result();
-    // TODO: Error handling
+    .map_err(|e| {
+        client::ResponseError::from(e)
+    })?;
     Ok(())
 }
 
@@ -33,7 +33,9 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
     .await
     .unwrap()
     .to_result()
-    .unwrap();
+    .map_err(|e| {
+        client::ResponseError::from(e)
+    })?;
     let token = &response.users[0].login_token;
     // "https://stanfordohs.pronto.io/api/"
     let base_url = format!(
@@ -63,6 +65,5 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
         .ok_or(BackendError::NotAuthenticated)?
         .api_key = response.users[0].access_token.clone();
     settings.save().await?;
-    // TODO: Error handling as usual
     Ok(())
 }
