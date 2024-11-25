@@ -13,7 +13,8 @@ To find the latest one, head to the [release page](https://github.com/arihant2ma
 ### Windows
 
 > [!NOTE]
-> ARM is not built at the moment due to GitHub CI limitations. If you are on ARM, you can build from source.
+> ARM executables for Windows and Linux are not built at the moment due to GitHub CI limitations.
+> If you are on ARM, you can build from source.
 
 Download the `prontus_x.y.z_x64_en-US.msi` file.
 Using a msi allows prontus notifications to look like they don't come from PowerShell.
@@ -21,7 +22,8 @@ If that is a non-issue, there is a portable exe and a .exe setup installer.
 
 ### Linux
 
-There are app image, .deb, and .rpm files available for installation.
+There are x86-64 app image, .deb, and .rpm files available for installation.
+ARM has to be built from source.
 
 ### MacOS
 
