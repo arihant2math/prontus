@@ -7,14 +7,12 @@ use serde::{Deserialize, Serialize};
 struct MessageMediaFile {
     pub thumbnail: String,
     pub duration: i64,
-
     pub external: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageMedia {
     pub id: u64,
-    pub message_id: i64,
     pub uuid: String,
     pub url: String,
     pub title: String,

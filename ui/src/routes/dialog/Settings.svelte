@@ -18,7 +18,7 @@
 
     /** @type {{settings: any, showSettings?: boolean}} */
     let { settings = $bindable(), showSettings = $bindable(false) } = $props();
-    let maxSizeValue;
+    let maxSizeValue = $state();
     run(() => {
         if (settings === null || settings.search.messages === null) {
             return;

@@ -3,6 +3,8 @@ use extension::ExtensionManager;
 
 #[derive(Debug, Error)]
 pub enum ExtensionThreadError {
+    #[error("I/O Error: {0}")]
+    IoError(#[from] std::io::Error),
     #[error("Extension Load Error: {0}")]
     ExtensionLoadError(#[from] extension::LoadExtensionsError),
     #[error("Extension Runtime Error: {0}")]
@@ -11,6 +13,9 @@ pub enum ExtensionThreadError {
 
 pub async fn run() -> Result<(), ExtensionThreadError> {
     let extensions_dir = settings::prontus_dir().join("extensions");
+    if !extensions_dir.exists() {
+        std::fs::create_dir_all(&extensions_dir)?;
+    }
     let mut extension_manager = {
         let mut extension_manager = ExtensionManager::default();
         extension_manager.load_extensions(extensions_dir).await?;
