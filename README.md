@@ -8,7 +8,7 @@ An alpha client for Pronto (https://pronto.io), a messaging application used by 
 
 At the moment, there are prebuilt alpha binaries.
 
-To find the latest one, head to the [release page](https://github.com/arihant2math/prontus/releases)
+To find the latest somewhat stable one, head to the [release page](https://github.com/arihant2math/prontus/releases).
 
 ### Windows
 
