@@ -16,8 +16,8 @@ pub struct AnnouncementMedia {
     pub mediatype: String,
     #[serde(rename = "urlmimetype")]
     pub url_mimetype: String,
-    pub width: u64,
-    pub height: u64,
+    pub width: Option<u64>,
+    pub height: Option<u64>,
     pub filesize: u64,
     pub path: Option<String>,
     pub created_at: String,
