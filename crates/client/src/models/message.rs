@@ -17,14 +17,14 @@ pub struct MessageMedia {
     pub message_id: i64,
     pub uuid: String,
     pub url: String,
-    pub title: String,
+    pub title: Option<String>,
     pub mediatype: String,
     #[serde(rename = "urlmimetype")]
     pub url_mimetype: String,
     pub width: u64,
     pub height: u64,
     pub filesize: u64,
-    pub path: String,
+    pub path: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

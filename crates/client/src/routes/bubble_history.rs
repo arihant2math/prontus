@@ -19,7 +19,7 @@ pub async fn get(
     client: &Client,
     bubble_id: u64,
     latest_message_id: Option<u64>,
-) -> Result<GetBubbleHistoryResult, reqwest::Error> {
+) -> Result<GetBubbleHistoryResult, crate::ResponseError> {
     let r = if let Some(latest_message_id) = latest_message_id {
         client
             .get(format!("{pronto_base_url}v1/bubble.history"))
@@ -32,6 +32,19 @@ pub async fn get(
             .send()
     }
     .await?;
-    let json = r.json::<GetBubbleHistoryResult>().await?;
-    Ok(json)
+    let text = r.text().await?;
+    log::trace!("Response: {}" , text );
+    let json = serde_json::from_str(&text);
+    match json {
+        Ok(json) => { return Ok(json); }
+        Err(e) => {
+            let json = serde_json::from_str::<GetBubbleHistoryResponse>(&text);
+            let e = json.unwrap_err();
+            log::error!("Error parsing json response: {:?}." , e );
+            let json = serde_json::from_str::<serde_json::Value>(&text);
+            if json.is_err() { return Err(crate::ResponseError::NotJson(text)); }
+            return Err(crate::ResponseError::from(e));
+        }
+    }
+    Ok(json?)
 }
