@@ -12,6 +12,7 @@ pub struct Permissions {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExtensionInfo {
+    pub id: String,
     pub name: String,
     pub version: String,
     pub description: Option<String>,

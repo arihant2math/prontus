@@ -9,6 +9,7 @@ use milli::{
     execute_search, filtered_universe, AscDesc, DefaultSearchLogger, DocumentId, GeoSortStrategy,
     Index, SearchContext, TermsMatchingStrategy, TimeBudget,
 };
+pub use milli;
 use serde_json::{Map, Value};
 use std::error::Error;
 use std::path::PathBuf;

@@ -7,6 +7,7 @@ edition = "2021"
 client = { path = "../client" }
 futures = "0.3"
 log = "0.4"
+search = { path = "../search" }
 settings = { path = "../settings" }
 tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
 ui-lib = { path = "../ui-lib" }

@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             TimeBudget::max(),
             None,
             None,
-        ).unwrap();
+        )?;
         println!("Results in {} seconds", results.elapsed.as_secs_f32());
         for result in results.results {
             println!("{}: {}", result.1.get("user_fullname").unwrap(), result.1.get("message").unwrap());

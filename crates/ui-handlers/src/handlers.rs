@@ -1,8 +1,12 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
 use ::settings::Settings;
 use tauri::{command, Emitter, State};
 use client::{Announcement, Bubble, BubbleStats, Task, ReactionType, Membership, ProntoClient, UserInfo, Message};
+use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
+use search::milli::score_details::ScoringStrategy;
+use search::SearchResults;
 use ui_lib::{AppData, AppState, BackendError, InnerAppState};
 
 #[command]
@@ -379,4 +383,36 @@ pub async fn get_typing_users(state: State<'_, AppState>) -> Result<HashMap<u64,
     let state = state.read().await;
     let state = state.try_inner()?;
     Ok(state.typing_users.clone())
+}
+
+#[command]
+pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<Option<SearchResults>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+    // TODO: Inefficent
+    let settings = Settings::load().await?;
+    if let Some(msg) = settings.search.messages {
+        let loc = PathBuf::from(msg.path);
+        let mut search = search::Search::new(&loc);
+        let results = search.search(
+            (!query.trim().is_empty()).then(|| query.trim()),
+            TermsMatchingStrategy::Last,
+            ScoringStrategy::Skip,
+            false,
+            &None,
+            &None,
+            GeoSortStrategy::default(),
+            0,
+            20,
+            None,
+            TimeBudget::max(),
+            None,
+            None,
+        ).unwrap();
+        // TODO: no unwrap (see above)
+        Ok(Some(results))
+    } else {
+        Ok(None)
+    }
 }

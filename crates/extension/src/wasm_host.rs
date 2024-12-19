@@ -41,7 +41,8 @@ pub struct WasmExtension {
     #[allow(dead_code)]
     engine: wasmtime::Engine,
     extension: wit::Extension,
-    store: wasmtime::Store<WasmState>
+    store: wasmtime::Store<WasmState>,
+    pub info: Arc<ExtensionInfo>,
 }
 
 impl WasmExtension {
@@ -77,7 +78,8 @@ impl WasmExtension {
         Ok(Self {
             engine,
             extension,
-            store
+            store,
+            info
         })
     }
 

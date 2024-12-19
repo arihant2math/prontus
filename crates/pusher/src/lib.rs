@@ -9,7 +9,7 @@ use std::thread;
 use std::time::Duration;
 use tokio::net::TcpStream;
 use tokio::sync::{broadcast, mpsc, RwLock};
-use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::tungstenite::{Bytes, Message, Utf8Bytes};
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 
 #[derive(Clone, Debug)]
@@ -33,8 +33,8 @@ async fn read_task(
         };
         match message {
             Ok(Message::Text(message)) => {
-                let data: PusherServerMessage = PusherServerMessage::from(message);
-                let _ = message_output.send(PusherServerMessageWrapper::PusherServerMessage(data));
+                let data: PusherServerMessage = PusherServerMessage::from(message.as_str().to_string());
+                let _ = message_output.send(PusherServerMessageWrapper::PusherServerMessage(data.into()));
             }
             Ok(Message::Ping(_)) => {
                 let _ = message_output.send(PusherServerMessageWrapper::Ping);
@@ -75,11 +75,11 @@ async fn write_task(
                 let _ = stream
                     .write()
                     .await
-                    .send(Message::Text(pcm.to_string()))
+                    .send(Message::Text(Utf8Bytes::from(pcm.to_string())))
                     .await;
             }
             PusherClientMessageWrapper::Pong => {
-                let _ = stream.write().await.send(Message::Pong(vec![])).await;
+                let _ = stream.write().await.send(Message::Pong(Bytes::new())).await;
             }
             PusherClientMessageWrapper::Shutdown => {
                 let _ = stream.write().await.send(Message::Close(None)).await;

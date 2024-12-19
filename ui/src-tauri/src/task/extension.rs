@@ -16,6 +16,7 @@ pub async fn run() -> Result<(), ExtensionThreadError> {
         extension_manager.load_extensions(extensions_dir).await?;
         extension_manager
     };
+
     extension_manager.run_tasks().await.map_err(|e| ExtensionThreadError::ExtensionRuntimeError(e))?;
     Ok(())
 }

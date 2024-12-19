@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use log::warn;
 use thiserror::Error;
+use crate::info::ExtensionInfo;
 use crate::wasm_host::WasmExtension;
 
 mod wasm_host;
@@ -26,13 +27,18 @@ pub struct ExtensionManager {
 impl ExtensionManager {
     pub async fn load_extensions(&mut self, extensions_parent_dir: PathBuf) -> Result<(), LoadExtensionsError> {
         // Every extension is a directory in the extensions_parent_dir
+        if !extensions_parent_dir.exists() {
+            fs::create_dir(&extensions_parent_dir)?;
+        }
         for entry in fs::read_dir(&extensions_parent_dir)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let info = Arc::new(extensions_parent_dir.join("extension.toml").try_into()?);
-                let extension = WasmExtension::load(path, info).await?;
-                self.extensions.push(extension);
+                let info: Arc<ExtensionInfo> = Arc::new(extensions_parent_dir.join("extension-manifest.toml").try_into()?);
+                if !self.extensions.iter().any(|e| &e.info.id == &info.id) {
+                    let extension = WasmExtension::load(path, info).await?;
+                    self.extensions.push(extension);
+                }
             } else {
                 warn!("Ignoring non-directory entry in top-level extensions directory {extensions_parent_dir:?}: {:?}", path);
             }

@@ -7,11 +7,11 @@ edition = "2021"
 client = { path = "../client" }
 futures-channel = "0.3.30"
 futures-util = "0.3.30"
-log = "0.4"
+log = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { workspace = true }
 tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
+tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
 
 [[example]]
 name = "recv"

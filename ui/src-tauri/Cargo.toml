@@ -5,8 +5,6 @@ description = "Prontus"
 authors = ["Ashwin Naren <arihant2math@gmail.com>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "ui_core"
 crate-type = ["lib", "cdylib", "staticlib"]
