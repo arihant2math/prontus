@@ -1,5 +1,5 @@
 [workspace]
-members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "probot", "pusher", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "wit-gen"]
+members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "probot", "pusher", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "updater", "version", "wit-gen"]
 resolver = "2"
 
 [workspace.dependencies]
