@@ -11,3 +11,5 @@ search = { path = "../search" }
 settings = { path = "../settings" }
 tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
 ui-lib = { path = "../ui-lib" }
+updater = { path = "../updater" }
+version = { path = "../version" }

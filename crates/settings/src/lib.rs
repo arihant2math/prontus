@@ -112,7 +112,7 @@ pub struct Search {
     pub messages: Option<MessagesSearchIndex>
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Update {
     pub notify: bool,
     pub auto_update: bool,
@@ -124,7 +124,7 @@ impl Default for Update {
         Update {
             notify: true,
             auto_update: false,
-            channel: "stable".to_string(),
+            channel: "beta".to_string(),
         }
     }
 }

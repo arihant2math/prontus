@@ -59,6 +59,18 @@ pub enum UpdateChannel {
     Stable,
 }
 
+impl From<&str> for UpdateChannel {
+    fn from(s: &str) -> Self {
+        match s {
+            "alpha" => UpdateChannel::Alpha,
+            "beta" => UpdateChannel::Beta,
+            "rc" => UpdateChannel::RC,
+            "stable" => UpdateChannel::Stable,
+            _ => panic!("Invalid update channel"),
+        }
+    }
+}
+
 impl UpdateChannel {
     pub fn url(&self) -> &'static str {
         match self {
@@ -83,13 +95,13 @@ impl UpdateFile {
         Self::get_update_file_with_url(channel.url()).await
     }
 
-    pub async fn update_available(&self) -> bool {
+    pub fn update_available(&self) -> bool {
         let current_version = version::VERSION;
         let latest_version = self.latest_version.clone().unwrap_or_else(|| current_version.to_string());
         current_version != latest_version
     }
 
-    pub async fn latest_version_details(&self) -> Result<Option<Version>, Box<dyn std::error::Error>> {
+    pub fn latest_version_details(&self) -> Result<Option<Version>, Box<dyn std::error::Error>> {
         let latest_version = &self.latest_version;
         if let Some(latest_version) = latest_version {
             Ok(self.versions.get(latest_version).cloned())
@@ -98,7 +110,7 @@ impl UpdateFile {
         }
     }
 
-    pub async fn no_start_active(&self) -> bool {
+    pub fn no_start_active(&self) -> bool {
         self.notices.iter().any(|notice| match notice {
             Notice::NoStart(ns) => if ns.version == version::VERSION { true } else { false },
             _ => false,

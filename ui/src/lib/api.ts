@@ -362,3 +362,19 @@ export async function getTypingUsers() {
         throw e;
     }
 }
+
+export async function version() {
+    try {
+        return await invoke("version");
+    } catch (e) {
+        toast.error("Error getting version", {description: JSON.stringify(e)});
+    }
+}
+
+export async function checkUpdate() {
+    try {
+        return await invoke("check_update");
+    } catch (e) {
+        toast.error("Error checking for update", {description: JSON.stringify(e)});
+    }
+}

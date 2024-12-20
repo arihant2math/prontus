@@ -79,7 +79,9 @@ pub fn run() {
             uncomplete_task,
             delete_task,
             set_typing,
-            get_typing_users
+            get_typing_users,
+            version,
+            check_update
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

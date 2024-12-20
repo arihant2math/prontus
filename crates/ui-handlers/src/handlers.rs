@@ -8,6 +8,7 @@ use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
 use search::milli::score_details::ScoringStrategy;
 use search::SearchResults;
 use ui_lib::{AppData, AppState, BackendError, InnerAppState};
+use updater::Version;
 
 #[command]
 pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
@@ -23,7 +24,7 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
             .ok_or(BackendError::NotAuthenticated)?
             .base_url
             .to_string(),
-        &settings.auth.ok_or(BackendError::NotAuthenticated)?.api_key,
+        &settings.auth.as_ref().ok_or(BackendError::NotAuthenticated)?.api_key.clone(),
     )
     .unwrap();
     let user_info_future = client.current_user_info();
@@ -72,7 +73,8 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
             .cloned()
             .collect(),
         is_typing: false,
-        typing_users: HashMap::new()
+        typing_users: HashMap::new(),
+        settings
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
@@ -391,9 +393,9 @@ pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<O
     let state = state.read().await;
     let state = state.try_inner()?;
     // TODO: Inefficent
-    let settings = Settings::load().await?;
-    if let Some(msg) = settings.search.messages {
-        let loc = PathBuf::from(msg.path);
+    let settings = &state.settings;
+    if let Some(msg) = settings.search.messages.as_ref() {
+        let loc = PathBuf::from(&msg.path);
         let mut search = search::Search::new(&loc);
         let results = search.search(
             (!query.trim().is_empty()).then(|| query.trim()),
@@ -412,6 +414,25 @@ pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<O
         ).unwrap();
         // TODO: no unwrap (see above)
         Ok(Some(results))
+    } else {
+        Ok(None)
+    }
+}
+
+#[command]
+pub async fn version() -> Result<String, BackendError> {
+    Ok(version::VERSION.to_string())
+}
+
+#[command]
+pub async fn check_update(state: State<'_, AppState>) -> Result<Option<Version>, BackendError> {
+    let state = state.inner().inner();
+    let state = state.read().await;
+    let state = state.try_inner()?;
+    // TODO: below can panic
+    let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(&*state.settings.update.channel)).await.unwrap();
+    if file.update_available() {
+        Ok(file.latest_version_details().unwrap())
     } else {
         Ok(None)
     }

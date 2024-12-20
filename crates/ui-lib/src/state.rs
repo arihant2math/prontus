@@ -6,6 +6,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::RwLock;
+use settings::Settings;
 
 #[derive(Copy, Clone, Debug, Error)]
 pub enum UnlockError {
@@ -34,6 +35,7 @@ pub struct AppData {
     // TODO: include thread id too
     pub typing_users: HashMap<u64, Vec<u64>>,
     pub is_typing: bool,
+    pub settings: Settings,
 }
 
 pub enum InnerAppState {
