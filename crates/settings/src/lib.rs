@@ -113,6 +113,23 @@ pub struct Search {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct Update {
+    pub notify: bool,
+    pub auto_update: bool,
+    pub channel: String,
+}
+
+impl Default for Update {
+    fn default() -> Self {
+        Update {
+            notify: true,
+            auto_update: false,
+            channel: "stable".to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Settings {
     #[serde(default)]
     pub auth: Option<Auth>,
@@ -121,7 +138,9 @@ pub struct Settings {
     #[serde(default)]
     pub options: Options,
     #[serde(default)]
-    pub search: Search
+    pub search: Search,
+    #[serde(default)]
+    pub update: Update
 }
 
 impl Settings {
