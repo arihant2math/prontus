@@ -186,11 +186,14 @@ pub fn api(input: TokenStream) -> TokenStream {
 
     // Build the output
     let expanded = quote! {
-            /// Sends a #method request to #url.
+            #[doc = "Sends a #method request to #url."]
             pub async fn #function_name(
                 #types
             ) -> Result<#response, crate::ResponseError> {
+                let initial_time = std::time::Instant::now();
                 let r = #send_request;
+                let elapsed = initial_time.elapsed();
+                log::debug!(target: "request_perf", "Network: {} ms", elapsed.as_millis());
                 #process
                 #parse
             }
