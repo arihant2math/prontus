@@ -7,7 +7,7 @@ edition = "2021"
 chrono = { version = "0.4", features = ["serde"] }
 client_macros = { path = "../client-macros" }
 log = { workspace = true }
-reqwest = { workspace = true, features = ["brotli", "cookies", "json"] }
+reqwest = { workspace = true, features = ["brotli", "cookies", "json", "rustls-tls"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { workspace = true }
 serde_path_to_error = "0.1"
