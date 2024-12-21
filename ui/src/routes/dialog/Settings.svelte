@@ -1,11 +1,9 @@
 <!--TODO: Add ability to log out-->
 <script>
-    import {run} from 'svelte/legacy';
-
     import {open} from '@tauri-apps/plugin-dialog';
     import RadioLabel from "../settingsComponents/RadioLabel.svelte";
     import OptionsLabel from "../settingsComponents/options/OptionsLabel.svelte";
-    import {getSettings, setSettings} from "$lib/api.ts";
+    import {getSettings, setSettings, version} from "$lib/api.ts";
     import {loadTheme} from "$lib/helpers.ts";
     import {fade} from "svelte/transition";
     import {Dialog, Separator, Tabs} from "bits-ui";
@@ -453,7 +451,14 @@
                             </Tabs.Content>
 
                             <Tabs.Content value="about" class="pt-3">
-                                <p>Prontus, an alternative Pronto client.</p>
+                                <div>
+                                    <p>Prontus, an alternative Pronto client.</p>
+                                </div>
+                                <div>
+                                    <p><b>Version</b>
+                                        {#await version() then version}{version}{/await}
+                                    </p>
+                                </div>
                             </Tabs.Content>
                         </Tabs.Root>
                     </div>

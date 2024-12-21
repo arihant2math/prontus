@@ -12,7 +12,7 @@
         sendMessage,
         getChannelUsers,
         loadChannelUsers,
-        getCurrentUser, getChannelInfo, getParentMessages, getSettings, readChannel, createDm
+        getCurrentUser, getChannelInfo, getParentMessages, getSettings, readChannel, createDm, checkUpdate
     } from "$lib/api.ts";
     import {positionPopovers} from "$lib/popup.js";
     import RichTextEdit from "./messageComponents/RichTextEdit.svelte";
@@ -149,6 +149,12 @@
         messages = await getMessages();
         parentMessages = await getParentMessages();
     });
+
+    checkUpdate().then((result) => {
+        if (result) {
+            toast.success("A new version of Prontus is available");
+        }
+    })
 </script>
 <div style="height: 100vh">
     <PaneGroup direction="horizontal"
