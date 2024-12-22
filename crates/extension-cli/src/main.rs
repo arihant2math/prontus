@@ -2,8 +2,10 @@ use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Manifest {
-    pub permissions: Permissions
+    // TODO: Fix
+    // pub permissions: Permissions
 }
 
 #[derive(Clone, Subcommand)]
@@ -27,9 +29,7 @@ struct Arguments {
 fn main() {
     let args = Arguments::parse();
     match args.command {
-        Command::Init(opts) => {
-        },
-        Command::Package => {
-        }
+        Command::Init { .. } => {}
+        Command::Package { .. } => {}
     }
 }

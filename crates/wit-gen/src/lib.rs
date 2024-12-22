@@ -125,7 +125,7 @@ fn convert_struct(item_struct: ItemStruct) -> language::Record {
     }
 
     language::Record {
-        name: language::WitIdent(name),
+        name: language::WitIdent(name.to_case(Case::Kebab)),
         fields,
     }
 }
@@ -153,7 +153,7 @@ fn convert_enum(item_enum: ItemEnum) -> language::Variant {
         });
     }
     language::Variant {
-        name: language::WitIdent(name),
+        name: language::WitIdent(name.to_case(Case::Kebab)),
         fields: variant_fields,
     }
 }
@@ -195,6 +195,8 @@ impl WitGenerator {
 
     pub fn run(&self) {
         let output = self.generate();
+        // create parent dir of output
+        std::fs::create_dir_all(self.output.parent().unwrap()).unwrap();
         std::fs::write(&self.output, output).unwrap();
     }
 }

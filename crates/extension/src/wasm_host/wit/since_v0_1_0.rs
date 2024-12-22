@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 use log::Level;
 use wasmtime::component::Linker;
 use crate::wasm_host::WasmState;
+use reqwest::{Client, Method};
 
 wasmtime::component::bindgen!({
     async: true,
@@ -10,11 +11,6 @@ wasmtime::component::bindgen!({
     with: {}
 });
 
-impl From<settings::Settings> for Settings {
-    fn from(_value: settings::Settings) -> Self {
-        Settings {}
-    }
-}
 
 pub fn linker() -> &'static Linker<WasmState> {
     static LINKER: OnceLock<Linker<WasmState>> = OnceLock::new();
@@ -23,51 +19,68 @@ pub fn linker() -> &'static Linker<WasmState> {
 
 #[wasmtime::component::__internal::async_trait]
 impl ExtensionImports for WasmState {
-    async fn get_settings(&mut self) -> wasmtime::Result<Result<Settings, ()>> {
+    async fn get_settings(&mut self) -> wasmtime::Result<Result<String, ()>> {
         if self.extension_info.permissions.read_settings {
-            Ok(Ok(settings::Settings::load().await.unwrap().into()))
+            let s = serde_json::to_string(&settings::Settings::load().await.unwrap()).unwrap();
+            Ok(Ok(s))
         } else {
             Ok(Err(()))
         }
     }
 
-    async fn set_settings(&mut self, _settings: Settings) -> wasmtime::Result<Result<(), ()>> {
+    async fn set_settings(&mut self, settings: String) -> wasmtime::Result<Result<(), ()>> {
         if self.extension_info.permissions.write_settings {
-            todo!("set_settings");
+            let settings: settings::Settings = serde_json::from_str(&settings).unwrap();
+            settings.save().await.unwrap();
+            Ok(Ok(()))
         } else {
             Ok(Err(()))
         }
     }
 
-    async fn request_url(&mut self, _method: wasmtime::component::__internal::String, _url: wasmtime::component::__internal::String) -> wasmtime::Result<Result<NetworkResponse, ()>> {
+    async fn request_url(&mut self, method: String, url: String) -> wasmtime::Result<Result<NetworkResponse, ()>> {
         if self.extension_info.permissions.full_network {
-            todo!()
+            let client = Client::new();
+            let request = client.request(match method.as_str() {
+                "get" => Method::GET,
+                "post" => Method::POST,
+                "put" => Method::PUT,
+                "patch" => Method::PATCH,
+                "delete" => Method::DELETE,
+                "head" => Method::HEAD,
+                _ => todo!("Proper error handling")
+            }, url);
+            let resp = request.send().await.unwrap();
+            Ok(Ok(NetworkResponse {
+                status: resp.status().as_u16() as u32,
+                body: resp.text().await.unwrap(),
+            }))
         } else {
             Ok(Err(()))
         }
     }
 
-    async fn log_trace(&mut self, message: wasmtime::component::__internal::String) -> wasmtime::Result<()> {
+    async fn log_trace(&mut self, message: String) -> wasmtime::Result<()> {
         log::log!(Level::Trace, "{}", message);
         Ok(())
     }
 
-    async fn log_debug(&mut self, message: wasmtime::component::__internal::String) -> wasmtime::Result<()> {
+    async fn log_debug(&mut self, message: String) -> wasmtime::Result<()> {
         log::log!(Level::Debug, "{}", message);
         Ok(())
     }
 
-    async fn log_info(&mut self, message: wasmtime::component::__internal::String) -> wasmtime::Result<()> {
+    async fn log_info(&mut self, message: String) -> wasmtime::Result<()> {
         log::log!(Level::Info, "{}", message);
         Ok(())
     }
 
-    async fn log_warning(&mut self, message: wasmtime::component::__internal::String) -> wasmtime::Result<()> {
+    async fn log_warning(&mut self, message: String) -> wasmtime::Result<()> {
         log::log!(Level::Warn, "{}", message);
         Ok(())
     }
 
-    async fn log_error(&mut self, message: wasmtime::component::__internal::String) -> wasmtime::Result<()> {
+    async fn log_error(&mut self, message: String) -> wasmtime::Result<()> {
         log::log!(Level::Error, "{}", message);
         Ok(())
     }

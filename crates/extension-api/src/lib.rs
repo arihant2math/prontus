@@ -53,11 +53,11 @@ static mut EXTENSION: Option<Box<dyn Extension>> = None;
 #[doc(hidden)]
 pub static ZED_API_VERSION: [u8; 6] = *include_bytes!(concat!(env!("OUT_DIR"), "/version_bytes"));
 
-wit::export!(Component);
+export!(Component);
 
 struct Component;
 
-impl wit::Guest for Component {
+impl Guest for Component {
     fn init_extension() {
         extension().init_extension();
     }

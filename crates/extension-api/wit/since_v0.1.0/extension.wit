@@ -1,30 +1,27 @@
 package prontus:extension;
 
 world extension {
-    record settings {
-    }
+  record network-response {
+    status: u32,
+    body: string,
+  }
 
-    record network-response {
-        status: u32,
-        body: string,
-    }
+  import get-settings: func() -> result<string>;
+  import set-settings: func(settings: string) -> result;
+  import request-url: func(method: string, url: string) -> result<network-response>;
 
-    import get-settings: func() -> result<settings>;
-    import set-settings: func(settings: settings) -> result;
-    import request-url: func(method: string, url: string) -> result<network-response>;
+  import log-trace: func(message: string);
+  import log-debug: func(message: string);
+  import log-info: func(message: string);
+  import log-warning: func(message: string);
+  import log-error: func(message: string);
 
-    import log-trace: func(message: string);
-    import log-debug: func(message: string);
-    import log-info: func(message: string);
-    import log-warning: func(message: string);
-    import log-error: func(message: string);
-
-    // import create-announcement: func(target-bubbles: list<u64>, content: string) -> result<announcement>;
-    // import get-announcements: func() -> result<list<announcement>>;
-    // import mark-read-announcement: func(announcement-id: u64) -> result;
+  // import create-announcement: func(target-bubbles: list<u64>, content: string) -> result<announcement>;
+  // import get-announcements: func() -> result<list<announcement>>;
+  // import mark-read-announcement: func(announcement-id: u64) -> result;
 
 
-    export init-extension: func();
-    export run-task: func();
-    export shutdown-extension: func();
+  export init-extension: func();
+  export run-task: func();
+  export shutdown-extension: func();
 }
