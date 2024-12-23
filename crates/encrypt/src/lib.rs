@@ -20,6 +20,8 @@ mod retrieval;
 use crate::retrieval::PublicLookupService;
 pub use encrypt_internal::*;
 use std::string::FromUtf8Error;
+use base64::DecodeError;
+use base64::prelude::*;
 
 pub struct Encrypt {
     pub dm_encryption: DMEncryption,
@@ -44,11 +46,13 @@ impl Encrypt {
     }
 
     // TODO: these methods should not be lossy and instead map to u16 codepoints
-    pub fn encrypt(&self, data: &str) -> Result<String, FromUtf8Error> {
-        String::from_utf8(self.dm_encryption.encrypt(data))
+    pub fn encrypt(&self, data: &str) -> String {
+        let encrypted_data = self.dm_encryption.encrypt(data);
+        BASE64_STANDARD.encode(&encrypted_data)
     }
 
     pub fn decrypt(&self, data: &str) -> Result<String, FromUtf8Error> {
-        String::from_utf8(self.dm_encryption.decrypt(data.as_ref()))
+        let decoded_data = BASE64_STANDARD.decode(data).unwrap();
+        String::from_utf8(self.dm_encryption.decrypt(&decoded_data))
     }
 }
