@@ -21,6 +21,7 @@ mod client;
 pub mod models;
 pub mod routes;
 pub(crate) mod serde_datetime;
+pub(crate) mod custom_json;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
