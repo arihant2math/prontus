@@ -11,6 +11,53 @@ pub struct MessageModifyResponse {
     pub message: Message,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct MessageModifyRequest {
+    channel_id: u64,
+    message: String,
+    user_id: u64,
+    time: DateTime<Utc>,
+    parent: Option<u64>,
+}
+
+impl MessageModifyRequest {
+    fn to_json(&self) -> Value {
+        let uuid = Uuid::new_v4().to_string();
+        let time_string = self.time.format("%Y-%m-%d %H:%M:%S").to_string();
+        if self.parent.is_some() {
+            json!({
+                    "bubble_id": self.channel_id,
+                    "created_at": time_string,
+                    "message": self.message,
+                    "id": Value::Null,
+                    "sendState": "sending",
+                    "user_id": self.user_id,
+                    "uuid": uuid,
+                    "parentmessage_id": self.parent
+            })
+        } else {
+            json!({
+                "bubble_id": self.channel_id,
+                "created_at": time_string,
+                "message": self.message,
+                "id": Value::Null,
+                "sendState": "sending",
+                "user_id": self.user_id,
+                "uuid": uuid
+            })
+        }
+    }
+}
+
+impl Serialize for MessageModifyRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        self.to_json().serialize(serializer)
+    }
+}
+
 pub type MessageModifyResult = crate::APIResult<MessageModifyResponse>;
 
 pub async fn post(
