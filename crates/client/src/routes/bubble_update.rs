@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use client_macros::api;
 use crate::{Bubble, Property};
+use crate::custom_json::ToJson;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -24,17 +25,8 @@ pub struct PostBubbleUpdateRequest {
     pub modification: BubbleUpdateModification,
 }
 
-impl Serialize for PostBubbleUpdateRequest {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        self.to_json().serialize(serializer)
-    }
-}
-
-impl PostBubbleUpdateRequest {
-    pub fn to_json(&self) -> serde_json::Value {
+impl ToJson for PostBubbleUpdateRequest {
+    fn to_json(&self) -> serde_json::Value {
         match &self.modification {
             BubbleUpdateModification::SetTitle(title) => {
                 json!({

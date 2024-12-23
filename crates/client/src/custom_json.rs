@@ -15,8 +15,7 @@ impl Serialize for dyn ToJson {
 }
 
 pub(crate) trait FromJson: Sized {
-    fn from_json(value: Value) -> Self {
-    }
+    fn from_json(value: Value) -> Self;
 }
 
 impl Deserialize for dyn FromJson {

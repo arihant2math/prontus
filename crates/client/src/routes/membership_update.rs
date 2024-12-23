@@ -1,6 +1,7 @@
 use crate::Membership;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use crate::custom_json::ToJson;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum NotificationsPreference {
@@ -28,17 +29,8 @@ pub struct PostMembershipUpdateRequest {
     pub modification: MembershipUpdateModification,
 }
 
-impl Serialize for PostMembershipUpdateRequest {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        self.to_json().serialize(serializer)
-    }
-}
-
-impl PostMembershipUpdateRequest {
-    pub fn to_json(&self) -> serde_json::Value {
+impl ToJson for PostMembershipUpdateRequest {
+    fn to_json(&self) -> serde_json::Value {
         match &self.modification {
             MembershipUpdateModification::RemoveAlias => {
                 json!({

@@ -4,6 +4,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use uuid::Uuid;
+use crate::custom_json::ToJson;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MessageModifyResponse {
@@ -20,7 +21,7 @@ pub struct MessageModifyRequest {
     parent: Option<u64>,
 }
 
-impl MessageModifyRequest {
+impl ToJson for MessageModifyRequest {
     fn to_json(&self) -> Value {
         let uuid = Uuid::new_v4().to_string();
         let time_string = self.time.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -46,15 +47,6 @@ impl MessageModifyRequest {
                 "uuid": uuid
             })
         }
-    }
-}
-
-impl Serialize for MessageModifyRequest {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        self.to_json().serialize(serializer)
     }
 }
 
