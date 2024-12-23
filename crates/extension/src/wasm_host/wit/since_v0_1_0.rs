@@ -48,7 +48,7 @@ impl ExtensionImports for WasmState {
                 "patch" => Method::PATCH,
                 "delete" => Method::DELETE,
                 "head" => Method::HEAD,
-                _ => todo!("Proper error handling")
+                _ => return Ok(Err(())),
             }, url);
             let resp = request.send().await.unwrap();
             Ok(Ok(NetworkResponse {

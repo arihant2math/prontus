@@ -91,7 +91,7 @@ impl WasmExtension {
 impl Drop for WasmExtension {
     fn drop(&mut self) {
         // TODO: Wait for async drop to be stabilized
-        // let _ = self.extension.shutdown_extension(&mut self.store);
+        let _ = self.extension.shutdown_extension(&mut self.store);
     }
 }
 
