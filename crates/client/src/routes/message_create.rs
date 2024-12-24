@@ -1,7 +1,7 @@
 use crate::models::Message;
 use chrono::{DateTime, Utc};
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use serde_json::{json, Value};
 use uuid::Uuid;
 use crate::custom_json::ToJson;
@@ -47,6 +47,15 @@ impl ToJson for MessageModifyRequest {
                 "uuid": uuid
             })
         }
+    }
+}
+
+impl Serialize for MessageModifyRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_json().serialize(serializer)
     }
 }
 

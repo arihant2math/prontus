@@ -5,7 +5,6 @@
 
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use crate::bubble_history::GetBubbleHistoryResponse;
 
 pub struct PutFileRequest {
     pub file_name: String,

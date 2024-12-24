@@ -15,6 +15,8 @@ pub enum BackendError {
     IoError(#[from] std::io::Error),
     #[error("Settings error: {0}")]
     SettingsError(#[from] settings::SettingsError),
+    // #[error("Search error: {0}")]
+    // SearchError(#[from] )
 }
 
 impl Into<InvokeError> for BackendError {

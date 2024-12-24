@@ -11,6 +11,7 @@ use milli::{
 };
 pub use milli;
 use serde_json::{Map, Value};
+use thiserror::Error;
 use std::error::Error;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
@@ -23,6 +24,16 @@ pub struct Search {
 pub struct SearchResults {
     pub results: Vec<(DocumentId, Map<String, Value>)>,
     pub elapsed: Duration,
+}
+
+#[derive(Debug, Error)]
+pub enum SearchError {
+    #[error("Serde json error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
+    #[error("Heed error: {0}")]
+    HeedError(#[from] heed::Error),
+    #[error("Milli error: {0}")]
+    MilliError(#[from] milli::Error)
 }
 
 impl Search {
@@ -48,7 +59,7 @@ impl Search {
         time_budget: TimeBudget,
         ranking_score_threshold: Option<f64>,
         locales: Option<&Vec<Language>>,
-    ) -> Result<SearchResults, Box<dyn Error + Send + Sync>> {
+    ) -> Result<SearchResults, SearchError> {
         let txn = self.index.read_txn()?;
         let start = Instant::now();
         let mut ctx = SearchContext::new(&self.index, &txn)?;

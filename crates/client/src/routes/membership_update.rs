@@ -91,6 +91,15 @@ impl ToJson for PostMembershipUpdateRequest {
     }
 }
 
+impl Serialize for PostMembershipUpdateRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_json().serialize(serializer)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PostMembershipUpdateResponse {
     pub ok: bool,

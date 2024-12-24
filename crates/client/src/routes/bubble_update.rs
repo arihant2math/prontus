@@ -3,7 +3,7 @@
 // {"bubble_id":3901612,"addmember":"owner"}
 // {"bubble_id":"3901612","category_id":679345}
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
 use client_macros::api;
 use crate::{Bubble, Property};
@@ -57,6 +57,15 @@ impl ToJson for PostBubbleUpdateRequest {
                 unimplemented!()
             }
         }
+    }
+}
+
+impl Serialize for PostBubbleUpdateRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_json().serialize(serializer)
     }
 }
 
