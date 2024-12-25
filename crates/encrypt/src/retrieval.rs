@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
+// TODO: get actual url
 static URL: &str = "https://github.com/arihant2math/prontus/";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -8,6 +9,9 @@ struct ServerResponse {
     pub organizations: HashMap<String, String>
 }
 
+/// Just a static json file with the somewhat protected keys for users
+/// It tries to prevent random access of keys from random organizations and discovery by hashing the keys.
+/// Theoretically it should be possible to search to see all users in a given org that use this system, but you need the org id.  
 pub struct PublicLookupService {
     pub organizations: HashMap<String, String>
 }

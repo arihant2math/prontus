@@ -40,7 +40,7 @@ pub async fn get(
     let json = serde_json::from_str(&text);
     match json {
         Ok(json) => { Ok(json) }
-        Err(e) => {
+        Err(_e) => {
             let json = serde_json::from_str::<GetBubbleHistoryResponse>(&text);
             let e = json.unwrap_err();
             log::error!("Error parsing json response: {:?}." , e );

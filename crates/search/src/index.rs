@@ -7,6 +7,7 @@ pub trait Index {
     const INDEX_LOCATION: PathBuf;
 
     fn index(&self, location: &PathBuf) -> milli::Result<milli::Index> {
+        // TODO: standardize size
         let mut options = EnvOpenOptions::new();
         options.map_size(128 * 1024 * 1024 * 1024); // 100 GB
 

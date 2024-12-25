@@ -144,8 +144,10 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// The path to the settings file
     pub fn path() -> PathBuf {
         // TODO: remove this deletion in the far far future
+        // TODO: migrate to load()
         let old_settings = prontus_dir()
             .join("settings.bnc");
         if old_settings.exists() {
@@ -156,6 +158,7 @@ impl Settings {
             .join("settings.json")
     }
 
+    /// Delete the settings file
     pub async fn delete() -> Result<()> {
         info!("Deleting settings file");
         let path = Self::path();

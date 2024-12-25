@@ -54,6 +54,7 @@ pub struct Command {
     handler: Box<dyn CommandTrait>,
 }
 
+/// Handle responses to messages that start with arbritrary strings of text
 pub struct CommandHandler {
     commands: Vec<Command>,
 }

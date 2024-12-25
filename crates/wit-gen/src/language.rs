@@ -130,7 +130,6 @@ impl WitType {
         }
     }
 
-    #[allow(dead_code)]
     pub fn tuple(inner: Vec<WitType>) -> WitType {
         WitType {
             name: WitIdent("tuple".to_string()),

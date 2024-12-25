@@ -54,6 +54,7 @@ mod handler;
 
 pub use handler::{handler, Command, CommandHandler, Handler, NoopHandler};
 use std::collections::HashMap;
+use std::convert::Infallible;
 
 pub use client;
 pub use client::ProntoClient;
@@ -72,19 +73,8 @@ pub trait TokenLoader {
     async fn load(&self, user_id: u64) -> Result<Option<String>, Self::Error>;
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct Never;
-
-impl error::Error for Never {}
-
-impl std::fmt::Display for Never {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Never")
-    }
-}
-
 impl TokenLoader for String {
-    type Error = Never;
+    type Error = Infallible;
 
     async fn load(&self, _: u64) -> Result<Option<String>, Self::Error> {
         Ok(Some(self.clone()))
@@ -92,7 +82,7 @@ impl TokenLoader for String {
 }
 
 impl TokenLoader for HashMap<u64, String> {
-    type Error = Never;
+    type Error = Infallible;
 
     async fn load(&self, user_id: u64) -> Result<Option<String>, Self::Error> {
         Ok(self.get(&user_id).cloned())
@@ -107,6 +97,7 @@ pub struct Bot<T: Handler> {
 }
 
 impl<T: Handler> Bot<T> {
+    /// Initialize bot with a client and handler, init() needs to be called after this function before run() is called.
     pub async fn new(client: Arc<ProntoClient>, handler: T) -> Self {
         let pusher_client = PusherClient::new(client.clone()).await;
         Self {
@@ -117,7 +108,10 @@ impl<T: Handler> Bot<T> {
         }
     }
 
+    /// Call this before run() to properly subscribe to pusher channel.
+    /// This function will panic if called twice.
     pub async fn init(&mut self) {
+        assert_ne!(self.inited);
         self.inited = true;
         self.pusher_client.init().await;
         let user_info = self.client.user_info(None).await.unwrap().user;
@@ -132,6 +126,7 @@ impl<T: Handler> Bot<T> {
             .await;
     }
 
+    /// init() must be called before this function or it will panic.
     pub async fn run(&self) {
         loop {
             let message = self.pusher_client.server_messages().await.recv().await;

@@ -12,7 +12,6 @@ use milli::{
 pub use milli;
 use serde_json::{Map, Value};
 use thiserror::Error;
-use std::error::Error;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 

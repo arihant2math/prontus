@@ -20,6 +20,7 @@ mod retrieval;
 use crate::retrieval::PublicLookupService;
 pub use encrypt_internal::*;
 use std::string::FromUtf8Error;
+#[allow(unused_imports)]
 use base64::DecodeError;
 use base64::prelude::*;
 
@@ -29,6 +30,7 @@ pub struct Encrypt {
 }
 
 impl Encrypt {
+    /// Lookup other user and load current user's secret key 
     pub async fn new(
         public_lookup_service: PublicLookupService,
         org_id: u64,
@@ -45,14 +47,22 @@ impl Encrypt {
         })
     }
 
-    // TODO: these methods should not be lossy and instead map to u16 codepoints
     pub fn encrypt(&self, data: &str) -> String {
-        let encrypted_data = self.dm_encryption.encrypt(data);
+        let encrypted_data = self.dm_encryption.encrypt(data.as_bytes());
         BASE64_STANDARD.encode(&encrypted_data)
     }
 
     pub fn decrypt(&self, data: &str) -> Result<String, FromUtf8Error> {
         let decoded_data = BASE64_STANDARD.decode(data).unwrap();
+        // TODO: this should not be possibly lossy ...
         String::from_utf8(self.dm_encryption.decrypt(&decoded_data))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_validity() {
+        // TODO: Finish
     }
 }

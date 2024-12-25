@@ -34,10 +34,10 @@ impl DMEncryption {
         }
     }
 
-    pub fn encrypt(&self, message: &str) -> Vec<u8> {
+    pub fn encrypt(&self, message: &[u8]) -> Vec<u8> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
         let nonce = ChaChaBox::generate_nonce(&mut OsRng);
-        let encrypted = chachabox.encrypt(&nonce, message.as_bytes()).unwrap();
+        let encrypted = chachabox.encrypt(&nonce, message).unwrap();
         encrypted
     }
 
@@ -57,6 +57,7 @@ pub fn load_secret_key() -> [u8; 32] {
         .unwrap()
         .get_secret()
         .unwrap();
+    // Keep in array to allow for Copy
     let mut secret_key = [0u8; 32];
     secret_key.copy_from_slice(&secret_vector);
     secret_key
