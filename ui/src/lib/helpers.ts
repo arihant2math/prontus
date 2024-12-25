@@ -14,21 +14,33 @@ export function getThemeClass(settings) {
 }
 
 export function loadTheme(settings) {
-    if (settings === undefined || settings === null) {
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-        return;
+    // Auto theme by default
+    let theme = 'Auto';
+    if (!(settings === undefined || settings === null)) {
+        theme = settings.appearance.theme;
     }
-    if (settings.appearance.theme === 'Dark' || (settings.appearance.theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+
+    // Add dark mode class if theme is dark or user prefers dark mode
+    if (theme === 'Dark' || (theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark')
     } else {
         document.documentElement.classList.remove('dark')
     }
+
+    // Handle color scheme changes iff settings appearrance is auto
+    // TODO: will this only happen when auto mode is on during launch?
+    if (settings.appearance.theme === 'Auto') {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
+        });
+    }
 }
 
+/// Parse datetimes from Pronto servers
 export function parseDatetime(str: string): Date {
     // Split the date and time parts
     const [datePart, timePart] = str.split(' ');
