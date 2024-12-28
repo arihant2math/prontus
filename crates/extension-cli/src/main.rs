@@ -1,108 +1,20 @@
 use anyhow::{bail, Context};
 use clap::{Parser, Subcommand};
 use extension::info::ExtensionInfo;
-use extension::WasmExtension;
+use extension::{WasmExtension, EXTENSION_FILE_NAME, MANIFEST_FILE_NAME};
 use serde::{Deserialize, Serialize};
 use std::env::current_dir;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use wit_component::ComponentEncoder;
 use wasm_encoder::{ComponentSectionId, Encode as _, RawSection, Section as _};
+use std::process::{Stdio, Command as StdCommand};
+use color_eyre::eyre::ContextCompat;
 
-const WASI_ADAPTER_URL: &str =
-    "https://github.com/bytecodealliance/wasmtime/releases/download/v18.0.2/wasi_snapshot_preview1.reactor.wasm";
-
-async fn install_wasi_preview1_adapter_if_needed() -> anyhow::Result<Vec<u8>> {
-    let cache_path = current_dir()?.join("wasi_snapshot_preview1.reactor.wasm");
-    if let Ok(content) = tokio::fs::read(&cache_path).await {
-        if wasmparser::Parser::is_core_wasm(&content) {
-            return Ok(content);
-        }
-    }
-
-    let _ = tokio::fs::remove_file(&cache_path).await;
-
-    println!(
-        "downloading wasi adapter module to {}",
-        cache_path.display()
-    );
-    let response = reqwest::get(WASI_ADAPTER_URL).await?;
-
-    let content = response.bytes().await?;
-
-    tokio::fs::write(&cache_path, &content)
-        .await
-        .with_context(|| format!("failed to save file {}", cache_path.display()))?;
-
-    if !wasmparser::Parser::is_core_wasm(&content) {
-        bail!("downloaded wasi adapter is invalid");
-    }
-    Ok(content.to_vec())
-}
-
-// This was adapted from:
-// https://github.com/zed-industries/zed/blob/02cc0b9afa8eb6162b9e65d1801633cb6f38154e/crates/extension/src/extension_builder.rs#L456C5-L458C5
-// which was adapted from:
-// https://github.com/bytecodealliance/wasm-tools/blob/1791a8f139722e9f8679a2bd3d8e423e55132b22/src/bin/wasm-tools/strip.rs
-fn strip_custom_sections(input: &[u8]) -> anyhow::Result<Vec<u8>> {
-    use wasmparser::Payload::*;
-
-    let strip_custom_section = |name: &str| name.starts_with(".debug");
-
-    let mut output = Vec::new();
-    let mut stack = Vec::new();
-
-    for payload in wasmparser::Parser::new(0).parse_all(input) {
-        let payload = payload?;
-        let component_header = wasm_encoder::Component::HEADER;
-        let module_header = wasm_encoder::Module::HEADER;
-
-        // Track nesting depth, so that we don't mess with inner producer sections:
-        match payload {
-            Version { encoding, .. } => {
-                output.extend_from_slice(match encoding {
-                    wasmparser::Encoding::Component => &component_header,
-                    wasmparser::Encoding::Module => &module_header,
-                });
-            }
-            ModuleSection { .. } | ComponentSection { .. } => {
-                stack.push(std::mem::take(&mut output));
-                continue;
-            }
-            End { .. } => {
-                let mut parent = match stack.pop() {
-                    Some(c) => c,
-                    None => break,
-                };
-                if output.starts_with(&component_header) {
-                    parent.push(ComponentSectionId::Component as u8);
-                    output.encode(&mut parent);
-                } else {
-                    parent.push(ComponentSectionId::CoreModule as u8);
-                    output.encode(&mut parent);
-                }
-                output = parent;
-            }
-            _ => {}
-        }
-
-        if let CustomSection(c) = &payload {
-            if strip_custom_section(c.name()) {
-                continue;
-            }
-        }
-
-        if let Some((id, range)) = payload.as_section() {
-            RawSection {
-                id,
-                data: &input[range],
-            }
-                .append_to(&mut output);
-        }
-    }
-
-    Ok(output)
-}
+mod wasm_compile;
+use wasm_compile::{strip_custom_sections, install_wasi_preview1_adapter_if_needed, install_rust_wasm_target_if_needed};
+use crate::wasm_compile::RUST_TARGET;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Permissions {
@@ -111,10 +23,58 @@ pub struct Permissions {
     pub full_network: Option<bool>,
 }
 
+impl Into<extension::info::Permissions> for Permissions {
+    fn into(self) -> extension::info::Permissions {
+        extension::info::Permissions {
+            read_settings: self.read_settings.unwrap_or(false),
+            write_settings: self.write_settings.unwrap_or(false),
+            full_network: self.full_network.unwrap_or(false),
+        }
+    }
+}
+
+impl From<extension::info::Permissions> for Permissions {
+    fn from(permissions: extension::info::Permissions) -> Self {
+        Self {
+            read_settings: Some(permissions.read_settings),
+            write_settings: Some(permissions.write_settings),
+            full_network: Some(permissions.full_network),
+        }
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Manifest {
     pub identifier: String,
     pub permissions: Permissions,
+}
+
+impl Manifest {
+    pub fn open(path: &PathBuf) -> anyhow::Result<Self> {
+        match path.extension().context("No file extension found for manifest")?.to_str().unwrap() {
+            "toml" => {
+                let manifest_text = std::fs::read_to_string(path)?;
+                let manifest: Manifest = toml::from_str(&manifest_text)?;
+                Ok(manifest)
+            }
+            "json" => {
+                let manifest_text = std::fs::read_to_string(path)?;
+                let manifest: Manifest = serde_json::from_str(&manifest_text)?;
+                Ok(manifest)
+            }
+            "yaml" => {
+                let manifest_text = std::fs::read_to_string(path)?;
+                let manifest: Manifest = serde_yaml::from_str(&manifest_text)?;
+                Ok(manifest)
+            }
+            "yml" => {
+                let manifest_text = std::fs::read_to_string(path)?;
+                let manifest: Manifest = serde_yaml::from_str(&manifest_text)?;
+                Ok(manifest)
+            }
+            _ => bail!("Unsupported file extension for manifest"),
+        }
+    }
 }
 
 fn default_path() -> PathBuf {
@@ -141,6 +101,8 @@ enum Command {
     Build {
         output: PathBuf,
         #[clap(long, short, action)]
+        release: bool,
+        #[clap(long, short, action)]
         no_strip: bool,
     },
     Compile {
@@ -160,16 +122,44 @@ struct Arguments {
     command: Command,
 }
 
-fn get_extension_info_path(path: &PathBuf) -> Option<PathBuf> {
-    if path.join("prontus_ext.toml").exists() {
-        Some(path.join("prontus_ext.toml"))
-    } else if path.join("prontus_ext.json").exists() {
-        Some(path.join("prontus_ext.json"))
-    } else if path.join("prontus_ext.yaml").exists() {
-        Some(path.join("prontus_ext.yaml"))
+fn get_manifest_path(root: &PathBuf, custom: Option<&PathBuf>) -> Option<PathBuf> {
+    if let Some(path) = custom {
+        return if path.exists() {
+            return Some(path.clone());
+        } else {
+            None
+        };
+    }
+    if root.join("prontus_ext.toml").exists() {
+        Some(root.join("prontus_ext.toml"))
+    } else if root.join("prontus_ext.json").exists() {
+        Some(root.join("prontus_ext.json"))
+    } else if root.join("prontus_ext.yaml").exists() {
+        Some(root.join("prontus_ext.yaml"))
     } else {
         None
     }
+}
+
+fn get_extension_info(path: &PathBuf, custom_manifest_path: Option<&PathBuf>) -> anyhow::Result<ExtensionInfo> {
+    let path = get_manifest_path(path, custom_manifest_path).context("Could not find extension info file")?;
+    let manifest = Manifest::open(&path)?;
+    let cargo_info = cargo_toml::Manifest::from_path(path.join("Cargo.toml"))?;
+    let package = cargo_info.package.context("Could not find package info in Cargo.toml")?;
+    let ext_info = ExtensionInfo {
+        id: manifest.identifier,
+        name: package.name,
+        version: package.version.context("Version in Cargo.toml is inherited, please specify a raw version")?,
+        description: package.description,
+        authors: package.authors,
+        license: package.license,
+        repository: package.repository,
+        homepage: package.homepage,
+        documentation: package.documentation,
+        keywords: package.keywords,
+        permissions: manifest.permissions.into(),
+    };
+    Some(ext_info)
 }
 
 #[tokio::main]
@@ -185,45 +175,33 @@ async fn main() -> anyhow::Result<()> {
             manifest_path,
             output_dir,
         } => {
-            let manifest_path = manifest_path.unwrap_or_else(|| {
-                let current_dir = current_dir().unwrap();
-                get_extension_info_path(&current_dir).expect("Could not find extension info file")
-            });
+            let ext_info = get_extension_info(&path, manifest_path.as_ref())?;
+            std::fs::create_dir(&output_dir).context("Failed to create output directory")?;
+            let main_output_dir = output_dir.join(format!("{}_{}", ext_info.name, ext_info.version));
+            std::fs::create_dir(&main_output_dir).context("Failed to create output directory")?;
+            let wasm_output = main_output_dir.join(EXTENSION_FILE_NAME);
+            build_wasm(&path, &wasm_output, true, false).await?;
+            let manifest_output = main_output_dir.join(MANIFEST_FILE_NAME);
+            let manifest_text = toml::to_string(&ext_info)?;
+            std::fs::write(manifest_output, &manifest_text)?;
         }
         Command::Compile { input, output, no_strip } => {
             compile_wasm(&input, &output, no_strip).await?;
         }
-        Command::Build { output, no_strip } => {
-            let path = current_dir()?;
-            let name = path.file_name().unwrap().to_str().unwrap().to_string();
-            // TODO: fix this
-            let input = path.join("target").join("wasm32-unknown-unknown").join("release").join(format!("{}.wasm", name.replace("-", "_")));
-            compile_wasm(&input, &output, no_strip).await?;
+        Command::Build { output, release, no_strip } => {
+            build_wasm(&current_dir()?, &output, release, no_strip).await?;
         }
         Command::TestLoad { path } => {
             WasmExtension::load(
                 path,
-                Arc::new(ExtensionInfo {
-                    id: "test".to_string(),
-                    name: "Test".to_string(),
-                    version: "0.0.0".to_string(),
-                    description: None,
-                    authors: None,
-                    license: None,
-                    repository: None,
-                    homepage: None,
-                    documentation: None,
-                    keywords: None,
-                    permissions: Default::default(),
-                }),
-            )
-            .await?;
+                Arc::new(get_extension_info(&path, None)?),
+            ).await?;
         }
     };
     Ok(())
 }
 
-async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) -> anyhow::Result<()>{
+async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) -> anyhow::Result<()> {
     let adapter_bytes = install_wasi_preview1_adapter_if_needed().await?;
     println!("Reading wasm module from {}", input_path.display());
     let wasm_bytes = std::fs::read(input_path)?;
@@ -247,11 +225,32 @@ async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) ->
     Ok(())
 }
 
+async fn build_wasm(cwd: &PathBuf, output: &PathBuf, release: bool, no_strip: bool) -> anyhow::Result<()> {
+    install_rust_wasm_target_if_needed()?;
+    StdCommand::new("cargo")
+        .current_dir(cwd)
+        .arg("build")
+        .arg("--target")
+        .arg(RUST_TARGET)
+        .arg(if release { "--release" } else { "--debug" })
+        .output()
+        .context("failed to run cargo build")?;
+    let name = cwd.file_name().unwrap().to_str().unwrap().to_string();
+    // TODO: fix this
+    let input = cwd.join("target").join(RUST_TARGET).join(if release {
+        "release"
+    } else {
+        "debug"
+    }).join(format!("{}.wasm", name.replace("-", "_")));
+    compile_wasm(&input, &output, no_strip).await?;
+    Ok(())
+}
+
 fn init(path: &PathBuf) {
     if !path.is_dir() {
         panic!("Path must be a directory");
     }
-    if get_extension_info_path(&path).is_none() {
+    if get_manifest_path(&path, None).is_none() {
         let manifest_path = path.join("prontus_ext.toml");
         let default_ident = path.file_name().unwrap().to_str().unwrap();
         let mut ident = inquire::Text::new(&format!("What should the id be ({default_ident})?"))

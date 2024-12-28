@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cargo_toml = "0.21"
 color-eyre = "0.6"
 clap = { version = "4.5", features = ["derive", "string"] }
 extension = { path = "../extension" }
