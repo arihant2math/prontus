@@ -1,12 +1,10 @@
 # Prontus
 
-An alpha client for Pronto (https://pronto.io), a messaging application used by educational institutions.
-
 **Current Progress:** https://github.com/arihant2math/prontus/issues/1
 
 ## Installation
 
-At the moment, there are prebuilt alpha binaries.
+At the moment, there are prebuilt binaries.
 
 To find the latest somewhat stable one, head to the [release page](https://github.com/arihant2math/prontus/releases).
 
