@@ -8,4 +8,4 @@ client = { path = "../client" }
 settings = { path = "../settings" }
 tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
 thiserror = { workspace = true }
-tokio = { version = "1", features = ["full"] }
+tokio = { workspace = true }

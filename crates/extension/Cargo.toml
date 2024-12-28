@@ -12,7 +12,6 @@ settings = { path = "../settings" }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
 toml = "0.8"
-wasmtime = "26"
-wasmtime-wasi = "26"
-wit-bindgen = { workspace = true }
+wasmtime = { workspace = true }
+wasmtime-wasi = { workspace = true }
 futures = "0.3.31"

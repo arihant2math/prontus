@@ -4,11 +4,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5", features = ["derive"] }
+color-eyre = "0.6"
+clap = { version = "4.5", features = ["derive", "string"] }
 extension = { path = "../extension" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9.34"
+inquire = "0.7"
 toml = "0.8"
-uuid = "1.11"
-
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+anyhow = "1.0"
+log = "0.4.22"
+wasmparser = { workspace = true }
+wasm-encoder = { workspace = true }
+wit-component = { workspace = true }
+reqwest = { workspace = true }

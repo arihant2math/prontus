@@ -5,8 +5,7 @@ edition = "2021"
 
 [dependencies]
 base64 = "0.22"
-blake3 = "1.5.4"
+blake3 = "1.5.5"
 encrypt_internal = { path = "../encrypt-internal" }
 reqwest = { workspace = true }
-serde = "1.0"
-serde_json = "1.0"
+serde = { workspace = true }
