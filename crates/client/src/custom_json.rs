@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 
@@ -14,10 +15,11 @@ impl Serialize for dyn ToJson {
     }
 }
 
-// pub(crate) trait FromJson: Sized {
-//     fn from_json(value: Value) -> Self;
-// }
-//
+#[allow(dead_code)]
+pub(crate) trait FromJson: Sized {
+    fn from_json(value: Value) -> Self;
+}
+
 // impl<'de> Deserialize<'de> for dyn FromJson where Self: Sized {
 //     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 //     where
