@@ -392,7 +392,6 @@ pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<O
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
-    // TODO: Inefficent
     let settings = &state.settings;
     if let Some(msg) = settings.search.messages.as_ref() {
         let loc = PathBuf::from(&msg.path);

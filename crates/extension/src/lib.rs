@@ -4,10 +4,10 @@ use std::sync::Arc;
 use log::warn;
 use thiserror::Error;
 use crate::info::ExtensionInfo;
-use crate::wasm_host::WasmExtension;
+pub use crate::wasm_host::WasmExtension;
 
 mod wasm_host;
-mod info;
+pub mod info;
 
 #[derive(Debug, Error)]
 pub enum LoadExtensionsError {
@@ -36,7 +36,7 @@ impl ExtensionManager {
             if path.is_dir() {
                 let info: Arc<ExtensionInfo> = Arc::new(extensions_parent_dir.join("extension-manifest.toml").try_into()?);
                 if !self.extensions.iter().any(|e| &e.info.id == &info.id) {
-                    let extension = WasmExtension::load(path, info).await?;
+                    let extension = WasmExtension::load(path.join("extension.wasm"), info).await?;
                     self.extensions.push(extension);
                 }
             } else {

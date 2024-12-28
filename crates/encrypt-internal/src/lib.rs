@@ -25,9 +25,9 @@ pub struct DMEncryption {
 }
 
 impl DMEncryption {
-    pub fn new(current_user_secret_key: &[u8], other_user_public_key: &[u8]) -> Self {
-        let current_user_secret_key = SecretKey::from_slice(current_user_secret_key).unwrap();
-        let other_user_public_key = PublicKey::from_slice(other_user_public_key).unwrap();
+    pub fn new(current_user_secret_key: [u8; 32], other_user_public_key: [u8; 32]) -> Self {
+        let current_user_secret_key = SecretKey::from_bytes(current_user_secret_key);
+        let other_user_public_key = PublicKey::from_bytes(other_user_public_key);
         DMEncryption {
             current_user_secret_key,
             other_user_public_key,

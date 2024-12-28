@@ -47,10 +47,10 @@ pub struct WasmExtension {
 
 impl WasmExtension {
     pub async fn load(
-        extension_dir: PathBuf,
+        extension_path: PathBuf,
         info: Arc<ExtensionInfo>,
     ) -> Result<Self, WasmExtensionError> {
-        let path = extension_dir.join("extension.wasm");
+        let path = extension_path;
 
         let mut wasm_file = File::open(path)?;
 

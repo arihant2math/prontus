@@ -93,6 +93,7 @@ async fn ping_task(
     mut server_messages: broadcast::Receiver<PusherServerMessageWrapper>,
     client_message: mpsc::Sender<PusherClientMessageWrapper>,
 ) {
+    // Respond to all pings with pongs to ensure the connection doesn't close
     loop {
         let message = server_messages.recv().await;
         let message = match message {
@@ -127,14 +128,19 @@ async fn task_thread(
     let write_task = write_task(ws_stream.clone(), client_messages_rx);
     let ping_task = ping_task(server_messages_rx, client_messages_tx);
     let read_task = read_task(ws_stream, server_messages_tx);
-    let _wt = tokio::task::spawn(write_task);
-    let _pt = tokio::task::spawn(ping_task);
-    let _rt = tokio::task::spawn(read_task);
+    let wt = tokio::task::spawn(write_task);
+    let pt = tokio::task::spawn(ping_task);
+    let rt = tokio::task::spawn(read_task);
+    let _ = tokio::join!(wt, pt, rt);
+    // TODO: Remove below after testing (the join should be enough)
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
     }
 }
 
+/// A pusher client handles sending and receiving messages to and from pusher.
+/// The communication happens on a thread because tokio task scoping is not great for this,
+/// although this might change in the future.
 #[derive(Clone)]
 pub struct PusherClient {
     client: Arc<ProntoClient>,
@@ -144,7 +150,9 @@ pub struct PusherClient {
 }
 
 impl PusherClient {
+    /// Connect to the pusher socket, spawn the communication thread, and initialize channels
     pub async fn new(client: Arc<ProntoClient>) -> Self {
+        // TODO: make this portable
         let (ws_stream, _) = connect_async("wss://ws-mt1.pusher.com/app/f44139496d9b75f37d27?protocol=7&client=js&version=8.3.0&flash=false")
             .await
             .unwrap();
@@ -192,6 +200,7 @@ impl PusherClient {
         }
     }
 
+    /// Get authentication and subscribe to a channel
     pub async fn subscribe(&self, channel: String) {
         let details = self.details.read().await.clone().unwrap();
         let message =
@@ -203,11 +212,18 @@ impl PusherClient {
             .await;
     }
 
+    /// Get a broadcast receiver for server messages
     pub async fn server_messages(&self) -> broadcast::Receiver<PusherServerMessageWrapper> {
         self.server_messages.read().await.resubscribe()
     }
 
+    /// Get a mpsc sender for sending client messages
     pub async fn client_message(&self) -> mpsc::Sender<PusherClientMessageWrapper> {
         self.client_message.read().await.clone()
+    }
+
+    // TODO: this is an async drop
+    pub async fn shutdown(&self) {
+        self.client_message.read().await.send(PusherClientMessageWrapper::Shutdown).unwrap();
     }
 }

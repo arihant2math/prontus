@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use serde::{Deserialize, Serialize};
 
 // TODO: get actual url
@@ -24,9 +26,9 @@ impl PublicLookupService {
         }
     }
 
-    pub fn lookup(&self, org_id: u64, user_id: u64) -> Option<&String> {
+    pub fn lookup(&self, org_id: u64, user_id: u64) -> Option<[u8; 32]> {
         let key = self.generate_key(org_id, user_id);
-        self.organizations.get(&key)
+        BASE64_STANDARD.decode(self.organizations.get(&key)).ok()?.try_into().ok()
     }
 
     pub fn generate_key(&self, org_id: u64, user_id: u64) -> String {

@@ -1,6 +1,7 @@
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
 use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, thiserror::Error)]
@@ -143,11 +144,23 @@ pub struct Settings {
     pub update: Update
 }
 
+static MIGRATIONS_PERFORMED: AtomicBool = AtomicBool::new(false);
+
 impl Settings {
+    pub async fn perform_migrations() -> tokio::io::Result<()> {
+        // TODO: remove these in the far far future
+        // Delete old bincode settings file
+        let old_settings = prontus_dir()
+            .join("settings.bnc");
+        if old_settings.exists() {
+            info!("Deleting old settings file");
+            tokio::fs::remove_file(old_settings).await?;
+        }
+        Ok(())
+    }
+
     /// The path to the settings file
     pub fn path() -> PathBuf {
-        // TODO: remove this deletion in the far far future
-        // TODO: migrate to load()
         let old_settings = prontus_dir()
             .join("settings.bnc");
         if old_settings.exists() {
@@ -167,6 +180,11 @@ impl Settings {
     }
 
     pub async fn load() -> Result<Self> {
+        if !MIGRATIONS_PERFORMED.load(std::sync::atomic::Ordering::Relaxed) {
+            info!("Performing migrations");
+            Self::perform_migrations().await?;
+            MIGRATIONS_PERFORMED.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
         debug!("Loading settings");
         let path = Self::path();
         if path.exists() {

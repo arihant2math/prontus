@@ -5,6 +5,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
+/// The `Handler` trait defines an asynchronous interface for handling events from pusher.
 pub trait Handler {
     type Error;
 
@@ -38,6 +39,7 @@ where
     }
 }
 
+/// Convert a function into a pusher event handler
 pub fn handler<F, I, E>(function: F) -> FunctionHandler<F>
 where
     F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output=Result<(), E>>>>,
@@ -54,7 +56,7 @@ pub struct Command {
     handler: Box<dyn CommandTrait>,
 }
 
-/// Handle responses to messages that start with arbritrary strings of text
+/// Handle responses to messages that start with arbitrary strings of text
 pub struct CommandHandler {
     commands: Vec<Command>,
 }

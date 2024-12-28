@@ -3,11 +3,22 @@ use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
+// TODO: Could be bitflaged
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Permissions {
     pub read_settings: bool,
     pub write_settings: bool,
     pub full_network: bool,
+}
+
+impl Default for Permissions {
+    fn default() -> Self {
+        Self {
+            read_settings: false,
+            write_settings: false,
+            full_network: false,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
