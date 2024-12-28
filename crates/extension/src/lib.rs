@@ -9,6 +9,9 @@ pub use crate::wasm_host::WasmExtension;
 mod wasm_host;
 pub mod info;
 
+pub const EXTENSION_FILE_NAME: &str = "extension.wasm";
+pub const MANIFEST_FILE_NAME: &str = "manifest.toml";
+
 #[derive(Debug, Error)]
 pub enum LoadExtensionsError {
     #[error("IO Error: {0}")]
@@ -34,9 +37,9 @@ impl ExtensionManager {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let info: Arc<ExtensionInfo> = Arc::new(extensions_parent_dir.join("extension-manifest.toml").try_into()?);
+                let info: Arc<ExtensionInfo> = Arc::new(extensions_parent_dir.join(MANIFEST_FILE_NAME).try_into()?);
                 if !self.extensions.iter().any(|e| &e.info.id == &info.id) {
-                    let extension = WasmExtension::load(path.join("extension.wasm"), info).await?;
+                    let extension = WasmExtension::load(path.join(EXTENSION_FILE_NAME), info).await?;
                     self.extensions.push(extension);
                 }
             } else {
