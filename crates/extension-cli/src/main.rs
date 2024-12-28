@@ -1,20 +1,19 @@
 use anyhow::{bail, Context};
 use clap::{Parser, Subcommand};
+use color_eyre::eyre::ContextCompat;
 use extension::info::ExtensionInfo;
 use extension::{WasmExtension, EXTENSION_FILE_NAME, MANIFEST_FILE_NAME};
 use serde::{Deserialize, Serialize};
 use std::env::current_dir;
-use std::ffi::OsStr;
 use std::path::PathBuf;
+use std::process::Command as StdCommand;
 use std::sync::Arc;
+use wasm_encoder::{Encode as _, Section as _};
 use wit_component::ComponentEncoder;
-use wasm_encoder::{ComponentSectionId, Encode as _, RawSection, Section as _};
-use std::process::{Stdio, Command as StdCommand};
-use color_eyre::eyre::ContextCompat;
 
 mod wasm_compile;
-use wasm_compile::{strip_custom_sections, install_wasi_preview1_adapter_if_needed, install_rust_wasm_target_if_needed};
 use crate::wasm_compile::RUST_TARGET;
+use wasm_compile::{install_rust_wasm_target_if_needed, install_wasi_preview1_adapter_if_needed, strip_custom_sections};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Permissions {
