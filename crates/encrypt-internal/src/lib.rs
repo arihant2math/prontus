@@ -49,8 +49,8 @@ impl DMEncryption {
     }
 }
 
-static SERVICE: &str = "prontus-encrypt";
-static DEFAULT_USER: &str = "com_prontus_default";
+const SERVICE: &str = "prontus-encrypt";
+const DEFAULT_USER: &str = "com_prontus_default";
 
 pub fn load_secret_key() -> [u8; 32] {
     let secret_vector = Entry::new(SERVICE, DEFAULT_USER)
