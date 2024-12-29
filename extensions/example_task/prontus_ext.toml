@@ -1,0 +1,5 @@
+identifier = "example_task"
+
+[permissions]
+read_settings = true
+write_settings = true
