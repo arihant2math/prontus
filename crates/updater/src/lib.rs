@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::Write;
 use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -118,7 +119,44 @@ impl UpdateFile {
     }
 }
 
-// TODO: eventually support auto updates
+pub enum InstallUpdateType {
+    WindowsMSI,
+    WindowsEXE,
+    WindowsStandAlone,
+    MacOSDiskImage,
+    LinuxDEB,
+    LinuxRPM,
+    LinuxAppImage
+}
+
+pub struct InstallUpdate {
+    pub update_type: InstallUpdateType,
+    pub download_url: String,
+    pub file_name: String,
+    pub checksum: String,
+}
+
+impl InstallUpdate {
+    pub async fn download(&self) -> reqwest::Result<()> {
+        let dir = std::env::temp_dir();
+        let file_path = dir.join(&self.file_name);
+        let client = reqwest::Client::new();
+        let mut res = client.get(&self.download_url).send().await?;
+        let mut file = std::fs::File::create(&file_path)?;
+        while let Some(chunk) = res.chunk().await? {
+            file.write_all(&chunk)?;
+        }
+        Ok(())
+    }
+
+    pub async fn install(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let dir = std::env::temp_dir();
+        let file_path = dir.join(&self.file_name);
+        // TODO: eventually support installing updates
+        todo!()
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
