@@ -15,6 +15,7 @@ tauri-build = { version = "2.0", features = [] }
 [dependencies]
 chrono = "0.4"
 client = { path = "../../crates/client" }
+color-eyre = "0.6"
 extension = { path = "../../crates/extension" }
 futures = "0.3"
 log = "0.4"
@@ -28,7 +29,7 @@ tauri-plugin-shell = "2.0"
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
 settings = { path = "../../crates/settings" }
-sentry = "0.34"
+sentry = "0.35"
 hyper = { version = "1", features = ["full"] }
 hyper-util = { version = "0.1", features = ["full"] }
 tauri-plugin-dialog = "2.0"

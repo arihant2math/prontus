@@ -11,6 +11,7 @@ use ui_handlers::*;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    color_eyre::install().expect("failed to install color_eyre");
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
