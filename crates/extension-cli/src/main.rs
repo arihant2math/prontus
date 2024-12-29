@@ -1,6 +1,5 @@
 use anyhow::{bail, Context};
 use clap::{Parser, Subcommand};
-use color_eyre::eyre::ContextCompat;
 use extension::info::ExtensionInfo;
 use extension::{WasmExtension, EXTENSION_FILE_NAME, MANIFEST_FILE_NAME};
 use serde::{Deserialize, Serialize};
@@ -8,7 +7,7 @@ use std::env::current_dir;
 use std::path::PathBuf;
 use std::process::Command as StdCommand;
 use std::sync::Arc;
-use wasm_encoder::{Encode as _, Section as _};
+use tokio::fs::File;
 use wit_component::ComponentEncoder;
 
 mod wasm_compile;
@@ -50,7 +49,7 @@ pub struct Manifest {
 
 impl Manifest {
     pub fn open(path: &PathBuf) -> anyhow::Result<Self> {
-        match path.extension().context("No file extension found for manifest")?.to_str().unwrap() {
+        match anyhow::Context::context(path.extension(), "No file extension found for manifest")?.to_str().unwrap() {
             "toml" => {
                 let manifest_text = std::fs::read_to_string(path)?;
                 let manifest: Manifest = toml::from_str(&manifest_text)?;
@@ -148,26 +147,30 @@ fn get_extension_info(path: &PathBuf, custom_manifest_path: Option<&PathBuf>) ->
     let ext_info = ExtensionInfo {
         id: manifest.identifier,
         name: package.name,
-        version: package.version.context("Version in Cargo.toml is inherited, please specify a raw version")?,
-        description: package.description,
-        authors: package.authors,
-        license: package.license,
-        repository: package.repository,
-        homepage: package.homepage,
-        documentation: package.documentation,
-        keywords: package.keywords,
+        version: package.version.get().context("Version in Cargo.toml is inherited, please specify a raw version")?.to_string(),
+        description: package.description.map(|s| s.get().context("Description in Cargo.toml is inherited, please specify a raw description").map(String::to_string).unwrap_or("".to_string())),
+        authors: Some(package.authors.get().context("Authors in Cargo.toml is inherited, please specify raw authors")?.into_iter().map(|a| a.to_string()).collect()),
+        license: package.license.map(|l| l.get().context("License in Cargo.toml is inherited, please specify a raw license").map(String::to_string).unwrap_or("".to_string())),
+        repository: package.repository.map(|r| r.get().context("Repository in Cargo.toml is inherited, please specify a raw repository").map(String::to_string).unwrap_or("".to_string())),
+        homepage: package.homepage.map(|h| h.get().context("Homepage in Cargo.toml is inherited, please specify a raw homepage").map(String::to_string).unwrap_or("".to_string())),
+        documentation: package.documentation.map(|d| d.get().context("Documentation in Cargo.toml is inherited, please specify a raw documentation").map(String::to_string).unwrap_or("".to_string())),
+        keywords: Some(package.keywords.get().context("Keywords in Cargo.toml is inherited, please specify raw keywords")?.into_iter().map(|k| k.to_string()).collect()),
         permissions: manifest.permissions.into(),
     };
-    Some(ext_info)
+    Ok(ext_info)
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    color_eyre::install().unwrap();
+    color_eyre::install().expect("Failed to initialize color_eyre");
+    simple_logger::SimpleLogger::new()
+        .with_level(log::LevelFilter::Info)
+        .init()
+        .context("Failed to initialize logger")?;
     let args = Arguments::parse();
     match args.command {
         Command::Init { path } => {
-            init(&path);
+            init(&path)?;
         }
         Command::Package {
             path,
@@ -175,14 +178,31 @@ async fn main() -> anyhow::Result<()> {
             output_dir,
         } => {
             let ext_info = get_extension_info(&path, manifest_path.as_ref())?;
-            std::fs::create_dir(&output_dir).context("Failed to create output directory")?;
+            tokio::fs::create_dir(&output_dir).await.context("Failed to create output directory")?;
             let main_output_dir = output_dir.join(format!("{}_{}", ext_info.name, ext_info.version));
-            std::fs::create_dir(&main_output_dir).context("Failed to create output directory")?;
+            tokio::fs::create_dir(&main_output_dir).await.context("Failed to create output directory")?;
             let wasm_output = main_output_dir.join(EXTENSION_FILE_NAME);
             build_wasm(&path, &wasm_output, true, false).await?;
+
             let manifest_output = main_output_dir.join(MANIFEST_FILE_NAME);
             let manifest_text = toml::to_string(&ext_info)?;
-            std::fs::write(manifest_output, &manifest_text)?;
+            tokio::fs::write(manifest_output, &manifest_text).await?;
+
+            let tar_output = output_dir.join(format!("{}_{}.tar", ext_info.name, ext_info.version));
+            let file = std::fs::File::create(&tar_output)?;
+            let mut archive = tar::Builder::new(file);
+            archive.append_dir_all(&main_output_dir, &main_output_dir)?;
+            let _ = archive.into_inner()?;
+
+            let gz_output = output_dir.join(format!("{}_{}.tar.gz", ext_info.name, ext_info.version));
+            let tar_file = File::open(&tar_output).await?;
+            let _ = File::create(&gz_output).await?;
+            let gz_file = File::options().write(true).open(&gz_output).await?;
+            let mut encoder = async_compression::tokio::write::GzipEncoder::with_quality(gz_file, async_compression::Level::Best);
+            tokio::io::copy(&mut tokio::io::BufReader::new(tar_file), &mut encoder).await?;
+
+            // Clean up the tar file
+            tokio::fs::remove_file(&tar_output).await?;
         }
         Command::Compile { input, output, no_strip } => {
             compile_wasm(&input, &output, no_strip).await?;
@@ -192,7 +212,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Command::TestLoad { path } => {
             WasmExtension::load(
-                path,
+                path.clone(),
                 Arc::new(get_extension_info(&path, None)?),
             ).await?;
         }
@@ -206,8 +226,7 @@ async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) ->
     let wasm_bytes = std::fs::read(input_path)?;
     println!("Encoding wasm component ...");
     let mut encoder = ComponentEncoder::default()
-        .module(&wasm_bytes)
-        .unwrap()
+        .module(&wasm_bytes)?
         .adapter("wasi_snapshot_preview1", &adapter_bytes)
         .context("failed to load adapter module")?
         .validate(true);
@@ -235,7 +254,6 @@ async fn build_wasm(cwd: &PathBuf, output: &PathBuf, release: bool, no_strip: bo
         .output()
         .context("failed to run cargo build")?;
     let name = cwd.file_name().unwrap().to_str().unwrap().to_string();
-    // TODO: fix this
     let input = cwd.join("target").join(RUST_TARGET).join(if release {
         "release"
     } else {
@@ -245,7 +263,7 @@ async fn build_wasm(cwd: &PathBuf, output: &PathBuf, release: bool, no_strip: bo
     Ok(())
 }
 
-fn init(path: &PathBuf) {
+fn init(path: &PathBuf) -> anyhow::Result<()> {
     if !path.is_dir() {
         panic!("Path must be a directory");
     }
@@ -254,7 +272,7 @@ fn init(path: &PathBuf) {
         let default_ident = path.file_name().unwrap().to_str().unwrap();
         let mut ident = inquire::Text::new(&format!("What should the id be ({default_ident})?"))
             .prompt()
-            .unwrap();
+            .context("Failed to prompt for id")?;
         if ident.is_empty() {
             ident = default_ident.to_string();
         }
@@ -263,7 +281,8 @@ fn init(path: &PathBuf) {
             identifier: ident,
             permissions,
         };
-        let manifest_text = toml::to_string(&manifest).unwrap();
-        std::fs::write(manifest_path, manifest_text).unwrap();
+        let manifest_text = toml::to_string(&manifest)?;
+        std::fs::write(manifest_path, manifest_text)?;
     }
+    Ok(())
 }
