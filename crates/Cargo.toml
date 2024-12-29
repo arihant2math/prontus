@@ -11,9 +11,12 @@ reqwest = "0.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 simd-json = "0.14"
+syn = "2.0"
+tar = "0.4"
 thiserror = "2"
 tokio = { version = "1.42", features = ["full"] }
-tar = "0.4"
+toml = "0.8"
+quote = "1.0"
 wit-bindgen = "0.36.0"
 wasmtime = "28"
 wasmtime-wasi = "28"

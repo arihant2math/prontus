@@ -13,6 +13,6 @@ serde_json = { workspace = true }
 settings = { path = "../settings" }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
-toml = "0.8"
+toml = { workspace = true }
 wasmtime = { workspace = true }
 wasmtime-wasi = { workspace = true }

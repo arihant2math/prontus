@@ -13,12 +13,12 @@ extension = { path = "../extension" }
 inquire = "0.7"
 reqwest = { workspace = true }
 log = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
+serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = "0.9.34"
 simple_logger = "5.0"
 tar = { workspace = true }
-toml = "0.8"
+toml = { workspace = true }
 tokio = { workspace = true }
 wasmparser = { workspace = true }
 wasm-encoder = { workspace = true }

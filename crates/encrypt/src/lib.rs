@@ -61,6 +61,9 @@ impl Encrypt {
 mod tests {
     #[test]
     fn test_validity() {
-        // TODO: Finish
+        let encrypt = Encrypt {
+            dm_encryption: DMEncryption::new([0; 32], [0; 32]),
+            lookup_service: PublicLookupService::new(),
+        };
     }
 }
