@@ -83,7 +83,7 @@ impl WasmExtension {
         })
     }
 
-    pub async fn run_task(&mut self) -> Result<(), Box<dyn error::Error + Send + Sync>> {
+    pub async fn run_task(&mut self) -> anyhow::Result<()> {
         Ok(self.extension.run_task(&mut self.store).await?)
     }
 }

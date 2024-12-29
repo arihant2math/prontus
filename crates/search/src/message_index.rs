@@ -113,7 +113,10 @@ pub struct MessageIndexInfo {
 }
 
 impl MessageIndexInfo {
-    // TODO: Load function
+    // TODO: use load function
+    // pub fn load(path: &PathBuf) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    //     Ok(serde_json::from_reader(std::fs::File::open(path)?)?)
+    // }
 
     pub fn save(&self, path: &PathBuf) -> Result<(), Box<dyn Error + Send + Sync>> {
         serde_json::to_writer(std::fs::File::create(path)?, &self)?;

@@ -51,7 +51,7 @@ impl ExtensionManager {
 
     pub async fn run_tasks(&mut
 
-                           self) -> Result<(), Box<dyn error::Error + Send + Sync>> {
+                           self) -> anyhow::Result<()> {
         let tasks = self.extensions.iter_mut().map(|extension| extension.run_task());
         let results = futures::future::join_all(tasks).await;
         for result in results {
