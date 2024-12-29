@@ -142,7 +142,8 @@ fn get_manifest_path(root: &PathBuf, custom: Option<&PathBuf>) -> Option<PathBuf
 fn get_extension_info(path: &PathBuf, custom_manifest_path: Option<&PathBuf>) -> anyhow::Result<ExtensionInfo> {
     let path = get_manifest_path(path, custom_manifest_path).context("Could not find extension info file")?;
     let manifest = Manifest::open(&path)?;
-    let cargo_info = cargo_toml::Manifest::from_path(path.join("Cargo.toml"))?;
+    let cargo_toml_path = anyhow::Context::context(path.parent(), "Could not get parent (programmer error)")?.join("Cargo.toml");
+    let cargo_info = cargo_toml::Manifest::from_path(&cargo_toml_path).context(format!("Could not find Cargo.toml at {}", cargo_toml_path.display()))?;
     let package = cargo_info.package.context("Could not find package info in Cargo.toml")?;
     let ext_info = ExtensionInfo {
         id: manifest.identifier,
@@ -170,7 +171,7 @@ async fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
     match args.command {
         Command::Init { path } => {
-            init(&path)?;
+            init(&path.canonicalize().unwrap())?;
         }
         Command::Package {
             path,
@@ -178,22 +179,26 @@ async fn main() -> anyhow::Result<()> {
             output_dir,
         } => {
             let ext_info = get_extension_info(&path, manifest_path.as_ref())?;
-            tokio::fs::create_dir(&output_dir).await.context("Failed to create output directory")?;
+            let _ = tokio::fs::create_dir(&output_dir).await;
             let main_output_dir = output_dir.join(format!("{}_{}", ext_info.name, ext_info.version));
-            tokio::fs::create_dir(&main_output_dir).await.context("Failed to create output directory")?;
+            let _ = tokio::fs::create_dir(&main_output_dir).await;
             let wasm_output = main_output_dir.join(EXTENSION_FILE_NAME);
+            println!("Compiling wasm ...");
             build_wasm(&path, &wasm_output, true, false).await?;
 
+            println!("Compiling manifest ...");
             let manifest_output = main_output_dir.join(MANIFEST_FILE_NAME);
             let manifest_text = toml::to_string(&ext_info)?;
             tokio::fs::write(manifest_output, &manifest_text).await?;
 
+            println!("Creating tarball ...");
             let tar_output = output_dir.join(format!("{}_{}.tar", ext_info.name, ext_info.version));
             let file = std::fs::File::create(&tar_output)?;
             let mut archive = tar::Builder::new(file);
-            archive.append_dir_all(&main_output_dir, &main_output_dir)?;
+            archive.append_dir_all(".", &main_output_dir)?;
             let _ = archive.into_inner()?;
 
+            println!("Compressing tarball ...");
             let gz_output = output_dir.join(format!("{}_{}.tar.gz", ext_info.name, ext_info.version));
             let tar_file = File::open(&tar_output).await?;
             let _ = File::create(&gz_output).await?;
@@ -202,7 +207,9 @@ async fn main() -> anyhow::Result<()> {
             tokio::io::copy(&mut tokio::io::BufReader::new(tar_file), &mut encoder).await?;
 
             // Clean up the tar file
-            tokio::fs::remove_file(&tar_output).await?;
+            println!("Cleaning up ...");
+            tokio::fs::remove_dir_all(&main_output_dir).await.context(format!("Failed to remove output directory: {}", &main_output_dir.display()))?;
+            tokio::fs::remove_file(&tar_output).await.context(format!("Failed to remove tar file: {}", &tar_output.display()))?;
         }
         Command::Compile { input, output, no_strip } => {
             compile_wasm(&input, &output, no_strip).await?;
