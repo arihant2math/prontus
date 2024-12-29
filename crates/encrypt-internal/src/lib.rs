@@ -18,6 +18,7 @@
 use crypto_box::aead::{Aead, AeadCore, OsRng};
 use crypto_box::{aead, ChaChaBox, PublicKey, SecretKey};
 use keyring::Entry;
+pub use aead::{Error, Result};
 
 pub struct DMEncryption {
     pub current_user_secret_key: SecretKey,
@@ -34,14 +35,14 @@ impl DMEncryption {
         }
     }
 
-    pub fn encrypt(&self, message: &[u8]) -> aead::Result<Vec<u8>> {
+    pub fn encrypt(&self, message: &[u8]) -> Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
         let nonce = ChaChaBox::generate_nonce(&mut OsRng);
         let encrypted = chachabox.encrypt(&nonce, message)?;
         Ok(encrypted)
     }
 
-    pub fn decrypt(&self, encrypted: &[u8]) -> aead::Result<Vec<u8>> {
+    pub fn decrypt(&self, encrypted: &[u8]) -> Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
         let nonce = ChaChaBox::generate_nonce(&mut OsRng);
         let decrypted = chachabox.decrypt(&nonce, encrypted)?;
