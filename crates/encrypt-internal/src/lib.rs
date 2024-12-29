@@ -16,7 +16,7 @@
 )]
 
 use crypto_box::aead::{Aead, AeadCore, OsRng};
-use crypto_box::{ChaChaBox, PublicKey, SecretKey};
+use crypto_box::{aead, ChaChaBox, PublicKey, SecretKey};
 use keyring::Entry;
 
 pub struct DMEncryption {
@@ -34,18 +34,18 @@ impl DMEncryption {
         }
     }
 
-    pub fn encrypt(&self, message: &[u8]) -> Vec<u8> {
+    pub fn encrypt(&self, message: &[u8]) -> aead::Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
         let nonce = ChaChaBox::generate_nonce(&mut OsRng);
-        let encrypted = chachabox.encrypt(&nonce, message).unwrap();
-        encrypted
+        let encrypted = chachabox.encrypt(&nonce, message)?;
+        Ok(encrypted)
     }
 
-    pub fn decrypt(&self, encrypted: &[u8]) -> Vec<u8> {
+    pub fn decrypt(&self, encrypted: &[u8]) -> aead::Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
         let nonce = ChaChaBox::generate_nonce(&mut OsRng);
-        let decrypted = chachabox.decrypt(&nonce, encrypted).unwrap();
-        decrypted
+        let decrypted = chachabox.decrypt(&nonce, encrypted)?;
+        Ok(decrypted)
     }
 }
 
@@ -54,7 +54,7 @@ const DEFAULT_USER: &str = "com_prontus_default";
 
 pub fn load_secret_key() -> [u8; 32] {
     let secret_vector = Entry::new(SERVICE, DEFAULT_USER)
-        .unwrap()
+        .expect("Failed to load secret key, please report this issue to the keyring developers")
         .get_secret()
         .unwrap();
     // Keep in array to allow for Copy

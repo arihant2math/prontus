@@ -46,14 +46,14 @@ impl Encrypt {
     }
 
     pub fn encrypt(&self, data: &str) -> String {
-        let encrypted_data = self.dm_encryption.encrypt(data.as_bytes());
+        let encrypted_data = self.dm_encryption.encrypt(data.as_bytes()).unwrap();
         BASE64_STANDARD.encode(&encrypted_data)
     }
 
     pub fn decrypt(&self, data: &str) -> Result<String, FromUtf8Error> {
         let decoded_data = BASE64_STANDARD.decode(data).unwrap();
         // TODO: this should not be possibly lossy ...
-        String::from_utf8(self.dm_encryption.decrypt(&decoded_data))
+        String::from_utf8(self.dm_encryption.decrypt(&decoded_data).unwrap())
     }
 }
 

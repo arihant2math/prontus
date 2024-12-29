@@ -18,7 +18,7 @@ fn wasm_engine() -> wasmtime::Engine {
             let mut config = wasmtime::Config::new();
             config.wasm_component_model(true);
             config.async_support(true);
-            wasmtime::Engine::new(&config).unwrap()
+            wasmtime::Engine::new(&config).expect("Failed to create Wasmtime Engine")
         })
         .clone()
 }

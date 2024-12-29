@@ -14,7 +14,7 @@ wasmtime::component::bindgen!({
 
 pub fn linker() -> &'static Linker<WasmState> {
     static LINKER: OnceLock<Linker<WasmState>> = OnceLock::new();
-    LINKER.get_or_init(|| super::new_linker(Extension::add_to_linker))
+    LINKER.get_or_init(|| super::new_linker(Extension::add_to_linker).expect("Failed to create linker"))
 }
 
 #[wasmtime::component::__internal::async_trait]
@@ -50,11 +50,15 @@ impl ExtensionImports for WasmState {
                 "head" => Method::HEAD,
                 _ => return Ok(Err(())),
             }, url);
-            let resp = request.send().await.unwrap();
-            Ok(Ok(NetworkResponse {
-                status: resp.status().as_u16() as u32,
-                body: resp.text().await.unwrap(),
-            }))
+            let resp = request.send().await;
+            if let Ok(resp) = resp {
+                Ok(Ok(NetworkResponse {
+                    status: resp.status().as_u16() as u32,
+                    body: resp.text().await.unwrap(),
+                }))
+            } else {
+                Ok(Err(()))
+            }
         } else {
             Ok(Err(()))
         }

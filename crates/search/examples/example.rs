@@ -38,7 +38,7 @@ async fn indexer_thread() {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     tokio::fs::create_dir_all(message_index_location()).await?;
     thread::spawn(|| {
         indexer_thread();
