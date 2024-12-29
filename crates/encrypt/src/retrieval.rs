@@ -28,7 +28,8 @@ impl PublicLookupService {
 
     pub fn lookup(&self, org_id: u64, user_id: u64) -> Option<[u8; 32]> {
         let key = self.generate_key(org_id, user_id);
-        BASE64_STANDARD.decode(self.organizations.get(&key)).ok()?.try_into().ok()
+        // TODO: return error if base64 fails.
+        BASE64_STANDARD.decode(self.organizations.get(&key)?).ok()?.try_into().ok()
     }
 
     pub fn generate_key(&self, org_id: u64, user_id: u64) -> String {

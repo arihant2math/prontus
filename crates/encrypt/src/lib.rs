@@ -17,12 +17,29 @@
 
 mod retrieval;
 
-use crate::retrieval::PublicLookupService;
-pub use encrypt_internal::*;
+use std::fmt::Display;
+pub use crate::retrieval::PublicLookupService;
 use std::string::FromUtf8Error;
-#[allow(unused_imports)]
-use base64::DecodeError;
 use base64::prelude::*;
+use thiserror::Error;
+use encrypt_internal::{load_secret_key, DMEncryption};
+
+#[derive(Debug, Error)]
+pub enum DecryptionError {
+    Base64Error(#[from] base64::DecodeError),
+    Utf8Error(#[from] FromUtf8Error),
+    CryptoError(#[from] encrypt_internal::Error),
+}
+
+impl Display for DecryptionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DecryptionError::Base64Error(e) => write!(f, "Base64 error: {}", e),
+            DecryptionError::Utf8Error(e) => write!(f, "UTF-8 error: {}", e),
+            DecryptionError::CryptoError(e) => write!(f, "Crypto error: {}", e),
+        }
+    }
+}
 
 pub struct Encrypt {
     pub dm_encryption: DMEncryption,
@@ -46,24 +63,52 @@ impl Encrypt {
     }
 
     pub fn encrypt(&self, data: &str) -> String {
-        let encrypted_data = self.dm_encryption.encrypt(data.as_bytes()).unwrap();
-        BASE64_STANDARD.encode(&encrypted_data)
+        let nonce = DMEncryption::generate_random_nonce();
+        let mut encrypted_data = self.dm_encryption.encrypt(data.as_bytes(), &nonce).unwrap();
+        let mut nonce_vec = nonce.to_vec();
+        let initial_len = nonce_vec.len() as u64;
+        let mut data = Vec::with_capacity(initial_len as usize + encrypted_data.len());
+        data.append(&mut initial_len.to_le_bytes().to_vec());
+        data.append(&mut nonce_vec);
+        data.append(&mut encrypted_data);
+        BASE64_STANDARD.encode(&data)
     }
 
-    pub fn decrypt(&self, data: &str) -> Result<String, FromUtf8Error> {
-        let decoded_data = BASE64_STANDARD.decode(data).unwrap();
-        // TODO: this should not be possibly lossy ...
-        String::from_utf8(self.dm_encryption.decrypt(&decoded_data).unwrap())
+    pub fn decrypt(&self, data: &str) -> Result<String, DecryptionError> {
+        let decoded_data = BASE64_STANDARD.decode(data)?;
+        let initial_len = u64::from_le_bytes([decoded_data[0], decoded_data[1], decoded_data[2], decoded_data[3], decoded_data[4], decoded_data[5], decoded_data[6], decoded_data[7]]);
+        let nonce = decoded_data[8..initial_len as usize + 8].to_vec();
+        let decoded_data = &decoded_data[initial_len as usize + 8..];
+        let nonce = DMEncryption::convert_nonce(&nonce);
+        Ok(String::from_utf8(self.dm_encryption.decrypt(&decoded_data, &nonce)?)?)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use encrypt_internal::DMEncryption;
+    use crate::Encrypt;
+    use crate::retrieval::PublicLookupService;
+
     #[test]
     fn test_validity() {
+        let current_user_keys = encrypt_internal::generate_key_pair();
+        let other_user_keys = encrypt_internal::generate_key_pair();
         let encrypt = Encrypt {
-            dm_encryption: DMEncryption::new([0; 32], [0; 32]),
-            lookup_service: PublicLookupService::new(),
+            dm_encryption: DMEncryption::new(current_user_keys.secret_key, other_user_keys.public_key),
+            lookup_service: PublicLookupService {
+                organizations: Default::default(),
+            },
         };
+        let decrypt = Encrypt {
+            dm_encryption: DMEncryption::new(other_user_keys.secret_key, current_user_keys.public_key),
+            lookup_service: PublicLookupService {
+                organizations: Default::default(),
+            },
+        };
+        let data = "Hello, World!";
+        let encrypted_data = encrypt.encrypt(data);
+        let decrypted_data = decrypt.decrypt(&encrypted_data).unwrap();
+        assert_eq!(data, decrypted_data);
     }
 }

@@ -16,7 +16,7 @@
 )]
 
 use crypto_box::aead::{Aead, AeadCore, OsRng};
-use crypto_box::{aead, ChaChaBox, PublicKey, SecretKey};
+use crypto_box::{aead, ChaChaBox, Nonce, PublicKey, SecretKey};
 use keyring::Entry;
 pub use aead::{Error, Result};
 
@@ -35,17 +35,23 @@ impl DMEncryption {
         }
     }
 
-    pub fn encrypt(&self, message: &[u8]) -> Result<Vec<u8>> {
+    pub fn generate_random_nonce() -> Nonce {
+        ChaChaBox::generate_nonce(&mut OsRng)
+    }
+
+    pub fn convert_nonce(nonce: &[u8]) -> Nonce {
+        Nonce::from_slice(nonce).clone()
+    }
+
+    pub fn encrypt(&self, message: &[u8], nonce: &Nonce) -> Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
-        let nonce = ChaChaBox::generate_nonce(&mut OsRng);
         let encrypted = chachabox.encrypt(&nonce, message)?;
         Ok(encrypted)
     }
 
-    pub fn decrypt(&self, encrypted: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, encrypted: &[u8], nonce: &Nonce) -> Result<Vec<u8>> {
         let chachabox = ChaChaBox::new(&self.other_user_public_key, &self.current_user_secret_key);
-        let nonce = ChaChaBox::generate_nonce(&mut OsRng);
-        let decrypted = chachabox.decrypt(&nonce, encrypted)?;
+        let decrypted = chachabox.decrypt(nonce, encrypted)?;
         Ok(decrypted)
     }
 }
@@ -90,5 +96,23 @@ pub fn load_key_pair(secret_key: [u8; 32]) -> KeyPair {
     KeyPair {
         secret_key: secret_key.to_bytes(),
         public_key: public_key.to_bytes(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_encryption() {
+        let current_user_keys = generate_key_pair();
+        let other_user_keys = generate_key_pair();
+        let encrypt_dm = DMEncryption::new(current_user_keys.secret_key, other_user_keys.public_key);
+        let decrypt_dm = DMEncryption::new(other_user_keys.secret_key, current_user_keys.public_key);
+        let data = b"Hello, World!";
+        let nonce = DMEncryption::generate_random_nonce();
+        let encrypted_data = encrypt_dm.encrypt(data, &nonce).unwrap();
+        let decrypted_data = decrypt_dm.decrypt(&encrypted_data, &nonce).unwrap();
+        assert_eq!(data.to_vec(), decrypted_data);
     }
 }
