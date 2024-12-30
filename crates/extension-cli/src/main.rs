@@ -49,24 +49,21 @@ pub struct Manifest {
 
 impl Manifest {
     pub fn open(path: &PathBuf) -> anyhow::Result<Self> {
+        let manifest_text = std::fs::read_to_string(path)?;
         match anyhow::Context::context(path.extension(), "No file extension found for manifest")?.to_str().unwrap() {
             "toml" => {
-                let manifest_text = std::fs::read_to_string(path)?;
                 let manifest: Manifest = toml::from_str(&manifest_text)?;
                 Ok(manifest)
             }
             "json" => {
-                let manifest_text = std::fs::read_to_string(path)?;
                 let manifest: Manifest = serde_json::from_str(&manifest_text)?;
                 Ok(manifest)
             }
             "yaml" => {
-                let manifest_text = std::fs::read_to_string(path)?;
                 let manifest: Manifest = serde_yaml::from_str(&manifest_text)?;
                 Ok(manifest)
             }
             "yml" => {
-                let manifest_text = std::fs::read_to_string(path)?;
                 let manifest: Manifest = serde_yaml::from_str(&manifest_text)?;
                 Ok(manifest)
             }
