@@ -9,7 +9,7 @@ futures = { workspace = true }
 log = { workspace = true }
 search = { path = "../search" }
 settings = { path = "../settings" }
-tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
+tauri = { workspace = true }
 ui-lib = { path = "../ui-lib" }
 updater = { path = "../updater" }
 version = { path = "../version" }

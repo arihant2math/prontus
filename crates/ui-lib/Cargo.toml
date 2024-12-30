@@ -6,6 +6,6 @@ edition = "2021"
 [dependencies]
 client = { path = "../client" }
 settings = { path = "../settings" }
-tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
+tauri = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

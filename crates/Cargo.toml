@@ -1,5 +1,5 @@
 [workspace]
-members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "probot", "pusher", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "updater", "version", "wit-gen"]
+members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "extension-manager", "probot", "pusher", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "updater", "version", "wit-gen"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -7,12 +7,14 @@ async-compression = { version = "0.4", features = ["gzip"] }
 anyhow = "1.0"
 futures = "0.3"
 log = "0.4"
-reqwest = "0.12"
+rand = "0.8"
+reqwest = { version = "0.12", features = ["http2", "http3"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 simd-json = "0.14"
 syn = "2.0"
 tar = "0.4"
+tauri = { version = "2.1", features = ["tray-icon", "unstable"] }
 thiserror = "2"
 tokio = { version = "1.42", features = ["full"] }
 toml = "0.8"
