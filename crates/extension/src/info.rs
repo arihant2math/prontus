@@ -3,7 +3,7 @@ use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
-// TODO: Could be bitflaged
+// TODO: Could be converted to bitflag
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Permissions {
     pub read_settings: bool,
