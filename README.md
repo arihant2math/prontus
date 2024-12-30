@@ -53,11 +53,12 @@ These might not all be implemented before the stable release, but they are the c
 - [x] Rich Text (Prontus support markdown and latex, with builtin styling commands in the message box)
 - [x] UI Customizability (Pronto has none, so Prontus is already better in many regards, but it aims to go even further,
   including custom themes and rearrangement of UI elements) https://github.com/arihant2math/prontus/issues/51
+- [x] Scripting Support (Work has already started with probot, a bot scripting crate)
 - [ ] Extensibility via plugins using WASM (Plugins are loaded and run, but have little access at the moment)
-- [ ] Better search via local message storage. (Already implemented in the backend, but the UI is not completed)
+- [ ] Better search via local message storage. (Already implemented in the backend and hooked, but the UI is not completed)
 - [ ] Encrypted DMs (Partially implemented, but without any settings or hook to the
   UI) https://github.com/arihant2math/prontus/issues/44
-- [ ] Scripting Support (Work has already started with probot, a bot scripting crate)
+- [ ] In-app scripting support (Non-hooked, but it uses JS and boa)
 
 ## Screenshots
 
