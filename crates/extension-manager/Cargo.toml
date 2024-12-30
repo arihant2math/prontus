@@ -1,0 +1,13 @@
+[package]
+name = "extension-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+extension = { path = "../extension" }
+rand = { workspace = true, features = [] }
+reqwest = { workspace = true, features = ["json"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+settings = { path = "../settings" }
+thiserror = { workspace = true }
