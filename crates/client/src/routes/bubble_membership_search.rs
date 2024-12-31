@@ -22,7 +22,7 @@ pub struct PostBubbleMembershipSearchRequest {
     pub page: u64,
     #[serde(default = "default_order_by", rename = "orderby")]
     pub order_by: Vec<String>,
-    // TODO:
+    // TODO: fix this
     // search: Option<String>
     // role: Option<String>
 }

@@ -4,7 +4,6 @@ use serde_json::json;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum UserVerifyRequest {
-    // TODO: Email type
     #[serde(rename = "email")]
     Email(String),
     // example: +14086692442
