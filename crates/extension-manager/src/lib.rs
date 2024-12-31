@@ -4,8 +4,7 @@ use serde::{Deserialize, Serialize};
 use extension::info::ExtensionInfo;
 use rand::random;
 
-// TODO: need to implement url
-pub const INDEX_URL: &str = "";
+pub const INDEX_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-extensions/refs/heads/main/extension-index.json";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VersionedExtensionInfo {
