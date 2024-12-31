@@ -5,7 +5,6 @@ mod message;
 mod settings;
 mod user;
 
-
 pub use auth::*;
 pub use channel::*;
 pub use handlers::*;

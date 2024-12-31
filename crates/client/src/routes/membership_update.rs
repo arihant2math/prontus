@@ -1,7 +1,7 @@
+use crate::custom_json::ToJson;
 use crate::Membership;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
-use crate::custom_json::ToJson;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum NotificationsPreference {

@@ -1,5 +1,5 @@
-use crate::{Category, Message};
 use crate::UserInfo;
+use crate::{Category, Message};
 use crate::{Membership, MembershipInfo};
 use serde::{Deserialize, Serialize};
 
@@ -61,5 +61,5 @@ pub struct Bubble {
     pub category: Option<Category>,
     pub memberships: Option<Vec<BubbleMembershipItem>>,
     pub pinned_message: Option<Message>,
-    pub pinned_message_user: Option<UserInfo>
+    pub pinned_message_user: Option<UserInfo>,
 }

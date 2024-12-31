@@ -23,12 +23,10 @@ impl ProntoClient {
         &self,
         request: user_search::GetUserSearchRequest,
     ) -> Result<user_search::GetUserSearchResponse, ResponseError> {
-        Ok(user_search::get(
-            &self.api_base_url,
-            &self.http_client,
-            request,
+        Ok(
+            user_search::get(&self.api_base_url, &self.http_client, request)
+                .await?
+                .to_result()?,
         )
-            .await?
-            .to_result()?)
     }
 }

@@ -1,5 +1,5 @@
-use tauri::{command, State};
 use client::{Bubble, BubbleStats, Membership, UserInfo};
+use tauri::{command, State};
 use ui_lib::{AppState, BackendError, ChannelUsers};
 
 #[command]
@@ -258,7 +258,11 @@ pub async fn read_channel(state: State<'_, AppState>, channel_id: u64) -> Result
 }
 
 #[command]
-pub async fn set_channel_title(state: State<'_, AppState>, channel_id: u64, title: String) -> Result<(), BackendError> {
+pub async fn set_channel_title(
+    state: State<'_, AppState>,
+    channel_id: u64,
+    title: String,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -269,28 +273,46 @@ pub async fn set_channel_title(state: State<'_, AppState>, channel_id: u64, titl
 }
 
 #[command]
-pub async fn set_channel_category(state: State<'_, AppState>, channel_id: u64, category_id: Option<u64>) -> Result<(), BackendError> {
+pub async fn set_channel_category(
+    state: State<'_, AppState>,
+    channel_id: u64,
+    category_id: Option<u64>,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
 
-    state.client.set_bubble_category(channel_id, category_id).await?;
+    state
+        .client
+        .set_bubble_category(channel_id, category_id)
+        .await?;
     // TODO: update bubble
     Ok(())
 }
 
 #[command]
-pub async fn modify_channel_permission(state: State<'_, AppState>, channel_id: u64, key: String, value: String) -> Result<(), BackendError> {
+pub async fn modify_channel_permission(
+    state: State<'_, AppState>,
+    channel_id: u64,
+    key: String,
+    value: String,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
 
-    state.client.modify_bubble_permission(channel_id, key, value).await?;
+    state
+        .client
+        .modify_bubble_permission(channel_id, key, value)
+        .await?;
     Ok(())
 }
 
 #[command]
-pub async fn delete_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(), BackendError> {
+pub async fn delete_channel(
+    state: State<'_, AppState>,
+    channel_id: u64,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;

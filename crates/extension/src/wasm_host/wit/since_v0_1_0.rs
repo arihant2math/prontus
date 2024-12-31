@@ -1,8 +1,8 @@
-use std::sync::OnceLock;
-use log::Level;
-use wasmtime::component::Linker;
 use crate::wasm_host::WasmState;
+use log::Level;
 use reqwest::{Client, Method};
+use std::sync::OnceLock;
+use wasmtime::component::Linker;
 
 wasmtime::component::bindgen!({
     async: true,
@@ -11,10 +11,11 @@ wasmtime::component::bindgen!({
     with: {}
 });
 
-
 pub fn linker() -> &'static Linker<WasmState> {
     static LINKER: OnceLock<Linker<WasmState>> = OnceLock::new();
-    LINKER.get_or_init(|| super::new_linker(Extension::add_to_linker).expect("Failed to create linker"))
+    LINKER.get_or_init(|| {
+        super::new_linker(Extension::add_to_linker).expect("Failed to create linker")
+    })
 }
 
 #[wasmtime::component::__internal::async_trait]
@@ -38,18 +39,25 @@ impl ExtensionImports for WasmState {
         }
     }
 
-    async fn request_url(&mut self, method: String, url: String) -> wasmtime::Result<Result<NetworkResponse, ()>> {
+    async fn request_url(
+        &mut self,
+        method: String,
+        url: String,
+    ) -> wasmtime::Result<Result<NetworkResponse, ()>> {
         if self.extension_info.permissions.full_network {
             let client = Client::new();
-            let request = client.request(match method.as_str() {
-                "get" => Method::GET,
-                "post" => Method::POST,
-                "put" => Method::PUT,
-                "patch" => Method::PATCH,
-                "delete" => Method::DELETE,
-                "head" => Method::HEAD,
-                _ => return Ok(Err(())),
-            }, url);
+            let request = client.request(
+                match method.as_str() {
+                    "get" => Method::GET,
+                    "post" => Method::POST,
+                    "put" => Method::PUT,
+                    "patch" => Method::PATCH,
+                    "delete" => Method::DELETE,
+                    "head" => Method::HEAD,
+                    _ => return Ok(Err(())),
+                },
+                url,
+            );
             let resp = request.send().await;
             if let Ok(resp) = resp {
                 Ok(Ok(NetworkResponse {

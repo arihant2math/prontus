@@ -33,8 +33,10 @@ async fn read_task(
         };
         match message {
             Ok(Message::Text(message)) => {
-                let data: PusherServerMessage = PusherServerMessage::from(message.as_str().to_string());
-                let _ = message_output.send(PusherServerMessageWrapper::PusherServerMessage(data.into()));
+                let data: PusherServerMessage =
+                    PusherServerMessage::from(message.as_str().to_string());
+                let _ = message_output
+                    .send(PusherServerMessageWrapper::PusherServerMessage(data.into()));
             }
             Ok(Message::Ping(_)) => {
                 let _ = message_output.send(PusherServerMessageWrapper::Ping);
@@ -224,6 +226,10 @@ impl PusherClient {
 
     // TODO: this is an async drop
     pub async fn shutdown(&self) {
-        self.client_message.read().await.send(PusherClientMessageWrapper::Shutdown).unwrap();
+        self.client_message
+            .read()
+            .await
+            .send(PusherClientMessageWrapper::Shutdown)
+            .unwrap();
     }
 }

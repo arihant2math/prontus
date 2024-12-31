@@ -3,11 +3,11 @@
 // {"bubble_id":3901612,"addmember":"owner"}
 // {"bubble_id":"3901612","category_id":679345}
 
+use crate::custom_json::ToJson;
+use crate::{Bubble, Property};
+use client_macros::api;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
-use client_macros::api;
-use crate::{Bubble, Property};
-use crate::custom_json::ToJson;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -16,7 +16,7 @@ pub enum BubbleUpdateModification {
     SetPinnedMessage((u64, chrono::NaiveDateTime)),
     RemovePinnedMessage(),
     SetCategory(Option<u64>),
-    ModifyPermission(Property)
+    ModifyPermission(Property),
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -72,7 +72,7 @@ impl Serialize for PostBubbleUpdateRequest {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BubbleUpdateResponse {
     pub ok: bool,
-    pub bubble: Bubble
+    pub bubble: Bubble,
 }
 
 pub type BubbleUpdateResult = crate::APIResult<BubbleUpdateResponse>;

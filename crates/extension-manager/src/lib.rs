@@ -1,15 +1,15 @@
-use std::collections::HashMap;
-use std::fs::File;
-use serde::{Deserialize, Serialize};
 use extension::info::ExtensionInfo;
 use rand::random;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fs::File;
 
 pub const INDEX_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-extensions/refs/heads/main/extension-index.json";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VersionedExtensionInfo {
     pub latest_version: ExtensionInfo,
-    pub versions: HashMap<String, (ExtensionInfo, String)>
+    pub versions: HashMap<String, (ExtensionInfo, String)>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

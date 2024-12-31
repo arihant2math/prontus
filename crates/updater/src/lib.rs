@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
-use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Download {
@@ -44,13 +44,17 @@ pub enum Notice {
 pub struct UpdateFile {
     pub latest_version: Option<String>,
     pub notices: Vec<Notice>,
-    pub versions: HashMap<String, Version>
+    pub versions: HashMap<String, Version>,
 }
 
-pub const ALPHA_UPDATE_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/alpha.json";
-pub const BETA_UPDATE_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/beta.json";
-pub const RC_UPDATE_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/rc.json";
-pub const STABLE_UPDATE_URL: &str = "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/stable.json";
+pub const ALPHA_UPDATE_URL: &str =
+    "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/alpha.json";
+pub const BETA_UPDATE_URL: &str =
+    "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/beta.json";
+pub const RC_UPDATE_URL: &str =
+    "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/rc.json";
+pub const STABLE_UPDATE_URL: &str =
+    "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/stable.json";
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum UpdateChannel {
@@ -92,13 +96,18 @@ impl UpdateFile {
         Ok(json)
     }
 
-    pub async fn update_file(channel: UpdateChannel) -> Result<UpdateFile, Box<dyn std::error::Error>> {
+    pub async fn update_file(
+        channel: UpdateChannel,
+    ) -> Result<UpdateFile, Box<dyn std::error::Error>> {
         Self::get_update_file_with_url(channel.url()).await
     }
 
     pub fn update_available(&self) -> bool {
         let current_version = version::VERSION;
-        let latest_version = self.latest_version.clone().unwrap_or_else(|| current_version.to_string());
+        let latest_version = self
+            .latest_version
+            .clone()
+            .unwrap_or_else(|| current_version.to_string());
         current_version != latest_version
     }
 
@@ -113,7 +122,13 @@ impl UpdateFile {
 
     pub fn no_start_active(&self) -> bool {
         self.notices.iter().any(|notice| match notice {
-            Notice::NoStart(ns) => if ns.version == version::VERSION { true } else { false },
+            Notice::NoStart(ns) => {
+                if ns.version == version::VERSION {
+                    true
+                } else {
+                    false
+                }
+            }
             _ => false,
         })
     }
@@ -126,7 +141,7 @@ pub enum InstallUpdateType {
     MacOSDiskImage,
     LinuxDEB,
     LinuxRPM,
-    LinuxAppImage
+    LinuxAppImage,
 }
 
 pub struct InstallUpdate {
@@ -157,7 +172,6 @@ impl InstallUpdate {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -165,7 +179,12 @@ mod tests {
     #[tokio::test]
     async fn test_channels() {
         // ensure all channels can be parsed normally
-        let channels = [UpdateChannel::Alpha, UpdateChannel::Beta, UpdateChannel::RC, UpdateChannel::Stable];
+        let channels = [
+            UpdateChannel::Alpha,
+            UpdateChannel::Beta,
+            UpdateChannel::RC,
+            UpdateChannel::Stable,
+        ];
         for channel in channels {
             UpdateFile::update_file(channel).await.unwrap();
         }

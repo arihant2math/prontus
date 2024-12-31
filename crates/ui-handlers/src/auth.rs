@@ -1,9 +1,9 @@
-use ui_lib::BackendError;
 use client::user_login::{DeviceInfo, UserLoginRequest};
 use client::ProntoClient;
 use log::info;
 use settings::Settings;
 use tauri::command;
+use ui_lib::BackendError;
 
 #[command]
 pub async fn get_code(email: String) -> Result<(), BackendError> {

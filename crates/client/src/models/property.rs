@@ -4,5 +4,5 @@ use serde_json::Value;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Property {
     pub key: String,
-    pub value: Value
+    pub value: Value,
 }

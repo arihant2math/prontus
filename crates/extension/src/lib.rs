@@ -1,13 +1,13 @@
-use std::{error, fs};
-use std::path::PathBuf;
-use std::sync::Arc;
-use log::warn;
-use thiserror::Error;
 use crate::info::ExtensionInfo;
 pub use crate::wasm_host::WasmExtension;
+use log::warn;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::{error, fs};
+use thiserror::Error;
 
-mod wasm_host;
 pub mod info;
+mod wasm_host;
 
 pub const EXTENSION_FILE_NAME: &str = "extension.wasm";
 pub const MANIFEST_FILE_NAME: &str = "manifest.toml";
@@ -28,7 +28,10 @@ pub struct ExtensionManager {
 }
 
 impl ExtensionManager {
-    pub async fn load_extensions(&mut self, extensions_parent_dir: PathBuf) -> Result<(), LoadExtensionsError> {
+    pub async fn load_extensions(
+        &mut self,
+        extensions_parent_dir: PathBuf,
+    ) -> Result<(), LoadExtensionsError> {
         // Every extension is a directory in the extensions_parent_dir
         if !extensions_parent_dir.exists() {
             fs::create_dir(&extensions_parent_dir)?;
@@ -37,9 +40,11 @@ impl ExtensionManager {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let info: Arc<ExtensionInfo> = Arc::new(extensions_parent_dir.join(MANIFEST_FILE_NAME).try_into()?);
+                let info: Arc<ExtensionInfo> =
+                    Arc::new(extensions_parent_dir.join(MANIFEST_FILE_NAME).try_into()?);
                 if !self.extensions.iter().any(|e| &e.info.id == &info.id) {
-                    let extension = WasmExtension::load(path.join(EXTENSION_FILE_NAME), info).await?;
+                    let extension =
+                        WasmExtension::load(path.join(EXTENSION_FILE_NAME), info).await?;
                     self.extensions.push(extension);
                 }
             } else {
@@ -49,10 +54,11 @@ impl ExtensionManager {
         Ok(())
     }
 
-    pub async fn run_tasks(&mut
-
-                           self) -> anyhow::Result<()> {
-        let tasks = self.extensions.iter_mut().map(|extension| extension.run_task());
+    pub async fn run_tasks(&mut self) -> anyhow::Result<()> {
+        let tasks = self
+            .extensions
+            .iter_mut()
+            .map(|extension| extension.run_task());
         let results = futures::future::join_all(tasks).await;
         for result in results {
             result?;

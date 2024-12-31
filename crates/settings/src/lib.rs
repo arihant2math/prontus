@@ -98,19 +98,19 @@ pub struct Options {
     #[serde(default)]
     pub analytics: bool,
     #[serde(default)]
-    pub read_messages: bool
+    pub read_messages: bool,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MessagesSearchIndex {
     pub path: String,
-    pub max_size: u64
+    pub max_size: u64,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Search {
     #[serde(default)]
-    pub messages: Option<MessagesSearchIndex>
+    pub messages: Option<MessagesSearchIndex>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -141,7 +141,7 @@ pub struct Settings {
     #[serde(default)]
     pub search: Search,
     #[serde(default)]
-    pub update: Update
+    pub update: Update,
 }
 
 static MIGRATIONS_PERFORMED: AtomicBool = AtomicBool::new(false);
@@ -150,8 +150,7 @@ impl Settings {
     pub async fn perform_migrations() -> tokio::io::Result<()> {
         // TODO: remove these in the far far future
         // Delete old bincode settings file
-        let old_settings = prontus_dir()
-            .join("settings.bnc");
+        let old_settings = prontus_dir().join("settings.bnc");
         if old_settings.exists() {
             info!("Deleting old settings file");
             tokio::fs::remove_file(old_settings).await?;
@@ -161,14 +160,12 @@ impl Settings {
 
     /// The path to the settings file
     pub fn path() -> PathBuf {
-        let old_settings = prontus_dir()
-            .join("settings.bnc");
+        let old_settings = prontus_dir().join("settings.bnc");
         if old_settings.exists() {
             info!("Deleting old settings file");
             std::fs::remove_file(old_settings).unwrap();
         }
-        prontus_dir()
-            .join("settings.json")
+        prontus_dir().join("settings.json")
     }
 
     /// Delete the settings file
@@ -191,9 +188,11 @@ impl Settings {
             // TODO: switch to OpenOptions
             let mut data = tokio::fs::read_to_string(&path).await?;
             unsafe {
-                Ok(simd_json::from_str(&mut data).inspect_err(|e| {
-                    error!("Error parsing settings: {:?}", e);
-                }).unwrap_or_default())
+                Ok(simd_json::from_str(&mut data)
+                    .inspect_err(|e| {
+                        error!("Error parsing settings: {:?}", e);
+                    })
+                    .unwrap_or_default())
             }
         } else {
             Ok(Self::default())

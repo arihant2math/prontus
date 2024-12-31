@@ -17,12 +17,12 @@
 
 mod retrieval;
 
-use std::fmt::Display;
 pub use crate::retrieval::PublicLookupService;
-use std::string::FromUtf8Error;
 use base64::prelude::*;
-use thiserror::Error;
 use encrypt_internal::{load_secret_key, DMEncryption};
+use std::fmt::Display;
+use std::string::FromUtf8Error;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum DecryptionError {
@@ -47,7 +47,7 @@ pub struct Encrypt {
 }
 
 impl Encrypt {
-    /// Lookup other user and load current user's secret key 
+    /// Lookup other user and load current user's secret key
     pub async fn new(
         public_lookup_service: PublicLookupService,
         org_id: u64,
@@ -76,32 +76,49 @@ impl Encrypt {
 
     pub fn decrypt(&self, data: &str) -> Result<String, DecryptionError> {
         let decoded_data = BASE64_STANDARD.decode(data)?;
-        let initial_len = u64::from_le_bytes([decoded_data[0], decoded_data[1], decoded_data[2], decoded_data[3], decoded_data[4], decoded_data[5], decoded_data[6], decoded_data[7]]);
+        let initial_len = u64::from_le_bytes([
+            decoded_data[0],
+            decoded_data[1],
+            decoded_data[2],
+            decoded_data[3],
+            decoded_data[4],
+            decoded_data[5],
+            decoded_data[6],
+            decoded_data[7],
+        ]);
         let nonce = decoded_data[8..initial_len as usize + 8].to_vec();
         let decoded_data = &decoded_data[initial_len as usize + 8..];
         let nonce = DMEncryption::convert_nonce(&nonce);
-        Ok(String::from_utf8(self.dm_encryption.decrypt(&decoded_data, &nonce)?)?)
+        Ok(String::from_utf8(
+            self.dm_encryption.decrypt(&decoded_data, &nonce)?,
+        )?)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use encrypt_internal::DMEncryption;
-    use crate::Encrypt;
     use crate::retrieval::PublicLookupService;
+    use crate::Encrypt;
+    use encrypt_internal::DMEncryption;
 
     #[test]
     fn test_validity() {
         let current_user_keys = encrypt_internal::generate_key_pair();
         let other_user_keys = encrypt_internal::generate_key_pair();
         let encrypt = Encrypt {
-            dm_encryption: DMEncryption::new(current_user_keys.secret_key, other_user_keys.public_key),
+            dm_encryption: DMEncryption::new(
+                current_user_keys.secret_key,
+                other_user_keys.public_key,
+            ),
             lookup_service: PublicLookupService {
                 organizations: Default::default(),
             },
         };
         let decrypt = Encrypt {
-            dm_encryption: DMEncryption::new(other_user_keys.secret_key, current_user_keys.public_key),
+            dm_encryption: DMEncryption::new(
+                other_user_keys.secret_key,
+                current_user_keys.public_key,
+            ),
             lookup_service: PublicLookupService {
                 organizations: Default::default(),
             },

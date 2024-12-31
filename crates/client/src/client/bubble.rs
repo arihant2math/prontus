@@ -2,7 +2,12 @@ use crate::bubble_history::GetBubbleHistoryResponse;
 use crate::bubble_info::GetBubbleInfoResponse;
 use crate::bubble_list::GetBubbleListResponse;
 use crate::bubble_mark::PostBubbleMarkRequest;
-use crate::{bubble_create, bubble_delete, bubble_history, bubble_info, bubble_list, bubble_mark, bubble_membership_search, bubble_update, dm_create, membership_update, MembershipUpdateModification, NotificationsPreference, PostBubbleMembershipSearchRequest, PostMembershipUpdateRequest, ProntoClient, ResponseError};
+use crate::{
+    bubble_create, bubble_delete, bubble_history, bubble_info, bubble_list, bubble_mark,
+    bubble_membership_search, bubble_update, dm_create, membership_update,
+    MembershipUpdateModification, NotificationsPreference, PostBubbleMembershipSearchRequest,
+    PostMembershipUpdateRequest, ProntoClient, ResponseError,
+};
 
 impl ProntoClient {
     pub async fn create_dm(
@@ -229,20 +234,30 @@ impl ProntoClient {
         .to_result()?)
     }
 
-    pub async fn pin_message(&self, bubble_id: u64, message_id: u64, end: chrono::NaiveDateTime) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
+    pub async fn pin_message(
+        &self,
+        bubble_id: u64,
+        message_id: u64,
+        end: chrono::NaiveDateTime,
+    ) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
         Ok(bubble_update::post(
             &self.api_base_url,
             &self.http_client,
             bubble_update::PostBubbleUpdateRequest {
                 bubble_id,
-                modification: bubble_update::BubbleUpdateModification::SetPinnedMessage((message_id, end)),
+                modification: bubble_update::BubbleUpdateModification::SetPinnedMessage((
+                    message_id, end,
+                )),
             },
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
-    pub async fn unpin_message(&self, bubble_id: u64) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
+    pub async fn unpin_message(
+        &self,
+        bubble_id: u64,
+    ) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
         Ok(bubble_update::post(
             &self.api_base_url,
             &self.http_client,
@@ -251,8 +266,8 @@ impl ProntoClient {
                 modification: bubble_update::BubbleUpdateModification::RemovePinnedMessage(),
             },
         )
-               .await?
-                .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn set_bubble_title(
@@ -268,8 +283,8 @@ impl ProntoClient {
                 modification: bubble_update::BubbleUpdateModification::SetTitle(title),
             },
         )
-                           .await?
-                .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn set_bubble_category(
@@ -285,32 +300,37 @@ impl ProntoClient {
                 modification: bubble_update::BubbleUpdateModification::SetCategory(category_id),
             },
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
     pub async fn modify_bubble_permission(
         &self,
         bubble_id: u64,
         name: String,
-        value: String
+        value: String,
     ) -> Result<bubble_update::BubbleUpdateResponse, ResponseError> {
         Ok(bubble_update::post(
             &self.api_base_url,
             &self.http_client,
             bubble_update::PostBubbleUpdateRequest {
                 bubble_id,
-                modification: bubble_update::BubbleUpdateModification::ModifyPermission(crate::Property {
-                    key: name,
-                    value: serde_json::Value::String(value)
-                }),
+                modification: bubble_update::BubbleUpdateModification::ModifyPermission(
+                    crate::Property {
+                        key: name,
+                        value: serde_json::Value::String(value),
+                    },
+                ),
             },
         )
-            .await?
-            .to_result()?)
+        .await?
+        .to_result()?)
     }
 
-    pub async fn delete_bubble(&self, bubble_id: u64) -> Result<bubble_delete::PostBubbleDeleteResponse, ResponseError> {
+    pub async fn delete_bubble(
+        &self,
+        bubble_id: u64,
+    ) -> Result<bubble_delete::PostBubbleDeleteResponse, ResponseError> {
         Ok(bubble_delete::post(
             &self.api_base_url,
             &self.http_client,

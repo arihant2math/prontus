@@ -1,7 +1,7 @@
-use std::path::PathBuf;
-use convert_case::{Case, Casing};
-use syn::{GenericArgument, ItemEnum, ItemStruct, PathArguments, Type};
 use crate::language::WitComponent;
+use convert_case::{Case, Casing};
+use std::path::PathBuf;
+use syn::{GenericArgument, ItemEnum, ItemStruct, PathArguments, Type};
 
 mod language;
 
@@ -37,73 +37,39 @@ fn convert_type(ty: &Type) -> language::WitType {
         Type::Path(path) => {
             let working_type = path.path.segments.last().unwrap();
             let inner = match &working_type.arguments {
-                PathArguments::AngleBracketed(inner) => {
-                    inner.args.iter().map(|arg| {
-                        match arg {
-                            GenericArgument::Type(ty) => convert_type(ty),
-                            _ => unimplemented!(),
-                        }
-                    }).collect()
-                }
+                PathArguments::AngleBracketed(inner) => inner
+                    .args
+                    .iter()
+                    .map(|arg| match arg {
+                        GenericArgument::Type(ty) => convert_type(ty),
+                        _ => unimplemented!(),
+                    })
+                    .collect(),
                 _ => Vec::new(),
             };
             let name = working_type.ident.to_string();
             match &*name {
-                "bool" => {
-                    language::WitType::bool()
-                }
-                "s8" => {
-                    language::WitType::s8()
-                }
-                "s16" => {
-                    language::WitType::s16()
-                }
-                "s32" => {
-                    language::WitType::s32()
-                }
-                "s64" => {
-                    language::WitType::s64()
-                }
-                "u8" => {
-                    language::WitType::u8()
-                }
-                "u16" => {
-                    language::WitType::u16()
-                }
-                "u32" => {
-                    language::WitType::u32()
-                }
-                "u64" => {
-                    language::WitType::u64()
-                }
-                "f32" => {
-                    language::WitType::f32()
-                }
-                "f64" => {
-                    language::WitType::f64()
-                }
-                "char" => {
-                    language::WitType::char()
-                }
-                "String" => {
-                    language::WitType::string()
-                }
-                "Vec" => {
-                    language::WitType::list(inner[0].clone())
-                }
-                "Option" => {
-                    language::WitType::option(inner[0].clone())
-                }
-                "Result" => {
-                    language::WitType::result(inner[0].clone(), inner[1].clone())
-                }
+                "bool" => language::WitType::bool(),
+                "s8" => language::WitType::s8(),
+                "s16" => language::WitType::s16(),
+                "s32" => language::WitType::s32(),
+                "s64" => language::WitType::s64(),
+                "u8" => language::WitType::u8(),
+                "u16" => language::WitType::u16(),
+                "u32" => language::WitType::u32(),
+                "u64" => language::WitType::u64(),
+                "f32" => language::WitType::f32(),
+                "f64" => language::WitType::f64(),
+                "char" => language::WitType::char(),
+                "String" => language::WitType::string(),
+                "Vec" => language::WitType::list(inner[0].clone()),
+                "Option" => language::WitType::option(inner[0].clone()),
+                "Result" => language::WitType::result(inner[0].clone(), inner[1].clone()),
 
-                s => {
-                    language::WitType {
-                        name: language::WitIdent(s.to_case(Case::Kebab)),
-                        inner,
-                    }
-                }
+                s => language::WitType {
+                    name: language::WitIdent(s.to_case(Case::Kebab)),
+                    inner,
+                },
             }
         }
         Type::Paren(paren) => convert_type(&*paren.elem),
@@ -137,15 +103,11 @@ fn convert_enum(item_enum: ItemEnum) -> language::Variant {
     for variant in item_enum.variants.iter() {
         let name = variant.ident.to_string().to_case(Case::Kebab);
         let ty = match &variant.fields {
-            syn::Fields::Unit => {
-                None
-            },
+            syn::Fields::Unit => None,
             syn::Fields::Named(_) => {
                 unimplemented!()
-            },
-            syn::Fields::Unnamed(fields) => {
-                Some(convert_type(&fields.unnamed[0].ty))
             }
+            syn::Fields::Unnamed(fields) => Some(convert_type(&fields.unnamed[0].ty)),
         };
         variant_fields.push(language::VariantField {
             name: language::WitIdent(name),
@@ -172,16 +134,21 @@ impl WitGenerator {
             let contents = std::fs::read_to_string(file).unwrap();
             // to token stream
             let file = syn::parse_file(&contents).unwrap();
-            let structs: Vec<_> = find_structs(file.clone()).into_iter().map(convert_struct).collect();
+            let structs: Vec<_> = find_structs(file.clone())
+                .into_iter()
+                .map(convert_struct)
+                .collect();
             all_structs.extend(structs);
 
             let enums: Vec<_> = find_enums(file).into_iter().map(convert_enum).collect();
             all_enums.extend(enums);
         }
-        let mut components: Vec<Box<dyn WitComponent>> = all_structs.into_iter()
+        let mut components: Vec<Box<dyn WitComponent>> = all_structs
+            .into_iter()
             .map(|r| Box::new(r) as Box<dyn WitComponent>)
             .collect();
-        let enum_components: Vec<Box<dyn WitComponent>> = all_enums.into_iter()
+        let enum_components: Vec<Box<dyn WitComponent>> = all_enums
+            .into_iter()
             .map(|r| Box::new(r) as Box<dyn WitComponent>)
             .collect();
         components.extend(enum_components);
@@ -206,7 +173,9 @@ mod tests {
     #[test]
     fn test() {
         let gen = super::WitGenerator {
-            files: vec![std::path::PathBuf::from("D:/Documents/Programming/prontus/crates/settings/src/lib.rs")],
+            files: vec![std::path::PathBuf::from(
+                "D:/Documents/Programming/prontus/crates/settings/src/lib.rs",
+            )],
             interface_name: "settings".into(),
             output: std::path::PathBuf::from("settings.wit"),
         };

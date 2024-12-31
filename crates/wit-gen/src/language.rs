@@ -14,126 +14,126 @@ impl WitComponent for WitIdent {
 #[derive(Clone)]
 pub struct WitType {
     pub name: WitIdent,
-    pub inner: Vec<WitType>
+    pub inner: Vec<WitType>,
 }
 
 impl WitType {
     pub fn bool() -> WitType {
         WitType {
             name: WitIdent("bool".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn s8() -> WitType {
         WitType {
             name: WitIdent("s8".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn s16() -> WitType {
         WitType {
             name: WitIdent("s16".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn s32() -> WitType {
         WitType {
             name: WitIdent("s32".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn s64() -> WitType {
         WitType {
             name: WitIdent("s64".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn u8() -> WitType {
         WitType {
             name: WitIdent("u8".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn u16() -> WitType {
         WitType {
             name: WitIdent("u16".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn u32() -> WitType {
         WitType {
             name: WitIdent("u32".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn u64() -> WitType {
         WitType {
             name: WitIdent("u64".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn f32() -> WitType {
         WitType {
             name: WitIdent("f32".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn f64() -> WitType {
         WitType {
             name: WitIdent("f64".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn char() -> WitType {
         WitType {
             name: WitIdent("char".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn string() -> WitType {
         WitType {
             name: WitIdent("string".to_string()),
-            inner: Vec::new()
+            inner: Vec::new(),
         }
     }
 
     pub fn list(inner: WitType) -> WitType {
         WitType {
             name: WitIdent("list".to_string()),
-            inner: vec![inner]
+            inner: vec![inner],
         }
     }
 
     pub fn option(inner: WitType) -> WitType {
         WitType {
             name: WitIdent("option".to_string()),
-            inner: vec![inner]
+            inner: vec![inner],
         }
     }
 
     pub fn result(ok: WitType, err: WitType) -> WitType {
         WitType {
             name: WitIdent("result".to_string()),
-            inner: vec![ok, err]
+            inner: vec![ok, err],
         }
     }
 
     pub fn tuple(inner: Vec<WitType>) -> WitType {
         WitType {
             name: WitIdent("tuple".to_string()),
-            inner
+            inner,
         }
     }
 }
@@ -143,7 +143,12 @@ impl WitComponent for WitType {
         if self.inner.is_empty() {
             return self.name.to_wit();
         }
-        let inner = self.inner.iter().map(|i| i.to_wit()).collect::<Vec<String>>().join(", ");
+        let inner = self
+            .inner
+            .iter()
+            .map(|i| i.to_wit())
+            .collect::<Vec<String>>()
+            .join(", ");
         format!("{}<{}>", self.name.to_wit(), inner)
     }
 }
@@ -151,7 +156,7 @@ impl WitComponent for WitType {
 #[derive(Clone)]
 pub struct Field {
     pub name: WitIdent,
-    pub ty: WitType
+    pub ty: WitType,
 }
 
 impl WitComponent for Field {
@@ -163,12 +168,17 @@ impl WitComponent for Field {
 #[derive(Clone)]
 pub struct Record {
     pub name: WitIdent,
-    pub fields: Vec<Field>
+    pub fields: Vec<Field>,
 }
 
 impl WitComponent for Record {
     fn to_wit(&self) -> String {
-        let fields = self.fields.iter().map(|f| f.to_wit()).collect::<Vec<String>>().join(",\n");
+        let fields = self
+            .fields
+            .iter()
+            .map(|f| f.to_wit())
+            .collect::<Vec<String>>()
+            .join(",\n");
         let output = String::from("record ");
         output + &self.name.to_wit() + " {\n" + &fields + "\n}\n"
     }
@@ -177,7 +187,7 @@ impl WitComponent for Record {
 #[derive(Clone)]
 pub struct VariantField {
     pub name: WitIdent,
-    pub ty: Option<WitType>
+    pub ty: Option<WitType>,
 }
 
 impl WitComponent for VariantField {
@@ -193,12 +203,17 @@ impl WitComponent for VariantField {
 #[derive(Clone)]
 pub struct Variant {
     pub name: WitIdent,
-    pub fields: Vec<VariantField>
+    pub fields: Vec<VariantField>,
 }
 
 impl WitComponent for Variant {
     fn to_wit(&self) -> String {
-        let fields = self.fields.iter().map(|f| f.to_wit()).collect::<Vec<String>>().join(",\n");
+        let fields = self
+            .fields
+            .iter()
+            .map(|f| f.to_wit())
+            .collect::<Vec<String>>()
+            .join(",\n");
         let output = String::from("variant ");
         output + &self.name.to_wit() + " {\n" + &fields + "\n}\n"
     }
@@ -207,12 +222,17 @@ impl WitComponent for Variant {
 #[derive(Clone)]
 pub struct Enum {
     name: WitIdent,
-    variants: Vec<WitIdent>
+    variants: Vec<WitIdent>,
 }
 
 impl WitComponent for Enum {
     fn to_wit(&self) -> String {
-        let variants = self.variants.iter().map(|v| v.to_wit()).collect::<Vec<String>>().join(",\n");
+        let variants = self
+            .variants
+            .iter()
+            .map(|v| v.to_wit())
+            .collect::<Vec<String>>()
+            .join(",\n");
         let output = String::from("enum ");
         output + &self.name.to_wit() + " {\n" + &variants + "\n}\n"
     }
@@ -220,7 +240,7 @@ impl WitComponent for Enum {
 
 pub struct Type {
     pub name: WitIdent,
-    pub expr: WitType
+    pub expr: WitType,
 }
 
 impl WitComponent for Type {
@@ -231,14 +251,18 @@ impl WitComponent for Type {
 
 pub struct Interface {
     pub name: WitIdent,
-    pub components: Vec<Box<dyn WitComponent>>
+    pub components: Vec<Box<dyn WitComponent>>,
 }
 
 impl WitComponent for Interface {
     fn to_wit(&self) -> String {
-        let components = self.components.iter().map(|c| c.to_wit()).collect::<Vec<String>>().join("\n");
+        let components = self
+            .components
+            .iter()
+            .map(|c| c.to_wit())
+            .collect::<Vec<String>>()
+            .join("\n");
         let output = String::from("interface ");
         output + &self.name.to_wit() + " {\n" + &components + "\n}\n"
     }
 }
-

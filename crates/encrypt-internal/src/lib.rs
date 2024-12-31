@@ -15,10 +15,10 @@
     while_true
 )]
 
+pub use aead::{Error, Result};
 use crypto_box::aead::{Aead, AeadCore, OsRng};
 use crypto_box::{aead, ChaChaBox, Nonce, PublicKey, SecretKey};
 use keyring::Entry;
-pub use aead::{Error, Result};
 
 pub struct DMEncryption {
     pub current_user_secret_key: SecretKey,
@@ -107,8 +107,10 @@ mod tests {
     fn test_encryption() {
         let current_user_keys = generate_key_pair();
         let other_user_keys = generate_key_pair();
-        let encrypt_dm = DMEncryption::new(current_user_keys.secret_key, other_user_keys.public_key);
-        let decrypt_dm = DMEncryption::new(other_user_keys.secret_key, current_user_keys.public_key);
+        let encrypt_dm =
+            DMEncryption::new(current_user_keys.secret_key, other_user_keys.public_key);
+        let decrypt_dm =
+            DMEncryption::new(other_user_keys.secret_key, current_user_keys.public_key);
         let data = b"Hello, World!";
         let nonce = DMEncryption::generate_random_nonce();
         let encrypted_data = encrypt_dm.encrypt(data, &nonce).unwrap();

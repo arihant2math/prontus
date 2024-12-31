@@ -18,10 +18,10 @@ pub use routes::*;
 
 pub mod api_error;
 mod client;
+pub(crate) mod custom_json;
 pub mod models;
 pub mod routes;
 pub(crate) mod serde_datetime;
-pub(crate) mod custom_json;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -232,15 +232,24 @@ mod tests {
     #[tokio::test]
     async fn test_get_announcement_list() {
         let client = get_client().await;
-        client.announcement_list("RECEIVED".to_string()).await.unwrap();
+        client
+            .announcement_list("RECEIVED".to_string())
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
     async fn test_get_task_list() {
         let client = get_client().await;
         let response = client.current_user_info().await.unwrap();
-        client.task_list(response.user.organizations[0].id, false).await.unwrap();
-        client.task_list(response.user.organizations[0].id, true).await.unwrap();
+        client
+            .task_list(response.user.organizations[0].id, false)
+            .await
+            .unwrap();
+        client
+            .task_list(response.user.organizations[0].id, true)
+            .await
+            .unwrap();
     }
 
     #[tokio::test]

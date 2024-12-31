@@ -41,16 +41,18 @@ pub async fn put(
         .send()
         .await?;
     let text = r.text().await?;
-    log::trace!("Response: {}" , text);
+    log::trace!("Response: {}", text);
     let json = serde_json::from_str(&text);
     match json {
-        Ok(json) => { Ok(json) }
+        Ok(json) => Ok(json),
         Err(_e) => {
             let json = serde_json::from_str::<PutFileResponse>(&text);
             let e = json.unwrap_err();
-            log::error!("Error parsing json response: {:?}." , e );
+            log::error!("Error parsing json response: {:?}.", e);
             let json = serde_json::from_str::<serde_json::Value>(&text);
-            if json.is_err() { return Err(crate::ResponseError::NotJson(text)); }
+            if json.is_err() {
+                return Err(crate::ResponseError::NotJson(text));
+            }
             Err(crate::ResponseError::from(e))
         }
     }

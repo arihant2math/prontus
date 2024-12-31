@@ -23,7 +23,7 @@ pub struct FunctionHandler<F> {
 
 impl<F, E> Handler for FunctionHandler<F>
 where
-    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output=Result<(), E>>>>,
+    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output = Result<(), E>>>>,
     E: error::Error + Send + Sync + 'static,
 {
     type Error = E;
@@ -33,16 +33,14 @@ where
         pronto_client: Arc<ProntoClient>,
         input: PusherServerEventType,
     ) -> Result<(), Self::Error> {
-        async {
-            (self.function)(pronto_client, input).await
-        }.await
+        async { (self.function)(pronto_client, input).await }.await
     }
 }
 
 /// Convert a function into a pusher event handler
 pub fn handler<F, I, E>(function: F) -> FunctionHandler<F>
 where
-    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output=Result<(), E>>>>,
+    F: Fn(Arc<ProntoClient>, PusherServerEventType) -> Pin<Box<dyn Future<Output = Result<(), E>>>>,
 {
     FunctionHandler { function }
 }
@@ -110,7 +108,11 @@ pub struct NoopHandler;
 impl Handler for NoopHandler {
     type Error = Box<dyn error::Error + Send + Sync>;
 
-    async fn handle(&self, _: Arc<ProntoClient>, _: PusherServerEventType) -> Result<(), Self::Error> {
+    async fn handle(
+        &self,
+        _: Arc<ProntoClient>,
+        _: PusherServerEventType,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 }

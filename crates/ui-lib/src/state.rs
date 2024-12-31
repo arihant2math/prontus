@@ -1,12 +1,12 @@
 use client::{
     Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, Task, UserInfo,
 };
+use settings::Settings;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::RwLock;
-use settings::Settings;
 
 #[derive(Copy, Clone, Debug, Error)]
 pub enum UnlockError {

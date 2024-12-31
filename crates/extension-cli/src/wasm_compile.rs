@@ -1,8 +1,8 @@
+use anyhow::{bail, Context};
 use std::env::current_dir;
 use std::path::PathBuf;
-use anyhow::{bail, Context};
+use std::process::{Command as StdCommand, Stdio};
 use wasm_encoder::{ComponentSectionId, Encode as _, RawSection, Section as _};
-use std::process::{Stdio, Command as StdCommand};
 
 pub const RUST_TARGET: &str = "wasm32-wasip1";
 const WASI_ADAPTER_URL: &str =
@@ -16,9 +16,9 @@ pub fn install_rust_wasm_target_if_needed() -> anyhow::Result<()> {
         .context("failed to run rustc")?;
     if !rustc_output.status.success() {
         bail!(
-                "failed to retrieve rust sysroot: {}",
-                String::from_utf8_lossy(&rustc_output.stderr)
-            );
+            "failed to retrieve rust sysroot: {}",
+            String::from_utf8_lossy(&rustc_output.stderr)
+        );
     }
 
     let sysroot = PathBuf::from(String::from_utf8(rustc_output.stdout)?.trim());
@@ -34,9 +34,9 @@ pub fn install_rust_wasm_target_if_needed() -> anyhow::Result<()> {
         .context("failed to run `rustup target add`")?;
     if !output.status.success() {
         bail!(
-                "failed to install the `{RUST_TARGET}` target: {}",
-                String::from_utf8_lossy(&rustc_output.stderr)
-            );
+            "failed to install the `{RUST_TARGET}` target: {}",
+            String::from_utf8_lossy(&rustc_output.stderr)
+        );
     }
 
     Ok(())
@@ -127,7 +127,7 @@ pub fn strip_custom_sections(input: &[u8]) -> anyhow::Result<Vec<u8>> {
                 id,
                 data: &input[range],
             }
-                .append_to(&mut output);
+            .append_to(&mut output);
         }
     }
 

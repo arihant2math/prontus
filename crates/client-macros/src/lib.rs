@@ -12,7 +12,7 @@ struct APIEndpoint {
     response: Type,
     request: Type,
     // TODO: don't use Expr here
-    extra_args: HashMap<String, Option<Expr>>
+    extra_args: HashMap<String, Option<Expr>>,
 }
 
 impl Parse for APIEndpoint {
@@ -40,7 +40,7 @@ impl Parse for APIEndpoint {
             url,
             request,
             response,
-            extra_args
+            extra_args,
         })
     }
 }
@@ -68,7 +68,7 @@ pub fn api(input: TokenStream) -> TokenStream {
         url,
         response,
         request,
-        extra_args
+        extra_args,
     } = syn::parse_macro_input!(input as APIEndpoint);
 
     if method != "get"
@@ -81,8 +81,8 @@ pub fn api(input: TokenStream) -> TokenStream {
             method.span(),
             "Invalid HTTP method. Must be one of: get, post, put, patch, delete",
         )
-            .to_compile_error()
-            .into();
+        .to_compile_error()
+        .into();
     }
 
     let has_request = !matches!(request, Type::Never(_));
@@ -95,8 +95,8 @@ pub fn api(input: TokenStream) -> TokenStream {
                     response.span(),
                     "Response type must be a wrapped Result type",
                 )
-                    .to_compile_error()
-                    .into();
+                .to_compile_error()
+                .into();
             }
             let ident = segments[0].ident.clone();
             // TODO: hack lol
@@ -135,37 +135,36 @@ pub fn api(input: TokenStream) -> TokenStream {
         }
     };
 
-    let send_request =
-        if let Some(request_expr) = extra_args.get("request") {
+    let send_request = if let Some(request_expr) = extra_args.get("request") {
+        quote! {
+            #request_expr
+        }
+    } else if has_request {
+        if method == "get" {
             quote! {
-                #request_expr
-            }
-        } else if has_request {
-            if method == "get" {
-                quote! {
-                    client
-                        .#method(format!("{pronto_base_url}{}", #url))
-                        .query(&request)
-                        .send()
-                        .await?
-                }
-            } else {
-                quote! {
-                    client
-                        .#method(format!("{pronto_base_url}{}", #url))
-                        .json(&request)
-                        .send()
-                        .await?
-                }
+                client
+                    .#method(format!("{pronto_base_url}{}", #url))
+                    .query(&request)
+                    .send()
+                    .await?
             }
         } else {
             quote! {
                 client
                     .#method(format!("{pronto_base_url}{}", #url))
+                    .json(&request)
                     .send()
                     .await?
             }
-        };
+        }
+    } else {
+        quote! {
+            client
+                .#method(format!("{pronto_base_url}{}", #url))
+                .send()
+                .await?
+        }
+    };
 
     let function_name = quote! {
         #method
@@ -186,18 +185,18 @@ pub fn api(input: TokenStream) -> TokenStream {
 
     // Build the output
     let expanded = quote! {
-            #[doc = "Sends a #method request to #url."]
-            pub async fn #function_name(
-                #types
-            ) -> Result<#response, crate::ResponseError> {
-                let initial_time = std::time::Instant::now();
-                let r = #send_request;
-                let elapsed = initial_time.elapsed();
-                log::debug!(target: "request_perf", "Network: {} ms", elapsed.as_millis());
-                #process
-                #parse
-            }
-        };
+        #[doc = "Sends a #method request to #url."]
+        pub async fn #function_name(
+            #types
+        ) -> Result<#response, crate::ResponseError> {
+            let initial_time = std::time::Instant::now();
+            let r = #send_request;
+            let elapsed = initial_time.elapsed();
+            log::debug!(target: "request_perf", "Network: {} ms", elapsed.as_millis());
+            #process
+            #parse
+        }
+    };
 
     TokenStream::from(expanded)
 }

@@ -60,9 +60,7 @@ pub use client;
 pub use client::ProntoClient;
 use log::{error, warn};
 pub use pusher;
-use pusher::{
-    PusherClient, PusherServerMessage, PusherServerMessageWrapper,
-};
+use pusher::{PusherClient, PusherServerMessage, PusherServerMessageWrapper};
 use std::error;
 use std::sync::Arc;
 
@@ -177,15 +175,16 @@ impl<T: Handler> BotBuilder<T> {
         user_id: u64,
     ) -> Self {
         self.client = Some(Arc::new(
-            ProntoClient::new(base_url, &token_loader.load(user_id).await.unwrap().unwrap()).unwrap(),
+            ProntoClient::new(
+                base_url,
+                &token_loader.load(user_id).await.unwrap().unwrap(),
+            )
+            .unwrap(),
         ));
         self
     }
 
-    pub fn handler(
-        mut self,
-        handler: T,
-    ) -> Self {
+    pub fn handler(mut self, handler: T) -> Self {
         self.handler = Some(handler);
         self
     }

@@ -1,10 +1,8 @@
 use std::error::Error;
 use std::io::stdin;
 
-use milli::{
-    GeoSortStrategy, TermsMatchingStrategy, TimeBudget,
-};
-use search::{Search};
+use milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
+use search::Search;
 use std::io::BufRead;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -16,8 +14,16 @@ fn message_index_location() -> PathBuf {
 
 #[tokio::main]
 async fn indexer_thread() {
-    tokio::fs::create_dir_all(&message_index_location()).await.unwrap();
-    let indexer = Arc::new(search::MessageIndexer::new(&message_index_location(), search::IndexerSettings::default()).await);
+    tokio::fs::create_dir_all(&message_index_location())
+        .await
+        .unwrap();
+    let indexer = Arc::new(
+        search::MessageIndexer::new(
+            &message_index_location(),
+            search::IndexerSettings::default(),
+        )
+        .await,
+    );
     tokio::task::spawn({
         let indexer = indexer.clone();
         async move {
@@ -50,7 +56,6 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         // read the query from stdin
         let query = stdin().lock().lines().next().unwrap().unwrap();
 
-
         println!("Query: {}", query);
         let results = search.search(
             (!query.trim().is_empty()).then(|| query.trim()),
@@ -69,7 +74,11 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         )?;
         println!("Results in {} seconds", results.elapsed.as_secs_f32());
         for result in results.results {
-            println!("{}: {}", result.1.get("user_fullname").unwrap(), result.1.get("message").unwrap());
+            println!(
+                "{}: {}",
+                result.1.get("user_fullname").unwrap(),
+                result.1.get("message").unwrap()
+            );
         }
     }
 }

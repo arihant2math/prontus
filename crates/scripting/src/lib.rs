@@ -1,3 +1,4 @@
+use boa_engine::gc::Tracer;
 use boa_engine::job::{FutureJob, JobQueue, NativeJob};
 use boa_engine::property::Attribute;
 use boa_engine::{Context, Finalize, JsResult, JsValue, NativeFunction, Source, Trace};
@@ -7,9 +8,8 @@ use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::{mpsc, Arc, Mutex};
-use boa_engine::gc::Tracer;
-use tokio::{join, task};
 use tokio::runtime::Runtime;
+use tokio::{join, task};
 
 // Tokio is needed because of reqwest
 pub struct TokioQueue {
@@ -156,7 +156,11 @@ impl Logger for ForwardingLogger {
     }
 }
 
-fn call_client_function(_this: &JsValue, _args: &[JsValue], _context: &mut Context) -> impl Future<Output=JsResult<JsValue>> {
+fn call_client_function(
+    _this: &JsValue,
+    _args: &[JsValue],
+    _context: &mut Context,
+) -> impl Future<Output = JsResult<JsValue>> {
     async move {
         // TODO: call client functions
         Ok(JsValue::Null)
@@ -164,18 +168,23 @@ fn call_client_function(_this: &JsValue, _args: &[JsValue], _context: &mut Conte
 }
 
 pub fn create_boa_context(sender: mpsc::Sender<String>) -> Context {
-    let tokio_rt = tokio::runtime::Builder::new_multi_thread().enable_all().build().expect("Failed to create tokio runtime");
+    let tokio_rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Failed to create tokio runtime");
     let mut ctx = Context::builder()
         .job_queue(Rc::new(TokioQueue::new(tokio_rt)))
         .build()
         .expect("Failed to create boa context");
     let console = Console::init_with_logger(&mut ctx, ForwardingLogger::new(sender));
-    ctx
-        .register_global_property(Console::NAME, console, Attribute::all())
+    ctx.register_global_property(Console::NAME, console, Attribute::all())
         .expect("the console builtin shouldn't exist");
-    ctx
-        .register_global_builtin_callable("client_function".parse().unwrap(), 1, NativeFunction::from_async_fn(call_client_function))
-        .expect("Failed to register client_function");
+    ctx.register_global_builtin_callable(
+        "client_function".parse().unwrap(),
+        1,
+        NativeFunction::from_async_fn(call_client_function),
+    )
+    .expect("Failed to register client_function");
     ctx
 }
 
@@ -188,10 +197,7 @@ impl ScriptingEngine {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel();
         let context = Arc::new(Mutex::new(create_boa_context(sender)));
-        Self {
-            context,
-            receiver,
-        }
+        Self { context, receiver }
     }
 
     pub fn run_code(&self, code: &str) -> JsResult<()> {

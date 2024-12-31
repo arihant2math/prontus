@@ -1,7 +1,7 @@
+use crate::wasm_host::{wasm_engine, WasmState};
+use wasmtime::component::__internal::anyhow;
 use wasmtime::component::{Component, Linker};
 use wasmtime::Store;
-use wasmtime::component::__internal::anyhow;
-use crate::wasm_host::{wasm_engine, WasmState};
 
 mod since_v0_1_0;
 
@@ -21,7 +21,7 @@ pub fn new_linker(
 }
 
 pub enum Extension {
-    V010(since_v0_1_0::Extension)
+    V010(since_v0_1_0::Extension),
 }
 
 impl Extension {
@@ -29,9 +29,11 @@ impl Extension {
         store: &mut Store<WasmState>,
         component: &Component,
     ) -> anyhow::Result<Self> {
-        Ok(latest::Extension::instantiate_async(store, component, latest::linker())
-            .await
-            .map(Extension::V010)?)
+        Ok(
+            latest::Extension::instantiate_async(store, component, latest::linker())
+                .await
+                .map(Extension::V010)?,
+        )
     }
 
     pub async fn init_extension(&self, store: &mut Store<WasmState>) -> anyhow::Result<()> {

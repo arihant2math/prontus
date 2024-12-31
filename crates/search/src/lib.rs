@@ -3,17 +3,17 @@ mod message_index;
 
 use crate::message_index::get_index;
 pub use message_index::{IndexerSettings, MessageIndexer};
+pub use milli;
 use milli::score_details::ScoringStrategy;
 use milli::tokenizer::Language;
 use milli::{
     execute_search, filtered_universe, AscDesc, DefaultSearchLogger, DocumentId, GeoSortStrategy,
     Index, SearchContext, TermsMatchingStrategy, TimeBudget,
 };
-pub use milli;
 use serde_json::{Map, Value};
-use thiserror::Error;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
+use thiserror::Error;
 
 pub struct Search {
     index: Index,
@@ -32,7 +32,7 @@ pub enum SearchError {
     #[error("Heed error: {0}")]
     HeedError(#[from] heed::Error),
     #[error("Milli error: {0}")]
-    MilliError(#[from] milli::Error)
+    MilliError(#[from] milli::Error),
 }
 
 impl Search {

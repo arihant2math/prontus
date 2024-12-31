@@ -21,14 +21,15 @@ pub fn message_index_location() -> PathBuf {
 
 pub fn get_index(dataset: &PathBuf) -> milli::Result<Index> {
     let disks = Disks::new_with_refreshed_list();
-    let max_disk_space = disks.list().iter()
+    let max_disk_space = disks
+        .list()
+        .iter()
         .max_by(|&d1, &d2| d1.total_space().cmp(&d2.total_space()))
         .map(|d| d.total_space());
     let mut options = EnvOpenOptions::new();
     options.map_size(max_disk_space
         .unwrap_or(128 * 1024 * 1024 * 1024) // 128 GB
-        as usize
-    );
+        as usize);
 
     Index::new(options, dataset.to_str().unwrap())
 }

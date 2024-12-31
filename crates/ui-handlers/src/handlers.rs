@@ -1,12 +1,15 @@
+use ::settings::Settings;
+use client::{
+    Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, ReactionType, Task,
+    UserInfo,
+};
+use search::milli::score_details::ScoringStrategy;
+use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
+use search::SearchResults;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use ::settings::Settings;
 use tauri::{command, Emitter, State};
-use client::{Announcement, Bubble, BubbleStats, Task, ReactionType, Membership, ProntoClient, UserInfo, Message};
-use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
-use search::milli::score_details::ScoringStrategy;
-use search::SearchResults;
 use ui_lib::{AppData, AppState, BackendError, InnerAppState};
 use updater::Version;
 
@@ -24,7 +27,12 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
             .ok_or(BackendError::NotAuthenticated)?
             .base_url
             .to_string(),
-        &settings.auth.as_ref().ok_or(BackendError::NotAuthenticated)?.api_key.clone(),
+        &settings
+            .auth
+            .as_ref()
+            .ok_or(BackendError::NotAuthenticated)?
+            .api_key
+            .clone(),
     )
     .unwrap();
     let user_info_future = client.current_user_info();
@@ -74,7 +82,7 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
             .collect(),
         is_typing: false,
         typing_users: HashMap::new(),
-        settings
+        settings,
     };
     *state.inner().inner().write().await = InnerAppState::Loaded(data);
     Ok(())
@@ -174,7 +182,6 @@ pub async fn set_reaction_state(
     Ok(())
 }
 
-
 #[command]
 pub async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), BackendError> {
     let channel_list = {
@@ -270,7 +277,9 @@ pub async fn user_search(
 }
 
 #[command]
-pub async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announcement>, BackendError> {
+pub async fn get_announcements(
+    state: State<'_, AppState>,
+) -> Result<Vec<Announcement>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -279,7 +288,10 @@ pub async fn get_announcements(state: State<'_, AppState>) -> Result<Vec<Announc
 }
 
 #[command]
-pub async fn mark_announcement_read(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
+pub async fn mark_announcement_read(
+    state: State<'_, AppState>,
+    id: u64,
+) -> Result<(), BackendError> {
     let state = state.inner().inner();
     let mut state = state.write().await;
     let state = state.try_inner_mut()?;
@@ -380,7 +392,9 @@ pub async fn set_typing(state: State<'_, AppState>, typing: bool) -> Result<(), 
 }
 
 #[command]
-pub async fn get_typing_users(state: State<'_, AppState>) -> Result<HashMap<u64, Vec<u64>>, BackendError> {
+pub async fn get_typing_users(
+    state: State<'_, AppState>,
+) -> Result<HashMap<u64, Vec<u64>>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -388,7 +402,10 @@ pub async fn get_typing_users(state: State<'_, AppState>) -> Result<HashMap<u64,
 }
 
 #[command]
-pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<Option<SearchResults>, BackendError> {
+pub async fn search_local(
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<Option<SearchResults>, BackendError> {
     let state = state.inner().inner();
     let state = state.read().await;
     let state = state.try_inner()?;
@@ -396,21 +413,23 @@ pub async fn search_local(state: State<'_, AppState>, query: String) -> Result<O
     if let Some(msg) = settings.search.messages.as_ref() {
         let loc = PathBuf::from(&msg.path);
         let mut search = search::Search::new(&loc);
-        let results = search.search(
-            (!query.trim().is_empty()).then(|| query.trim()),
-            TermsMatchingStrategy::Last,
-            ScoringStrategy::Skip,
-            false,
-            &None,
-            &None,
-            GeoSortStrategy::default(),
-            0,
-            20,
-            None,
-            TimeBudget::max(),
-            None,
-            None,
-        ).unwrap();
+        let results = search
+            .search(
+                (!query.trim().is_empty()).then(|| query.trim()),
+                TermsMatchingStrategy::Last,
+                ScoringStrategy::Skip,
+                false,
+                &None,
+                &None,
+                GeoSortStrategy::default(),
+                0,
+                20,
+                None,
+                TimeBudget::max(),
+                None,
+                None,
+            )
+            .unwrap();
         // TODO: no unwrap (see above)
         Ok(Some(results))
     } else {
@@ -429,7 +448,11 @@ pub async fn check_update(state: State<'_, AppState>) -> Result<Option<Version>,
     let state = state.read().await;
     let state = state.try_inner()?;
     // TODO: below can panic
-    let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(&*state.settings.update.channel)).await.unwrap();
+    let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(
+        &*state.settings.update.channel,
+    ))
+    .await
+    .unwrap();
     if file.update_available() {
         Ok(file.latest_version_details().unwrap())
     } else {

@@ -1,3 +1,4 @@
+use crate::info::ExtensionInfo;
 use std::error;
 use std::fs::File;
 use std::io::Read;
@@ -6,7 +7,6 @@ use std::sync::{Arc, OnceLock};
 use thiserror::Error;
 use wasmtime::component::{Component, ResourceTable};
 use wasmtime_wasi::WasiCtxBuilder;
-use crate::info::ExtensionInfo;
 
 pub(crate) mod wit;
 
@@ -34,7 +34,7 @@ pub enum WasmExtensionError {
     #[error("I/O Error: {0}")]
     IoError(#[from] std::io::Error),
     #[error("Wasmtime Error: {0}")]
-    WasmtimeError(#[from] wasmtime::Error)
+    WasmtimeError(#[from] wasmtime::Error),
 }
 
 pub struct WasmExtension {
@@ -58,16 +58,15 @@ impl WasmExtension {
         wasm_file.read_to_end(&mut wasm_bytes)?;
 
         let engine = wasm_engine();
-        let ctx = {
-            WasiCtxBuilder::new()
-                .inherit_stdio()
-                .build()
-        };
-        let mut store = wasmtime::Store::new(&engine, WasmState {
-            extension_info: info.clone(),
-            ctx,
-            table: ResourceTable::new(),
-        });
+        let ctx = { WasiCtxBuilder::new().inherit_stdio().build() };
+        let mut store = wasmtime::Store::new(
+            &engine,
+            WasmState {
+                extension_info: info.clone(),
+                ctx,
+                table: ResourceTable::new(),
+            },
+        );
 
         let component = Component::from_binary(&store.engine(), &wasm_bytes)?;
 
@@ -79,7 +78,7 @@ impl WasmExtension {
             engine,
             extension,
             store,
-            info
+            info,
         })
     }
 

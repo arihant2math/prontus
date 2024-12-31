@@ -9,5 +9,5 @@ pub enum UserUpdateModification {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UserUpdateResponse {
     pub ok: bool,
-    pub user: UserInfo
+    pub user: UserInfo,
 }

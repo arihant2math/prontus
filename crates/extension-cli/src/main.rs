@@ -12,7 +12,10 @@ use wit_component::ComponentEncoder;
 
 mod wasm_compile;
 use crate::wasm_compile::RUST_TARGET;
-use wasm_compile::{install_rust_wasm_target_if_needed, install_wasi_preview1_adapter_if_needed, strip_custom_sections};
+use wasm_compile::{
+    install_rust_wasm_target_if_needed, install_wasi_preview1_adapter_if_needed,
+    strip_custom_sections,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Permissions {
@@ -50,7 +53,10 @@ pub struct Manifest {
 impl Manifest {
     pub fn open(path: &PathBuf) -> anyhow::Result<Self> {
         let manifest_text = std::fs::read_to_string(path)?;
-        match anyhow::Context::context(path.extension(), "No file extension found for manifest")?.to_str().unwrap() {
+        match anyhow::Context::context(path.extension(), "No file extension found for manifest")?
+            .to_str()
+            .unwrap()
+        {
             "toml" => {
                 let manifest: Manifest = toml::from_str(&manifest_text)?;
                 Ok(manifest)
@@ -107,7 +113,7 @@ enum Command {
         no_strip: bool,
     },
     TestLoad {
-        path: PathBuf
+        path: PathBuf,
     },
 }
 
@@ -136,23 +142,81 @@ fn get_manifest_path(root: &PathBuf, custom: Option<&PathBuf>) -> Option<PathBuf
     }
 }
 
-fn get_extension_info(path: &PathBuf, custom_manifest_path: Option<&PathBuf>) -> anyhow::Result<ExtensionInfo> {
-    let path = get_manifest_path(path, custom_manifest_path).context("Could not find extension info file")?;
+fn get_extension_info(
+    path: &PathBuf,
+    custom_manifest_path: Option<&PathBuf>,
+) -> anyhow::Result<ExtensionInfo> {
+    let path = get_manifest_path(path, custom_manifest_path)
+        .context("Could not find extension info file")?;
     let manifest = Manifest::open(&path)?;
-    let cargo_toml_path = anyhow::Context::context(path.parent(), "Could not get parent (programmer error)")?.join("Cargo.toml");
-    let cargo_info = cargo_toml::Manifest::from_path(&cargo_toml_path).context(format!("Could not find Cargo.toml at {}", cargo_toml_path.display()))?;
-    let package = cargo_info.package.context("Could not find package info in Cargo.toml")?;
+    let cargo_toml_path =
+        anyhow::Context::context(path.parent(), "Could not get parent (programmer error)")?
+            .join("Cargo.toml");
+    let cargo_info = cargo_toml::Manifest::from_path(&cargo_toml_path).context(format!(
+        "Could not find Cargo.toml at {}",
+        cargo_toml_path.display()
+    ))?;
+    let package = cargo_info
+        .package
+        .context("Could not find package info in Cargo.toml")?;
     let ext_info = ExtensionInfo {
         id: manifest.identifier,
         name: package.name,
-        version: package.version.get().context("Version in Cargo.toml is inherited, please specify a raw version")?.to_string(),
-        description: package.description.map(|s| s.get().context("Description in Cargo.toml is inherited, please specify a raw description").map(String::to_string).unwrap_or("".to_string())),
-        authors: Some(package.authors.get().context("Authors in Cargo.toml is inherited, please specify raw authors")?.into_iter().map(|a| a.to_string()).collect()),
-        license: package.license.map(|l| l.get().context("License in Cargo.toml is inherited, please specify a raw license").map(String::to_string).unwrap_or("".to_string())),
-        repository: package.repository.map(|r| r.get().context("Repository in Cargo.toml is inherited, please specify a raw repository").map(String::to_string).unwrap_or("".to_string())),
-        homepage: package.homepage.map(|h| h.get().context("Homepage in Cargo.toml is inherited, please specify a raw homepage").map(String::to_string).unwrap_or("".to_string())),
-        documentation: package.documentation.map(|d| d.get().context("Documentation in Cargo.toml is inherited, please specify a raw documentation").map(String::to_string).unwrap_or("".to_string())),
-        keywords: Some(package.keywords.get().context("Keywords in Cargo.toml is inherited, please specify raw keywords")?.into_iter().map(|k| k.to_string()).collect()),
+        version: package
+            .version
+            .get()
+            .context("Version in Cargo.toml is inherited, please specify a raw version")?
+            .to_string(),
+        description: package.description.map(|s| {
+            s.get()
+                .context("Description in Cargo.toml is inherited, please specify a raw description")
+                .map(String::to_string)
+                .unwrap_or("".to_string())
+        }),
+        authors: Some(
+            package
+                .authors
+                .get()
+                .context("Authors in Cargo.toml is inherited, please specify raw authors")?
+                .into_iter()
+                .map(|a| a.to_string())
+                .collect(),
+        ),
+        license: package.license.map(|l| {
+            l.get()
+                .context("License in Cargo.toml is inherited, please specify a raw license")
+                .map(String::to_string)
+                .unwrap_or("".to_string())
+        }),
+        repository: package.repository.map(|r| {
+            r.get()
+                .context("Repository in Cargo.toml is inherited, please specify a raw repository")
+                .map(String::to_string)
+                .unwrap_or("".to_string())
+        }),
+        homepage: package.homepage.map(|h| {
+            h.get()
+                .context("Homepage in Cargo.toml is inherited, please specify a raw homepage")
+                .map(String::to_string)
+                .unwrap_or("".to_string())
+        }),
+        documentation: package.documentation.map(|d| {
+            d.get()
+                .context(
+                    "Documentation in Cargo.toml is inherited, please specify a raw documentation",
+                )
+                .map(String::to_string)
+                .unwrap_or("".to_string())
+        }),
+        keywords: Some(
+            package
+                .keywords
+                .get()
+                .context("Keywords in Cargo.toml is inherited, please specify raw keywords")?
+                .into_iter()
+                .map(|k| k.to_string())
+                .collect(),
+        ),
         permissions: manifest.permissions.into(),
     };
     Ok(ext_info)
@@ -177,7 +241,8 @@ async fn main() -> anyhow::Result<()> {
         } => {
             let ext_info = get_extension_info(&path, manifest_path.as_ref())?;
             let _ = tokio::fs::create_dir(&output_dir).await;
-            let main_output_dir = output_dir.join(format!("{}_{}", ext_info.name, ext_info.version));
+            let main_output_dir =
+                output_dir.join(format!("{}_{}", ext_info.name, ext_info.version));
             let _ = tokio::fs::create_dir(&main_output_dir).await;
             let wasm_output = main_output_dir.join(EXTENSION_FILE_NAME);
             println!("Compiling wasm ...");
@@ -196,35 +261,56 @@ async fn main() -> anyhow::Result<()> {
             let _ = archive.into_inner()?;
 
             println!("Compressing tarball ...");
-            let gz_output = output_dir.join(format!("{}_{}.tar.gz", ext_info.name, ext_info.version));
+            let gz_output =
+                output_dir.join(format!("{}_{}.tar.gz", ext_info.name, ext_info.version));
             let tar_file = File::open(&tar_output).await?;
             let _ = File::create(&gz_output).await?;
             let gz_file = File::options().write(true).open(&gz_output).await?;
-            let mut encoder = async_compression::tokio::write::GzipEncoder::with_quality(gz_file, async_compression::Level::Best);
+            let mut encoder = async_compression::tokio::write::GzipEncoder::with_quality(
+                gz_file,
+                async_compression::Level::Best,
+            );
             tokio::io::copy(&mut tokio::io::BufReader::new(tar_file), &mut encoder).await?;
 
             // Clean up the tar file
             println!("Cleaning up ...");
-            tokio::fs::remove_dir_all(&main_output_dir).await.context(format!("Failed to remove output directory: {}", &main_output_dir.display()))?;
-            tokio::fs::remove_file(&tar_output).await.context(format!("Failed to remove tar file: {}", &tar_output.display()))?;
+            tokio::fs::remove_dir_all(&main_output_dir)
+                .await
+                .context(format!(
+                    "Failed to remove output directory: {}",
+                    &main_output_dir.display()
+                ))?;
+            tokio::fs::remove_file(&tar_output).await.context(format!(
+                "Failed to remove tar file: {}",
+                &tar_output.display()
+            ))?;
         }
-        Command::Compile { input, output, no_strip } => {
+        Command::Compile {
+            input,
+            output,
+            no_strip,
+        } => {
             compile_wasm(&input, &output, no_strip).await?;
         }
-        Command::Build { output, release, no_strip } => {
+        Command::Build {
+            output,
+            release,
+            no_strip,
+        } => {
             build_wasm(&current_dir()?, &output, release, no_strip).await?;
         }
         Command::TestLoad { path } => {
-            WasmExtension::load(
-                path.clone(),
-                Arc::new(get_extension_info(&path, None)?),
-            ).await?;
+            WasmExtension::load(path.clone(), Arc::new(get_extension_info(&path, None)?)).await?;
         }
     };
     Ok(())
 }
 
-async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) -> anyhow::Result<()> {
+async fn compile_wasm(
+    input_path: &PathBuf,
+    output: &PathBuf,
+    no_strip: bool,
+) -> anyhow::Result<()> {
     let adapter_bytes = install_wasi_preview1_adapter_if_needed().await?;
     println!("Reading wasm module from {}", input_path.display());
     let wasm_bytes = std::fs::read(input_path)?;
@@ -236,10 +322,14 @@ async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) ->
         .validate(true);
     let component_bytes = if !no_strip {
         println!("Stripping debug sections ...");
-        let component_bytes = encoder.encode().context("failed to encode wasm component")?;
+        let component_bytes = encoder
+            .encode()
+            .context("failed to encode wasm component")?;
         strip_custom_sections(&component_bytes)?
     } else {
-        let component_bytes = encoder.encode().context("failed to encode wasm component")?;
+        let component_bytes = encoder
+            .encode()
+            .context("failed to encode wasm component")?;
         component_bytes
     };
     println!("Writing wasm component to {}", output.display());
@@ -247,7 +337,12 @@ async fn compile_wasm(input_path: &PathBuf, output: &PathBuf, no_strip: bool) ->
     Ok(())
 }
 
-async fn build_wasm(cwd: &PathBuf, output: &PathBuf, release: bool, no_strip: bool) -> anyhow::Result<()> {
+async fn build_wasm(
+    cwd: &PathBuf,
+    output: &PathBuf,
+    release: bool,
+    no_strip: bool,
+) -> anyhow::Result<()> {
     install_rust_wasm_target_if_needed()?;
     StdCommand::new("cargo")
         .current_dir(cwd)
@@ -258,11 +353,11 @@ async fn build_wasm(cwd: &PathBuf, output: &PathBuf, release: bool, no_strip: bo
         .output()
         .context("failed to run cargo build")?;
     let name = cwd.file_name().unwrap().to_str().unwrap().to_string();
-    let input = cwd.join("target").join(RUST_TARGET).join(if release {
-        "release"
-    } else {
-        "debug"
-    }).join(format!("{}.wasm", name.replace("-", "_")));
+    let input = cwd
+        .join("target")
+        .join(RUST_TARGET)
+        .join(if release { "release" } else { "debug" })
+        .join(format!("{}.wasm", name.replace("-", "_")));
     compile_wasm(&input, &output, no_strip).await?;
     Ok(())
 }

@@ -36,7 +36,11 @@ impl Default for GetUserSearchRequest {
 
 pub type GetUserSearchResult = crate::APIResult<GetUserSearchResponse>;
 
-pub async fn get(pronto_base_url: &str, client: &reqwest::Client, request: GetUserSearchRequest) -> Result<GetUserSearchResult, crate::ResponseError> {
+pub async fn get(
+    pronto_base_url: &str,
+    client: &reqwest::Client,
+    request: GetUserSearchRequest,
+) -> Result<GetUserSearchResult, crate::ResponseError> {
     let mut query_url = format!("{pronto_base_url}{}", "clients/users/search");
     query_url.push_str("?");
     query_url.push_str(&format!("page[size]={}", request.page_size));
@@ -44,16 +48,18 @@ pub async fn get(pronto_base_url: &str, client: &reqwest::Client, request: GetUs
     query_url.push_str(&format!("filter[query]={}", request.query));
     let r = client.get(query_url).send().await?;
     let text = r.text().await?;
-    log::trace!("Response: {}" , text);
+    log::trace!("Response: {}", text);
     let json = serde_json::from_str(&text);
     match json {
-        Ok(json) => { Ok(json) }
+        Ok(json) => Ok(json),
         Err(_) => {
             let json = serde_json::from_str::<GetUserSearchResponse>(&text);
             let e = json.unwrap_err();
-            log::error!("Error parsing json response: {:?}." , e );
+            log::error!("Error parsing json response: {:?}.", e);
             let json = serde_json::from_str::<serde_json::Value>(&text);
-            if json.is_err() { return Err(crate::ResponseError::NotJson(text)); }
+            if json.is_err() {
+                return Err(crate::ResponseError::NotJson(text));
+            }
             Err(crate::ResponseError::from(e))
         }
     }

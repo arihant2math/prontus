@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 
 // TODO: Could be converted to bitflag
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,7 +33,7 @@ pub struct ExtensionInfo {
     pub homepage: Option<String>,
     pub documentation: Option<String>,
     pub keywords: Option<Vec<String>>,
-    pub permissions: Permissions
+    pub permissions: Permissions,
 }
 
 #[derive(Debug, thiserror::Error)]
