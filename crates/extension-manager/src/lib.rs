@@ -22,7 +22,7 @@ async fn install_extension(url: String) {
     // Generate random append first to prevent overwriting
     let file_name = url.split('/').last().unwrap();
     let dir_name = file_name.split('.').next().unwrap();
-    let rnd = rand::random::<u64>();
+    let rnd = random::<u64>();
     let temp_file = std::env::temp_dir().join(format!("prontus_extension_{rnd}.tar.gz"));
     let temp_dir = std::env::temp_dir().join(format!("prontus_extension_{rnd}"));
     let req = reqwest::get(url).await.unwrap();
