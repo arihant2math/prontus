@@ -7,8 +7,7 @@
     let flag = $state(false);
 
     let initials = $derived(user.fullname.split(" ").map((n) => n[0]).join(""));
-    // TODO: fix
-    let fontSize = $derived(small ? "text-sm" : "text-sm");
+    let fontSize = $derived(small ? "text-xs" : "text-sm");
 
     // TODO: use hasProfilePic to detect image validity instead due to false negatives that force initials to load when they shouldn't
     function setFlag() {

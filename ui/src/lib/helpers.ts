@@ -27,8 +27,7 @@ export function loadTheme(settings) {
         document.documentElement.classList.remove('dark')
     }
 
-    // Handle color scheme changes iff settings appearrance is auto
-    // TODO: will this only happen when auto mode is on during launch?
+    // Handle color scheme changes iff settings appearance is auto
     if (settings.appearance.theme === 'Auto') {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
             if (event.matches) {

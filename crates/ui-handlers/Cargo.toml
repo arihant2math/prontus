@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 client = { path = "../client" }
+dashmap = { workspace = true }
 futures = { workspace = true }
 log = { workspace = true }
 search = { path = "../search" }

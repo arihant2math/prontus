@@ -2,7 +2,7 @@
     import { PinInput, Toggle } from "bits-ui";
 
     /** @type {{value?: any}} */
-    let { value = $bindable([]) } = $props();
+    let {value = $bindable([])} = $props();
     // TODO: onchange prop
 
 </script>

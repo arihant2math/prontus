@@ -64,14 +64,11 @@ pub async fn run(
 
     // TODO: this object doesn't update instantly when a user changes a setting
     let settings = Settings::load().await?;
-    let direct_mentions = {
+    let direct_mention = {
         let state = context.inner();
         let state = state.read().await;
         let state = state.try_inner()?;
-        [
-            "<@everyone>".to_string(),
-            format!("<@{}>", state.user_info.id),
-        ]
+        format!("<@{}>", state.user_info.id)
     };
 
     loop {
@@ -97,12 +94,13 @@ pub async fn run(
                                             if membership.notification_preference != "ALL" {
                                                 show_notification = false;
                                             }
-                                            // TODO: Handle the @everyone preference ...
-                                            for mention in direct_mentions.iter() {
-                                                if event.message.message.contains(mention) {
-                                                    show_notification = true;
-                                                }
+                                            if event.message.message.contains(&direct_mention) && (membership.notification_preference == "MENTIONS" || membership.notification_preference == "MENTIONS_EXCLUDE_ALL") {
+                                                show_notification = true;
                                             }
+                                            if event.message.message.contains("<@everyone>") && membership.notification_preference == "MENTIONS" {
+                                                show_notification = true;
+                                            }
+
                                             if membership.mute {
                                                 show_notification = false;
                                             }
@@ -161,7 +159,9 @@ pub async fn run(
                                 let state = context.inner();
                                 let mut state = state.write().await;
                                 let state = state.try_inner_mut()?;
-                                // TODO: double for loop, ew
+                                // double for loop (I can't think of a better way to do this)
+                                // time complexity is O(b*n) in all cases
+                                // Iterating through the event stats first would lead to a better average/best case complexity
                                 for (bubble, stats, _) in state.channel_list.iter_mut() {
                                     for stat in event.stats.iter() {
                                         if bubble.id == stat.bubble_id {
@@ -318,7 +318,7 @@ pub async fn run(
                                 let _ = handle.emit("typingListUpdate", ());
                             }
                             // TODO: handle other
-                            _ => {}
+                            // _ => {}
                         }
                     }
                     PusherServerMessage::Error(e) => {

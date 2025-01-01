@@ -178,7 +178,7 @@
                         {/each}
                     </div>
                 </div>
-                <ReactionPanel message_id={message.id}/>
+                <ReactionPanel message_id={message.id} reactions={message.reactions}/>
                 <ul class="fixed hidden flex flex-row text-sm bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 rounded-lg shadow-md" data-popover data-popover-target-parent data-popover-configure data-popover-show-method="hover" data-popover-position="right" data-popover-offset="-150">
                     {#if !inThread}
                         <li>

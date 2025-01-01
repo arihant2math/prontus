@@ -1,6 +1,6 @@
 <script>
     /** @type {{url: any, mimetype: any, type: any}} */
-    let { url, mimetype, type } = $props();
+    let {url, mimetype, type} = $props();
 
     // TODO: hardcoded
     let realUrl = $derived(url.replace("https://files.chat.trypronto.com/", "http://localhost:10521/"));

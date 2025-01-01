@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-compression = { workspace = true }
+anyhow = { workspace = true }
 client = { path = "../client" }
 futures = { workspace = true }
 log = { workspace = true }

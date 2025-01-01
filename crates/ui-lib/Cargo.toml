@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 client = { path = "../client" }
+dashmap = { workspace = true }
 settings = { path = "../settings" }
 tauri = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+updater = { path = "../updater" }

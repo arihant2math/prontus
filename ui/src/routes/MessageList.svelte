@@ -54,6 +54,7 @@
             });
             updating = false;
         }
+        positionPopovers();
     }
 
     positionPopovers();

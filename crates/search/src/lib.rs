@@ -29,10 +29,10 @@ pub struct SearchResults {
 pub enum SearchError {
     #[error("Serde json error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
-    #[error("Heed error: {0}")]
-    HeedError(#[from] heed::Error),
     #[error("Milli error: {0}")]
     MilliError(#[from] milli::Error),
+    #[error("Heed error: {0}")]
+    MilliHeedError(#[from] milli::heed::Error),
 }
 
 impl Search {

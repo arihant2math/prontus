@@ -65,7 +65,7 @@
        aria-label="Sidebar"
        class="h-full">
     <div style="height: 100vh" class="h-full z-40 bg-gray-50 dark:bg-slate-950">
-        <!--TODO: maybe move this to the bottom-->
+        <!--TODO: maybe move this to the bottom (maybe a setting) -->
         <CurrentUserCard bind:user={currentUser} {...on}/>
         <ul class="space-y-2 font-medium px-3 h-full overflow-y-auto overflow-x-hidden no-scrollbar pb-20" id="sidebar-list">
             {#each channels as item}

@@ -1,4 +1,4 @@
-use heed::EnvOpenOptions;
+use milli::heed::EnvOpenOptions;
 use std::path::PathBuf;
 
 #[allow(unused)]

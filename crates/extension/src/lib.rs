@@ -3,7 +3,7 @@ pub use crate::wasm_host::WasmExtension;
 use log::warn;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::{error, fs};
+use std::fs;
 use thiserror::Error;
 
 pub mod info;

@@ -4,46 +4,35 @@ use ui_lib::{AppState, BackendError, ChannelUsers};
 
 #[command]
 pub async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-
+    let state = state.try_inner()?;
     let bubble_info = state.client.bubble_info(id).await?;
-    state.current_channel = bubble_info.bubble;
+    *state.current_channel.write().map_err(|_| BackendError::RwLockWriteError)? = bubble_info.bubble;
     Ok(())
 }
 
 #[command]
 pub async fn get_current_channel(state: State<'_, AppState>) -> Result<Bubble, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
-
-    Ok(state.current_channel.clone())
+    Ok(state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.clone())
 }
 
 #[command]
 pub async fn get_channel_list(
     state: State<'_, AppState>,
 ) -> Result<Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
-
-    Ok(state.channel_list.clone())
+    Ok(state.channel_list.read().map_err(|_| BackendError::RwLockReadError)?.clone())
 }
 
 #[command]
 pub async fn get_channel_info(
     state: State<'_, AppState>,
 ) -> Result<Option<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
-    let id = state.current_channel.id;
-    let bubble = state
-        .channel_list
+    let id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
+    let channel_list = state.channel_list.read().map_err(|_| BackendError::RwLockReadError)?;
+    let bubble = channel_list
         .iter()
         .find(|(bubble, _, _)| bubble.id == id);
     Ok(bubble.cloned())
@@ -54,8 +43,6 @@ pub async fn get_channel_users(
     state: State<'_, AppState>,
     id: u64,
 ) -> Result<Vec<UserInfo>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     let users = state
@@ -76,8 +63,6 @@ pub async fn get_channel_users(
 #[command]
 pub async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
     let membership = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         let page = state.channel_users.get(&id).map(|u| u.page).unwrap_or(1);
         state
@@ -90,14 +75,12 @@ pub async fn load_channel_users(state: State<'_, AppState>, id: u64) -> Result<(
             .await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
 
     let users: Vec<u64> = membership.membership.iter().map(|m| m.user_id).collect();
-    let o = state.channel_users.get_mut(&id).map(|u| {
-        u.users.extend(users.clone());
-        u.page += 1;
+    let o = state.channel_users.get_mut(&id).map(|mut u| {
+        u.value_mut().users.extend(users.clone());
+        u.value_mut().page += 1;
     });
     if o.is_none() {
         state.channel_users.insert(
@@ -124,20 +107,16 @@ pub async fn set_channel_mute(
     mute: bool,
 ) -> Result<(), BackendError> {
     let membership = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
 
         state.client.mute_bubble(channel_id, mute).await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    state
-        .channel_list
+    let state = state.try_inner()?;
+    let mut channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    channel_list
         .iter_mut()
-        .find(|(bubble, _, _)| bubble.id == state.current_channel.id)
+        .find(|(bubble, _, _)| bubble.id == state.current_channel.read().unwrap().id)
         .unwrap()
         .2 = Some(membership.membership);
     Ok(())
@@ -150,20 +129,19 @@ pub async fn set_channel_pin(
     pin: bool,
 ) -> Result<(), BackendError> {
     let membership = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
 
         state.client.pin_bubble(channel_id, pin).await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
+    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
     state
         .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?
         .iter_mut()
-        .find(|(bubble, _, _)| bubble.id == state.current_channel.id)
+        .find(|(bubble, _, _)| bubble.id == current_channel_id)
         .unwrap()
         .2 = Some(membership.membership);
     Ok(())
@@ -176,20 +154,19 @@ pub async fn set_channel_alias(
     alias: Option<String>,
 ) -> Result<(), BackendError> {
     let membership = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
 
         state.client.set_bubble_alias(channel_id, alias).await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
+    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
     state
         .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?
         .iter_mut()
-        .find(|(bubble, _, _)| bubble.id == state.current_channel.id)
+        .find(|(bubble, _, _)| bubble.id == current_channel_id)
         .unwrap()
         .2 = Some(membership.membership);
     Ok(())
@@ -202,8 +179,6 @@ pub async fn set_channel_notifications(
     level: String,
 ) -> Result<(), BackendError> {
     let membership = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
 
         state
@@ -220,13 +195,14 @@ pub async fn set_channel_notifications(
             .await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
+    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
     state
         .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?
         .iter_mut()
-        .find(|(bubble, _, _)| bubble.id == state.current_channel.id)
+        .find(|(bubble, _, _)| bubble.id == current_channel_id)
         .unwrap()
         .2 = Some(membership.membership);
     Ok(())
@@ -235,11 +211,11 @@ pub async fn set_channel_notifications(
 #[command]
 pub async fn read_channel(state: State<'_, AppState>, channel_id: u64) -> Result<(), BackendError> {
     {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         let latest_bubble_id = state
             .channel_list
+            .read()
+            .map_err(|_| BackendError::RwLockReadError)?
             .iter()
             .find(|(info, _, _)| info.id == channel_id)
             .cloned()
@@ -263,8 +239,6 @@ pub async fn set_channel_title(
     channel_id: u64,
     title: String,
 ) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     state.client.set_bubble_title(channel_id, title).await?;
@@ -278,8 +252,6 @@ pub async fn set_channel_category(
     channel_id: u64,
     category_id: Option<u64>,
 ) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     state
@@ -297,14 +269,13 @@ pub async fn modify_channel_permission(
     key: String,
     value: String,
 ) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     state
         .client
         .modify_bubble_permission(channel_id, key, value)
         .await?;
+    // TODO: update state
     Ok(())
 }
 
@@ -313,8 +284,6 @@ pub async fn delete_channel(
     state: State<'_, AppState>,
     channel_id: u64,
 ) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     state.client.delete_bubble(channel_id).await?;

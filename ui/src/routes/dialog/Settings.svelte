@@ -1,4 +1,3 @@
-<!--TODO: Add ability to log out-->
 <script>
     import {open} from '@tauri-apps/plugin-dialog';
     import RadioLabel from "../settingsComponents/RadioLabel.svelte";

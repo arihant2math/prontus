@@ -1,12 +1,15 @@
 use client::{
     Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, Task, UserInfo,
 };
+use dashmap::DashMap;
 use settings::Settings;
-use std::collections::HashMap;
-use std::ops::Deref;
-use std::sync::Arc;
+use std::cell::UnsafeCell;
+use std::sync::{
+    atomic::AtomicBool,
+    Arc,
+    RwLock
+};
 use thiserror::Error;
-use tokio::sync::RwLock;
 
 #[derive(Copy, Clone, Debug, Error)]
 pub enum UnlockError {
@@ -23,19 +26,19 @@ pub struct ChannelUsers {
 
 pub struct AppData {
     pub user_info: UserInfo,
-    pub users: HashMap<u64, UserInfo>,
+    pub users: DashMap<u64, UserInfo>,
     pub client: Arc<ProntoClient>,
-    pub channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>,
-    pub channel_users: HashMap<u64, ChannelUsers>,
-    pub current_channel: Bubble,
-    pub message_list: Vec<Message>,
-    pub parent_messages: Vec<Message>,
-    pub announcements: Vec<Announcement>,
-    pub tasks: Vec<Task>,
+    pub channel_list: RwLock<Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>>,
+    pub channel_users: DashMap<u64, ChannelUsers>,
+    pub current_channel: RwLock<Bubble>,
+    pub message_list: RwLock<Vec<Message>>,
+    pub parent_messages: RwLock<Vec<Message>>,
+    pub announcements: RwLock<Vec<Announcement>>,
+    pub tasks: RwLock<Vec<Task>>,
     // TODO: include thread id too
-    pub typing_users: HashMap<u64, Vec<u64>>,
-    pub is_typing: bool,
-    pub settings: Settings,
+    pub typing_users: DashMap<u64, Vec<u64>>,
+    pub is_typing: AtomicBool,
+    pub settings: RwLock<Settings>,
 }
 
 pub enum InnerAppState {
@@ -43,42 +46,42 @@ pub enum InnerAppState {
     Loaded(AppData),
 }
 
-impl InnerAppState {
-    pub fn try_inner(&self) -> Result<&AppData, UnlockError> {
-        match self {
-            InnerAppState::Loaded(data) => Ok(data),
-            InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
-        }
-    }
-
-    pub fn try_inner_mut(&mut self) -> Result<&mut AppData, UnlockError> {
-        match self {
-            InnerAppState::Loaded(data) => Ok(data),
-            InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
-        }
-    }
-}
-
-#[derive(Clone)]
+/// AppStateV2 is a non-bottlenecked version of AppState
 pub struct AppState {
-    pub inner: Arc<RwLock<InnerAppState>>,
+    pub loaded: AtomicBool,
+    inner: Arc<UnsafeCell<InnerAppState>>,
 }
+
+unsafe impl Send for AppState {}
+unsafe impl Sync for AppState {}
 
 impl AppState {
-    pub async fn is_loaded(&self) -> bool {
-        match self.inner.read().await.deref() {
-            InnerAppState::Loaded(_) => true,
-            InnerAppState::Unloaded => false,
-        }
-    }
-
-    pub fn inner(&self) -> &RwLock<InnerAppState> {
-        &self.inner
-    }
-
     pub fn unloaded() -> Self {
         Self {
-            inner: Arc::new(RwLock::new(InnerAppState::Unloaded)),
+            loaded: AtomicBool::new(false),
+            inner: Arc::new(UnsafeCell::new(InnerAppState::Unloaded)),
         }
+    }
+
+    pub async fn is_loaded(&self) -> bool {
+        self.loaded.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    pub fn try_inner(&self) -> Result<&AppData, UnlockError> {
+        if self.loaded.load(std::sync::atomic::Ordering::Relaxed) {
+            match unsafe { &*self.inner.get() } {
+                InnerAppState::Loaded(data) => Ok(data),
+                InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
+            }
+        } else {
+            Err(UnlockError::NotLoaded)
+        }
+    }
+
+    pub fn load(&self, data: AppData) {
+        unsafe {
+            *self.inner.get() = InnerAppState::Loaded(data);
+        }
+        self.loaded.store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }

@@ -3,14 +3,15 @@ use client::{
     Announcement, Bubble, BubbleStats, Membership, Message, ProntoClient, ReactionType, Task,
     UserInfo,
 };
+use dashmap::DashMap;
 use search::milli::score_details::ScoringStrategy;
 use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
 use search::SearchResults;
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
+use std::sync::atomic::AtomicBool;
 use tauri::{command, Emitter, State};
-use ui_lib::{AppData, AppState, BackendError, InnerAppState};
+use ui_lib::{AppData, AppState, BackendError};
 use updater::Version;
 
 #[command]
@@ -39,7 +40,7 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
     let channel_list_future = client.bubble_list();
     let (user_info, channel_list) = futures::join!(user_info_future, channel_list_future);
     let user_info = user_info?.user;
-    let mut users = HashMap::new();
+    let users = DashMap::new();
     users.insert(user_info.id, user_info.clone());
     let channel_list = channel_list?;
     let mut state_channel_list: Vec<(Bubble, Option<BubbleStats>, Option<Membership>)> = vec![];
@@ -68,23 +69,23 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         user_info,
         users,
         client: Arc::new(client),
-        current_channel: state_channel_list[0].clone().0,
-        channel_list: state_channel_list,
-        message_list: vec![],
-        parent_messages: vec![],
-        channel_users: HashMap::new(),
-        announcements: announcements_list?.announcements,
-        tasks: tasks_list_incomplete?
+        current_channel: RwLock::new(state_channel_list[0].clone().0),
+        channel_list: RwLock::new(state_channel_list),
+        message_list: RwLock::new(vec![]),
+        parent_messages: RwLock::new(vec![]),
+        channel_users: DashMap::new(),
+        announcements: RwLock::new(announcements_list?.announcements),
+        tasks: RwLock::new(tasks_list_incomplete?
             .tasks
             .iter()
             .chain(tasks_list_complete?.tasks.iter())
             .cloned()
-            .collect(),
-        is_typing: false,
-        typing_users: HashMap::new(),
-        settings,
+            .collect()),
+        is_typing: AtomicBool::new(false),
+        typing_users: DashMap::new(),
+        settings: RwLock::new(settings),
     };
-    *state.inner().inner().write().await = InnerAppState::Loaded(data);
+    state.load(data);
     Ok(())
 }
 
@@ -101,8 +102,6 @@ pub async fn set_reaction_state(
         reaction_type: ReactionType,
         active: bool,
     ) -> Result<Message, BackendError> {
-        let state = state.clone().inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
 
         let message = if active {
@@ -122,17 +121,15 @@ pub async fn set_reaction_state(
         active,
     );
     {
-        let state = state.inner().inner();
-        let mut state = state.write().await;
-        let state = state.try_inner_mut()?;
+        let state = state.try_inner()?;
 
         if active {
             state
                 .client
                 .add_reaction(message_id, ReactionType::from(reaction_id as i32))
                 .await?;
-            let messages = state
-                .message_list
+            let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+            let messages = message_list
                 .iter_mut()
                 .find(|message| message.id == message_id)
                 .unwrap();
@@ -154,8 +151,8 @@ pub async fn set_reaction_state(
                 .client
                 .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
                 .await?;
-            let messages = state
-                .message_list
+            let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+            let messages = message_list
                 .iter_mut()
                 .find(|message| message.id == message_id)
                 .unwrap();
@@ -169,12 +166,10 @@ pub async fn set_reaction_state(
     }
     let message = message.await?;
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
+    let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
 
-    *state
-        .message_list
+    *message_list
         .iter_mut()
         .find(|m| m.id == message_id)
         .unwrap() = message;
@@ -183,10 +178,8 @@ pub async fn set_reaction_state(
 }
 
 #[command]
-pub async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), BackendError> {
+pub async fn create_dm(handle: tauri::AppHandle, state: State<'_, AppState>, user_id: u64) -> Result<(), BackendError> {
     let channel_list = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         state
             .client
@@ -210,20 +203,18 @@ pub async fn create_dm(state: State<'_, AppState>, user_id: u64) -> Result<(), B
         state_channel_list
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    state.channel_list = channel_list;
-    // TODO: Return new channel (id atleast) and emit a channel list changed event
+    let state = state.try_inner()?;
+    let mut state_channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    *state_channel_list = channel_list;
+    // TODO: Return new channel (id at the minimum)
+    let _ = handle.emit("channelListUpdate", ());
 
     Ok(())
 }
 
 #[command]
-pub async fn create_bubble(state: State<'_, AppState>, name: String) -> Result<(), BackendError> {
+pub async fn create_bubble(handle: tauri::AppHandle, state: State<'_, AppState>, name: String) -> Result<(), BackendError> {
     let channel_list = {
-        let state = state.inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         state
             .client
@@ -247,11 +238,11 @@ pub async fn create_bubble(state: State<'_, AppState>, name: String) -> Result<(
         state_channel_list
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    state.channel_list = channel_list;
-    // TODO: Return new channel (id atleast) and emit a channe list changed event
+    let state = state.try_inner()?;
+    let mut state_channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    *state_channel_list = channel_list;
+    // TODO: Return new channel (id at the minimum)
+    let _ = handle.emit("channelListUpdate", ());
 
     Ok(())
 }
@@ -261,8 +252,6 @@ pub async fn user_search(
     state: State<'_, AppState>,
     query: String,
 ) -> Result<Vec<UserInfo>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
     let response = state
@@ -280,11 +269,9 @@ pub async fn user_search(
 pub async fn get_announcements(
     state: State<'_, AppState>,
 ) -> Result<Vec<Announcement>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
-    Ok(state.announcements.clone())
+    Ok(state.announcements.read().map_err(|_| BackendError::RwLockReadError)?.clone())
 }
 
 #[command]
@@ -292,11 +279,10 @@ pub async fn mark_announcement_read(
     state: State<'_, AppState>,
     id: u64,
 ) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
     let new_announcement = state.client.mark_read_announcement(id).await?;
-    state.announcements.iter_mut().for_each(|announcement| {
+    let mut state_announcements = state.announcements.write().map_err(|_| BackendError::RwLockWriteError)?;
+    state_announcements.iter_mut().for_each(|announcement| {
         if announcement.id == new_announcement.announcement.id {
             *announcement = new_announcement.announcement.clone();
         }
@@ -306,11 +292,9 @@ pub async fn mark_announcement_read(
 
 #[command]
 pub async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
 
-    Ok(state.tasks.clone())
+    Ok(state.tasks.read().map_err(|_| BackendError::RwLockReadError)?.clone())
 }
 
 #[command]
@@ -320,16 +304,13 @@ pub async fn complete_task(
     task_id: u64,
 ) -> Result<(), BackendError> {
     let updated_task = {
-        let state = state.clone().inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         state.client.task_complete(task_id).await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    if let Some(task) = state.tasks.iter_mut().find(|task| task.id == task_id) {
+    let state = state.try_inner()?;
+    let mut state_tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    if let Some(task) = state_tasks.iter_mut().find(|task| task.id == task_id) {
         *task = updated_task.task.clone();
     }
     let _ = handle.emit("taskListUpdate", ());
@@ -343,16 +324,13 @@ pub async fn uncomplete_task(
     task_id: u64,
 ) -> Result<(), BackendError> {
     let updated_task = {
-        let state = state.clone().inner().inner();
-        let state = state.read().await;
         let state = state.try_inner()?;
         state.client.task_uncomplete(task_id).await?
     };
 
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    if let Some(task) = state.tasks.iter_mut().find(|task| task.id == task_id) {
+    let state = state.try_inner()?;
+    let mut state_tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    if let Some(task) = state_tasks.iter_mut().find(|task| task.id == task_id) {
         *task = updated_task.task.clone();
     }
     let _ = handle.emit("taskListUpdate", ());
@@ -366,13 +344,11 @@ pub async fn delete_task(
     task_id: u64,
 ) -> Result<(), BackendError> {
     // TODO: Fix
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
+    let state = state.try_inner()?;
 
     // state.client.task_delete(task_id).await?;
-    state.tasks = state
-        .tasks
+    let mut tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    *tasks = tasks
         .iter()
         .filter(|task| task.id != task_id)
         .cloned()
@@ -383,10 +359,8 @@ pub async fn delete_task(
 
 #[command]
 pub async fn set_typing(state: State<'_, AppState>, typing: bool) -> Result<(), BackendError> {
-    let state = state.inner().inner();
-    let mut state = state.write().await;
-    let state = state.try_inner_mut()?;
-    state.is_typing = typing;
+    let state = state.try_inner()?;
+    state.is_typing.store(typing, std::sync::atomic::Ordering::Relaxed);
     // TODO: send pusher message
     Ok(())
 }
@@ -394,9 +368,7 @@ pub async fn set_typing(state: State<'_, AppState>, typing: bool) -> Result<(), 
 #[command]
 pub async fn get_typing_users(
     state: State<'_, AppState>,
-) -> Result<HashMap<u64, Vec<u64>>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
+) -> Result<DashMap<u64, Vec<u64>>, BackendError> {
     let state = state.try_inner()?;
     Ok(state.typing_users.clone())
 }
@@ -406,10 +378,8 @@ pub async fn search_local(
     state: State<'_, AppState>,
     query: String,
 ) -> Result<Option<SearchResults>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
-    let settings = &state.settings;
+    let settings = &state.settings.read().map_err(|_| BackendError::RwLockReadError)?;
     if let Some(msg) = settings.search.messages.as_ref() {
         let loc = PathBuf::from(&msg.path);
         let mut search = search::Search::new(&loc);
@@ -444,17 +414,14 @@ pub async fn version() -> Result<String, BackendError> {
 
 #[command]
 pub async fn check_update(state: State<'_, AppState>) -> Result<Option<Version>, BackendError> {
-    let state = state.inner().inner();
-    let state = state.read().await;
     let state = state.try_inner()?;
-    // TODO: below can panic
+    let settings = state.settings.read().map_err(|_| BackendError::RwLockReadError)?;
     let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(
-        &*state.settings.update.channel,
+        &*settings.update.channel,
     ))
-    .await
-    .unwrap();
+    .await?;
     if file.update_available() {
-        Ok(file.latest_version_details().unwrap())
+        Ok(file.latest_version_details()?)
     } else {
         Ok(None)
     }

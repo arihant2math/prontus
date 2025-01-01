@@ -1,6 +1,6 @@
 use client::{Message, ProntoClient};
 use dashmap::DashMap;
-use heed::EnvOpenOptions;
+use milli::heed::EnvOpenOptions;
 use log::{debug, info};
 use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
 use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};

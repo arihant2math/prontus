@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
+use thiserror::Error;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Download {
@@ -56,6 +57,16 @@ pub const RC_UPDATE_URL: &str =
 pub const STABLE_UPDATE_URL: &str =
     "https://raw.githubusercontent.com/arihant2math/prontus-update/refs/heads/main/stable.json";
 
+#[derive(Debug, Error)]
+pub enum UpdateError {
+    #[error("Failed to get update file: {0}")]
+    ReqwestError(#[from] reqwest::Error),
+    #[error("Failed to parse update file: {0}")]
+    SerdeError(#[from] serde_json::Error),
+    #[error("I/O error: {0}")]
+    IOError(#[from] std::io::Error),
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum UpdateChannel {
     Alpha,
@@ -88,7 +99,7 @@ impl UpdateChannel {
 }
 
 impl UpdateFile {
-    async fn get_update_file_with_url(url: &str) -> Result<UpdateFile, Box<dyn std::error::Error>> {
+    async fn get_update_file_with_url(url: &str) -> Result<UpdateFile, UpdateError> {
         let client = reqwest::Client::new();
         let res = client.get(url).send().await?;
         let text = res.text().await?;
@@ -98,7 +109,7 @@ impl UpdateFile {
 
     pub async fn update_file(
         channel: UpdateChannel,
-    ) -> Result<UpdateFile, Box<dyn std::error::Error>> {
+    ) -> Result<UpdateFile, UpdateError> {
         Self::get_update_file_with_url(channel.url()).await
     }
 
@@ -111,7 +122,7 @@ impl UpdateFile {
         current_version != latest_version
     }
 
-    pub fn latest_version_details(&self) -> Result<Option<Version>, Box<dyn std::error::Error>> {
+    pub fn latest_version_details(&self) -> Result<Option<Version>, UpdateError> {
         let latest_version = &self.latest_version;
         if let Some(latest_version) = latest_version {
             Ok(self.versions.get(latest_version).cloned())
@@ -152,7 +163,7 @@ pub struct InstallUpdate {
 }
 
 impl InstallUpdate {
-    pub async fn download(&self) -> reqwest::Result<()> {
+    pub async fn download(&self) -> Result<(), UpdateError> {
         let dir = std::env::temp_dir();
         let file_path = dir.join(&self.file_name);
         let client = reqwest::Client::new();

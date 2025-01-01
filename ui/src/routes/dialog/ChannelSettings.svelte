@@ -1,4 +1,3 @@
-<!--TODO: Add ability to log out-->
 <script>
     import {
         getSettings,

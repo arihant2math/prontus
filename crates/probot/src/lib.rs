@@ -109,7 +109,7 @@ impl<T: Handler> Bot<T> {
     /// Call this before run() to properly subscribe to pusher channel.
     /// This function will panic if called twice.
     pub async fn init(&mut self) {
-        assert_ne!(self.inited);
+        assert!(!self.inited);
         self.inited = true;
         self.pusher_client.init().await;
         let user_info = self.client.user_info(None).await.unwrap().user;

@@ -230,6 +230,7 @@ impl PusherClient {
             .read()
             .await
             .send(PusherClientMessageWrapper::Shutdown)
+            .await
             .unwrap();
     }
 }

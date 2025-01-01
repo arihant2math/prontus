@@ -1,5 +1,4 @@
 use crate::info::ExtensionInfo;
-use std::error;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;

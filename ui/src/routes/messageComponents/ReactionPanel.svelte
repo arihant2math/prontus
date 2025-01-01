@@ -2,11 +2,10 @@
     import {setReactionState} from "$lib/api.ts";
 
     /** @type {{message_id: any}} */
-    let { message_id } = $props();
+    let {message_id, reactions} = $props();
 
     async function react(react_id) {
-        // TODO: Allow for unreacting too
-        await setReactionState(message_id, react_id, true);
+        await setReactionState(message_id, react_id, !reactions.find(r => r.reaction_id === react_id));
     }
 </script>
 
