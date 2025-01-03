@@ -54,7 +54,8 @@ impl Encrypt {
         user_id: u64,
     ) -> Option<Self> {
         let key = public_lookup_service.lookup(org_id, user_id)?;
-        let secret_key = load_secret_key();
+        // TODO: handle error
+        let secret_key = load_secret_key().ok()?;
         let dm_encryption = DMEncryption::new(secret_key, key);
         Some(Self {
             dm_encryption,

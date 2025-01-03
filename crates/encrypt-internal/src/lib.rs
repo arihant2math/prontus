@@ -59,20 +59,23 @@ impl DMEncryption {
 const SERVICE: &str = "prontus-encrypt";
 const DEFAULT_USER: &str = "com_prontus_default";
 
-pub fn load_secret_key() -> [u8; 32] {
+pub fn load_secret_key() -> keyring::Result<[u8; 32]> {
     let secret_vector = Entry::new(SERVICE, DEFAULT_USER)
         .expect("Failed to load secret key, please report this issue to the keyring developers")
-        .get_secret()
-        .unwrap();
+        .get_secret()?;
+    if secret_vector.len() != 32 {
+        return Err(keyring::Error::Invalid("com_prontus_default".to_string(), "Invalid secret key length".to_string()));
+    }
     // Keep in array to allow for Copy
     let mut secret_key = [0u8; 32];
     secret_key.copy_from_slice(&secret_vector);
-    secret_key
+    Ok(secret_key)
 }
 
-pub fn store_secret_key(secret_key: [u8; 32]) {
-    let entry = Entry::new(SERVICE, DEFAULT_USER).unwrap();
-    entry.set_secret(&secret_key).unwrap();
+pub fn store_secret_key(secret_key: [u8; 32]) -> keyring::Result<()> {
+    let entry = Entry::new(SERVICE, DEFAULT_USER).expect("Failed to load secret key, please report this issue to the keyring developers");
+    entry.set_secret(&secret_key)?;
+    Ok(())
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
