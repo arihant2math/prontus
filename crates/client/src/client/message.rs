@@ -46,7 +46,7 @@ impl ProntoClient {
     pub async fn delete_message(
         &self,
         message_id: u64,
-    ) -> Result<message_delete::DeleteMessageResult, ResponseError> {
+    ) -> Result<message_delete::DeleteMessageResponse, ResponseError> {
         Ok(
             message_delete::post(&self.api_base_url, &self.http_client, message_id)
                 .await?
