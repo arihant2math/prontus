@@ -113,7 +113,7 @@ pub enum ResponseError {
 
 impl From<APIError> for ResponseError {
     fn from(e: APIError) -> Self {
-        ResponseError::ApiError(e.to_string())
+        ResponseError::ApiError(e.error)
     }
 }
 
