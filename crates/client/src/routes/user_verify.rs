@@ -9,7 +9,7 @@ pub enum UserVerifyRequest {
     // example: +14086692442
     // Which is +[country code][phone number]
     #[serde(rename = "phone")]
-    Phone(String), // TODO: Phone type
+    Phone(String),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

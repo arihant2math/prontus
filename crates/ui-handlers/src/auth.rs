@@ -63,6 +63,5 @@ pub async fn send_code(email: String, code: String) -> Result<(), BackendError> 
         .ok_or(BackendError::NotAuthenticated)?
         .api_key = response.users[0].access_token.clone();
     settings.save().await?;
-    // TODO: Error handling as usual
     Ok(())
 }

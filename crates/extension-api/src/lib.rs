@@ -44,6 +44,7 @@ fn extension() -> &'static mut dyn Extension {
     unsafe { EXTENSION.as_deref_mut().unwrap() }
 }
 
+// TODO: static mut is deprecated
 static mut EXTENSION: Option<Box<dyn Extension>> = None;
 
 #[cfg(target_arch = "wasm32")]

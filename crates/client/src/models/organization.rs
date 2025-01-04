@@ -1,15 +1,16 @@
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use crate::serde_datetime;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Organization {
     pub id: u64,
     pub name: String,
-    // TODO: Datetime
-    pub created_at: String,
-    // TODO: Datetime
-    pub updated_at: String,
+    #[serde(with = "serde_datetime")]
+    pub created_at: NaiveDateTime,
+    #[serde(with = "serde_datetime")]
+    pub updated_at: NaiveDateTime,
     pub profilepic: i64,
-    // TODO: Datetime
     pub profilepicupdated: String,
     pub tasks_enabled: bool,
     pub uuid: String,

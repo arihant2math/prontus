@@ -175,6 +175,11 @@ impl InstallUpdate {
         Ok(())
     }
 
+    #[cfg(target_os = "windows")]
+    async fn inner_install(&self) -> Result<(), UpdateError> {
+        Ok(())
+    }
+
     pub async fn install(&self) -> Result<(), Box<dyn std::error::Error>> {
         let dir = std::env::temp_dir();
         let file_path = dir.join(&self.file_name);

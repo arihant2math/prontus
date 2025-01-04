@@ -11,7 +11,6 @@ struct APIEndpoint {
     url: Expr,
     response: Type,
     request: Type,
-    // TODO: don't use Expr here
     extra_args: HashMap<String, Option<Expr>>,
 }
 

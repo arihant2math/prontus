@@ -194,14 +194,14 @@ mod tests {
 
     async fn get_client() -> ProntoClient {
         INIT.call_once(|| {
-            simple_logger::init_with_level(log::Level::Debug).unwrap();
+            simple_logger::init_with_level(log::Level::Debug).expect("Failed to initialize testing logger");
         });
-        let settings = settings::Settings::load().await.unwrap();
+        let settings = settings::Settings::load().await.expect("Failed to load settings");
         let client = ProntoClient::new(
             "https://stanfordohs.pronto.io/api/".to_string(),
-            &settings.auth.unwrap().api_key,
+            &settings.auth.expect("Failed to get auth section of settings, open prontus and authenticate before running these tests").api_key,
         );
-        client.unwrap()
+        client.expect("Failed to create client")
     }
 
     #[tokio::test]
@@ -212,21 +212,21 @@ mod tests {
     #[tokio::test]
     async fn test_get_current_user_info() {
         let client = get_client().await;
-        let _response = client.current_user_info().await.unwrap();
+        let _response = client.current_user_info().await.expect("Failed to get current user info");
     }
 
     #[tokio::test]
     async fn test_get_bubble_list() {
         let client = get_client().await;
-        let _response = client.bubble_list().await.unwrap();
+        let _response = client.bubble_list().await.expect("Failed to get bubble list");
     }
 
     #[tokio::test]
     async fn test_get_bubble_info() {
         let client = get_client().await;
-        let bubble_list = client.bubble_list().await.unwrap();
+        let bubble_list = client.bubble_list().await.expect("Failed to get bubble list");
         let bubble_id = bubble_list.bubbles[0].id;
-        let _response = client.bubble_info(bubble_id).await.unwrap();
+        let _response = client.bubble_info(bubble_id).await.expect("Failed to get bubble info");
     }
 
     #[tokio::test]
@@ -235,7 +235,7 @@ mod tests {
         client
             .announcement_list("RECEIVED".to_string())
             .await
-            .unwrap();
+            .expect("Failed to get announcement list");
     }
 
     #[tokio::test]
@@ -245,19 +245,19 @@ mod tests {
         client
             .task_list(response.user.organizations[0].id, false)
             .await
-            .unwrap();
+            .expect("Failed to get task list");
         client
             .task_list(response.user.organizations[0].id, true)
             .await
-            .unwrap();
+            .expect("Failed to get task list");
     }
 
     #[tokio::test]
     async fn test_get_bubble_history() {
         let client = get_client().await;
-        let bubble_list = client.bubble_list().await.unwrap();
+        let bubble_list = client.bubble_list().await.expect("Failed to get bubble list");
         let bubble_id = bubble_list.bubbles[0].id;
-        let _response = client.bubble_history(bubble_id, None).await.unwrap();
+        let _response = client.bubble_history(bubble_id, None).await.expect("Failed to get bubble history");
     }
 
     #[tokio::test]
