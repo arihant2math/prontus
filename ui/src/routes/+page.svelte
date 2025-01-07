@@ -18,7 +18,8 @@
             console.log("User is authenticated");
             page = 0
         }, (e) => {
-            if (e.toString() === "The user is not authenticated") {
+            // TODO: smh text matching
+            if (e.toString() === "The user is not authenticated" || e.toString() === "Response error: API error: UNAUTHORIZED") {
                 page = 1
             } else {
                 console.error(e);
