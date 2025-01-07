@@ -207,7 +207,7 @@
                         <UserList bind:channelUsers={channelUsers} onCreateDm={createDmForUser}/>
                     {/if}
                     {#if showThread}
-                        <div class="w-max h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
+                        <div class="w-auto h-full overflow-x-hidden overflow-y-hidden border border-gray-500">
                             <button class="fixed top-16 right-4 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-lg"
                                     onclick={() => {showThread = false}} aria-label="Close Thread">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -218,11 +218,11 @@
                             </button>
                             <div class="flex flex-col w-full h-full overflow-x-hidden overflow-y-hidden ml-4">
                                 <MessageList bind:messages={threadMessages}
-                                             channelInfo={channelInfo} viewThread={(id) => {}}
+                                             channelInfo={channelInfo} viewThread={(_id) => {}}
                                              bind:parentMessages={parentMessages} currentUser={currentUser}
                                              inThread={true}
                                              settings={settings} onCreateDm={createDmForUser}/>
-                                <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 p-5">
+                                <div class="w-full mt-auto bg-white dark:bg-slate-900 z-40 px-5 pb-4 pt-1">
                                     <RichTextEdit
                                             sendMessage={async (text) => {await queuedSendMessage(text, threadParent)}}/>
                                 </div>
