@@ -1,7 +1,9 @@
 [package]
 name = "scripting"
 version = "0.1.0"
-edition = "2021"
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
 
 [dependencies]
 boa_engine = { workspace = true }

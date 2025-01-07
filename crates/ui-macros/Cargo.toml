@@ -1,7 +1,9 @@
 [package]
 name = "ui-macros"
-version = "0.1.0"
-edition = "2021"
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+version = { workspace = true }
 
 [lib]
 proc-macro = true

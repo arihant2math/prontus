@@ -47,8 +47,9 @@ pub enum InnerAppState {
 }
 
 /// AppStateV2 is a non-bottlenecked version of AppState
+#[derive(Clone)]
 pub struct AppState {
-    pub loaded: AtomicBool,
+    pub loaded: Arc<AtomicBool>,
     inner: Arc<UnsafeCell<InnerAppState>>,
 }
 
@@ -58,7 +59,7 @@ unsafe impl Sync for AppState {}
 impl AppState {
     pub fn unloaded() -> Self {
         Self {
-            loaded: AtomicBool::new(false),
+            loaded: Arc::new(AtomicBool::new(false)),
             inner: Arc::new(UnsafeCell::new(InnerAppState::Unloaded)),
         }
     }

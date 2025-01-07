@@ -415,9 +415,9 @@ pub async fn version() -> Result<String, BackendError> {
 #[command]
 pub async fn check_update(state: State<'_, AppState>) -> Result<Option<Version>, BackendError> {
     let state = state.try_inner()?;
-    let settings = state.settings.read().map_err(|_| BackendError::RwLockReadError)?;
+    let update_channel = state.settings.read().map_err(|_| BackendError::RwLockReadError)?.update.channel.clone();
     let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(
-        &*settings.update.channel,
+        &*update_channel,
     ))
     .await?;
     if file.update_available() {

@@ -2,6 +2,12 @@
 members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "extension-manager", "probot", "pusher", "scripting", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "updater", "version", "wit-gen"]
 resolver = "2"
 
+[workspace.package]
+authors = ["Ashwin Naren <arihant2math@gmail.com>"]
+edition = "2021"
+license = "MIT"
+version = "0.1.0-beta.1"
+
 [workspace.dependencies]
 async-compression = { version = "0.4", features = ["gzip"] }
 anyhow = "1.0"
