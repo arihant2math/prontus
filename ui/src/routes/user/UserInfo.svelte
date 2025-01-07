@@ -7,7 +7,7 @@
 </script>
 
 {#if user !== null}
-    <div class="shadow-lg">
+    <div>
         <div class="flex items-center justify-between mb-2 space-x-4">
             <ProfilePicture user={user}/>
             <div>

@@ -20,10 +20,12 @@
     }
 </script>
 
-<div class="w-max h-full overflow-y-scroll no-scrollbar" onscroll={onScroll}>
-    <ul class="flex flex-col w-max">
+<div class="w-auto h-full overflow-y-scroll no-scrollbar" onscroll={onScroll}>
+    <ul class="flex flex-col w-full">
         {#each channelUsers as user}
-            <UserCard user={user} onCreateDm={onCreateDm}/>
+            <li class="w-full">
+                <UserCard user={user} onCreateDm={onCreateDm}/>
+            </li>
         {/each}
     </ul>
 </div>
