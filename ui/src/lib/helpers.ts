@@ -28,14 +28,16 @@ export function loadTheme(settings) {
     }
 
     // Handle color scheme changes iff settings appearance is auto
-    if (settings.appearance.theme === 'Auto') {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark')
-            } else {
-                document.documentElement.classList.remove('dark')
-            }
-        });
+    if (!(settings === undefined || settings === null)) {
+        if (settings.appearance.theme === 'Auto') {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark')
+                } else {
+                    document.documentElement.classList.remove('dark')
+                }
+            });
+        }
     }
 }
 
