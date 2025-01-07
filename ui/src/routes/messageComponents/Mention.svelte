@@ -5,9 +5,14 @@
     let { id } = $props();
 
 
-    function getUserConditional(id) {
+    async function getUserConditional(id) {
         if (id !== 0) {
-            return getUser(id);
+            try {
+                return await getUser(id);
+            } catch (e) {
+                console.error(id, e);
+                return -1;
+            }
         }
 
         return null;
@@ -21,6 +26,8 @@
 {:then user}
     {#if user === null}
         <span class="bg-blue-200 dark:bg-purple-800">@everyone</span>
+    {:else if user === -1}
+        <span class="bg-red-200 dark:bg-red-800 hover:underline">@{id}</span>
     {:else}
         <span class="bg-blue-200 dark:bg-purple-800 hover:underline">@{user.fullname}</span>
     {/if}
