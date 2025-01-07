@@ -1,3 +1,5 @@
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
 use ui_lib::AppState;
 use client::ProntoClient;
 use hyper::body::Incoming;
@@ -11,6 +13,34 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
+const PORT: u16 = 10521;
+
+pub struct ServiceHandlerError {
+    pub inner: reqwest::Error,
+    pub req: Request<Incoming>
+}
+
+impl Debug for ServiceHandlerError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ServiceHandlerError")
+            .field("inner", &self.inner)
+            .field("req", &self.req)
+            .finish()
+    }
+}
+
+impl Display for ServiceHandlerError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {} {}", self.req.method().to_string(), self.req.uri().to_string(), self.inner)
+    }
+}
+
+impl std::error::Error for ServiceHandlerError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.inner)
+    }
+}
+
 pub struct ServiceHandler {
     client: Arc<ProntoClient>,
 }
@@ -23,7 +53,7 @@ impl ServiceHandler {
 
 impl Service<Request<Incoming>> for ServiceHandler {
     type Response = Response<reqwest::Body>;
-    type Error = reqwest::Error;
+    type Error = ServiceHandlerError;
     type Future =
         std::pin::Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
@@ -40,7 +70,7 @@ impl Service<Request<Incoming>> for ServiceHandler {
                     ),
                 )
                 .send()
-                .await?;
+                .await.map_err(|e| ServiceHandlerError { inner: e, req })?;
             Ok(response.into())
         })
     }
@@ -59,9 +89,9 @@ pub async fn run(
         state.client.clone()
     };
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 10521));
+    let addr = SocketAddr::from(([127, 0, 0, 1], PORT));
 
-    // We create a TcpListener and bind it to 127.0.0.1:3000
+    // We create a TcpListener and bind it to the address
     let listener = TcpListener::bind(addr).await?;
 
     // We start a loop to continuously accept incoming connections
@@ -76,7 +106,7 @@ pub async fn run(
         tokio::task::spawn({
             let client = client.clone();
             async move {
-                // Finally, we bind the incoming connection to our `hello` service
+                // Finally, we bind the incoming connection to our service
                 if let Err(err) = http1::Builder::new()
                     // `service_fn` converts our function in a `Service`
                     .serve_connection(io, ServiceHandler::new(client.clone()))
