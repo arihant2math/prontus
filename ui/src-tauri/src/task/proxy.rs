@@ -55,9 +55,7 @@ pub async fn run(
         }
     }
     let client = {
-        let state = context.inner();
-        let state = state.read().await;
-        let state = state.try_inner()?;
+        let state = context.try_inner()?;
         state.client.clone()
     };
 

@@ -24,22 +24,20 @@ pub async fn run(
 ) -> Result<(), PusherThreadError> {
     loop {
         if context.is_loaded().await {
+            // TODO: this is a busy loop, we should probably park or use a notifier
+            std::hint::spin_loop();
             break;
         }
     }
 
     let pusher_client = {
-        let state = context.inner();
-        let mut state = state.write().await;
-        let state = state.try_inner_mut()?;
+        let state = context.try_inner()?;
         PusherClient::new(state.client.clone()).await
     };
     pusher_client.init().await;
     info!("Pusher client initialized");
     {
-        let state = context.inner();
-        let mut state_ = state.write().await;
-        let state = state_.try_inner_mut()?;
+        let state = context.try_inner()?;
 
         pusher_client
             .subscribe(format!(
@@ -51,13 +49,13 @@ pub async fn run(
             .subscribe(format!("private-user.{}", state.user_info.id))
             .await;
         let mut tasks = vec![];
-        for channel in state.channel_list.iter() {
+        for channel in state.channel_list.read().unwrap().iter() {
             tasks.push(pusher_client.subscribe(format!(
                 "private-bubble.{}.{}",
                 channel.0.id, channel.0.channel_code
             )))
         }
-        drop(state_);
+        drop(state);
         join_all(tasks).await;
         info!("Subscribed to pusher channels");
     }
@@ -65,9 +63,8 @@ pub async fn run(
     // TODO: this object doesn't update instantly when a user changes a setting
     let settings = Settings::load().await?;
     let direct_mention = {
-        let state = context.inner();
-        let state = state.read().await;
-        let state = state.try_inner()?;
+        let state = context.try_inner()?;
+
         format!("<@{}>", state.user_info.id)
     };
 
@@ -81,11 +78,10 @@ pub async fn run(
                             PusherServerEventType::PusherServerMessageAddedEvent(event) => {
                                 // TODO: Make sure app in not in foreground
                                 if settings.options.notifications {
-                                    let state = context.inner();
-                                    let state = state.read().await;
-                                    let state = state.try_inner()?;
-                                    let channel = state
-                                        .channel_list
+                                    let state = context.try_inner()?;
+
+                                    let channel_list = state.channel_list.read().unwrap();
+                                    let channel = channel_list
                                         .iter()
                                         .find(|c| c.0.id == event.message.bubble_id);
                                     let mut show_notification = true;
@@ -120,24 +116,23 @@ pub async fn run(
                                             .unwrap();
                                     }
                                 }
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel.id {
-                                    if !state.message_list.iter().any(|m| m.id == event.message.id)
+                                let state = context.try_inner()?;
+
+                                if event.message.bubble_id == state.current_channel.read().unwrap().id {
+                                    let mut state_message_list = state.message_list.write().unwrap();
+                                    if !state_message_list.iter().any(|m| m.id == event.message.id)
                                     {
-                                        state.message_list.insert(0, event.message);
+                                        state_message_list.insert(0, event.message);
                                     }
                                 }
                                 let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerMessageUpdatedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                if event.message.bubble_id == state.current_channel.id {
-                                    let message = state
-                                        .message_list
+                                let state = context.try_inner()?;
+
+                                if event.message.bubble_id == state.current_channel.read().unwrap().id {
+                                    let mut state_message_list = state.message_list.write().unwrap();
+                                    let message = state_message_list
                                         .iter_mut()
                                         .find(|m| m.id == event.message.id);
                                     if let Some(message) = message {
@@ -148,21 +143,19 @@ pub async fn run(
                                 }
                             }
                             PusherServerEventType::PusherServerMessageRemovedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                state.message_list.retain(|m| m.id != event.message.id);
+                                let state = context.try_inner()?;
+                                let mut state_message_list = state.message_list.write().unwrap();
+                                state_message_list.retain(|m| m.id != event.message.id);
 
                                 let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerBubbleStatsEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
+                                let state = context.try_inner()?;
                                 // double for loop (I can't think of a better way to do this)
                                 // time complexity is O(b*n) in all cases
                                 // Iterating through the event stats first would lead to a better average/best case complexity
-                                for (bubble, stats, _) in state.channel_list.iter_mut() {
+                                let mut state_channel_list = state.channel_list.write().unwrap();
+                                for (bubble, stats, _) in state_channel_list.iter_mut() {
                                     for stat in event.stats.iter() {
                                         if bubble.id == stat.bubble_id {
                                             *stats = Some(stat.clone());
@@ -173,11 +166,9 @@ pub async fn run(
                                 let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserPresenceEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                for (id, user) in state.users.iter_mut() {
-                                    if id == &event.user_id {
+                                let state = context.try_inner()?;
+                                for mut user in state.users.iter_mut() {
+                                    if user.id == event.user_id {
                                         user.online = event.is_online;
                                     }
                                 }
@@ -186,11 +177,9 @@ pub async fn run(
                                 let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserUpdatedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
+                               let state = context.try_inner()?;
                                 let user = state.users.get_mut(&event.user.id);
-                                if let Some(user) = user {
+                                if let Some(mut user) = user {
                                     *user = event.user;
                                 } else {
                                     state.users.insert(event.user.id, event.user);
@@ -200,11 +189,9 @@ pub async fn run(
                                 let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerReactionAddedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                let message = state
-                                    .message_list
+                                let state = context.try_inner()?;
+                                let mut message_list = state.message_list.write().unwrap();
+                                let message = message_list
                                     .iter_mut()
                                     .find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
@@ -228,11 +215,9 @@ pub async fn run(
                                 let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerReactionRemovedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                let message = state
-                                    .message_list
+                                let state = context.try_inner()?;
+                                let mut message_list = state.message_list.write().unwrap();
+                                let message = message_list
                                     .iter_mut()
                                     .find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
@@ -249,10 +234,10 @@ pub async fn run(
                                 let _ = handle.emit("messageListUpdate", ());
                             }
                             PusherServerEventType::PusherServerMembershipUpdatedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                for (bubble, _, membership) in state.channel_list.iter_mut() {
+                                let state = context.try_inner()?;
+                                let mut state_channel_list = state.channel_list.write().unwrap();
+
+                                for (bubble, _, membership) in state_channel_list.iter_mut() {
                                     if bubble.id == event.membership.bubble_id {
                                         if let Some(membership) = membership {
                                             *membership = event.membership.clone();
@@ -264,29 +249,27 @@ pub async fn run(
                                 let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerAnnouncementAddedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                state.announcements.insert(0, event.announcement.clone());
+                                let state = context.try_inner()?;
+                                let mut announcements = state.announcements.write().unwrap();
+
+                                announcements.insert(0, event.announcement.clone());
 
                                 let _ = handle.emit("announcementListUpdate", ());
                             }
                             PusherServerEventType::PusherServerAnnouncementRemovedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                state
-                                    .announcements
+                                let state = context.try_inner()?;
+
+                                let mut announcements = state.announcements.write().unwrap();
+                                announcements
                                     .retain(|a| a.id != event.announcement_id);
 
                                 let _ = handle.emit("announcementListUpdate", ());
                             }
                             PusherServerEventType::PusherServerAnnouncementUpdatedEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
-                                let announcement = state
-                                    .announcements
+                                let state = context.try_inner()?;
+
+                                let mut announcements = state.announcements.write().unwrap();
+                                let announcement = announcements
                                     .iter_mut()
                                     .find(|a| a.id == event.announcement.id);
                                 if let Some(announcement) = announcement {
@@ -296,11 +279,10 @@ pub async fn run(
                                 let _ = handle.emit("announcementListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserTypingEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
+                                let state = context.try_inner()?;
+
                                 let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
-                                let users = state.typing_users.entry(channel_id).or_default();
+                                let mut users = state.typing_users.entry(channel_id).or_default();
                                 if !users.contains(&event.user_id) {
                                     users.push(event.user_id);
                                 }
@@ -308,17 +290,26 @@ pub async fn run(
                                 let _ = handle.emit("typingListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserStoppedTypingEvent(event) => {
-                                let state = context.inner();
-                                let mut state = state.write().await;
-                                let state = state.try_inner_mut()?;
+                                let state = context.try_inner()?;
+
                                 let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
-                                let users = state.typing_users.entry(channel_id).or_default();
+                                let mut users = state.typing_users.entry(channel_id).or_default();
                                 users.retain(|u| u != &event.user_id);
 
                                 let _ = handle.emit("typingListUpdate", ());
                             }
+                            PusherServerEventType::PusherServerTaskUpdatedEvent(event) => {
+                                let state = context.try_inner()?;
+                                let mut tasks = state.tasks.write().unwrap();
+                                let task = tasks.iter_mut().find(|t| t.id == event.task.id);
+                                if let Some(task) = task {
+                                    *task = event.task.clone();
+                                }
+
+                                let _ = handle.emit("taskListUpdate", ());
+                            }
                             // TODO: handle other
-                            // _ => {}
+                            _ => {}
                         }
                     }
                     PusherServerMessage::Error(e) => {

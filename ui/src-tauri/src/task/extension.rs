@@ -6,7 +6,7 @@ pub enum ExtensionThreadError {
     #[error("Extension Load Error: {0}")]
     ExtensionLoadError(#[from] extension::LoadExtensionsError),
     #[error("Extension Runtime Error: {0}")]
-    ExtensionRuntimeError(Box<dyn std::error::Error + Send + Sync>),
+    ExtensionRuntimeError(anyhow::Error),
 }
 
 pub async fn run() -> Result<(), ExtensionThreadError> {
