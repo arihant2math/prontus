@@ -22,7 +22,8 @@ jobs:
           submodules: 'true'
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        rustflags: ""
+        with:
+          rustflags: ""
 
       - uses: actions/setup-node@v4
         with:
