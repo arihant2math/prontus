@@ -180,9 +180,15 @@ impl InstallUpdate {
         Ok(())
     }
 
+    #[cfg(not(target_os = "windows"))]
+    async fn inner_install(&self) -> Result<(), UpdateError> {
+        Ok(())
+    }
+
     pub async fn install(&self) -> Result<(), Box<dyn std::error::Error>> {
         let dir = std::env::temp_dir();
-        let file_path = dir.join(&self.file_name);
+        let _file_path = dir.join(&self.file_name);
+        self.inner_install().await?;
         // TODO: eventually support installing updates
         todo!()
     }
