@@ -12,3 +12,4 @@ extracted/
 # Custom
 **/bundle/
 **/wasi_snapshot_preview1.reactor.wasm
+gh_token.txt
