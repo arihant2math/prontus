@@ -4,11 +4,8 @@ use client::{
 use dashmap::DashMap;
 use settings::Settings;
 use std::cell::UnsafeCell;
-use std::sync::{
-    atomic::AtomicBool,
-    Arc,
-    RwLock
-};
+use std::sync::atomic::AtomicI64;
+use std::sync::{atomic::AtomicBool, Arc, RwLock};
 use thiserror::Error;
 
 #[derive(Copy, Clone, Debug, Error)]
@@ -50,6 +47,7 @@ pub enum InnerAppState {
 #[derive(Clone)]
 pub struct AppState {
     pub loaded: Arc<AtomicBool>,
+    inner_lock: Arc<AtomicI64>,
     inner: Arc<UnsafeCell<InnerAppState>>,
 }
 
@@ -60,29 +58,54 @@ impl AppState {
     pub fn unloaded() -> Self {
         Self {
             loaded: Arc::new(AtomicBool::new(false)),
+            inner_lock: Arc::new(AtomicI64::new(0)),
             inner: Arc::new(UnsafeCell::new(InnerAppState::Unloaded)),
         }
     }
 
-    pub async fn is_loaded(&self) -> bool {
+    fn read_lock(&self) {
+        while self.inner_lock.load(std::sync::atomic::Ordering::Relaxed) == -1 {
+            std::hint::spin_loop();
+        }
+        let current = self.inner_lock.load(std::sync::atomic::Ordering::Relaxed);
+        self.inner_lock
+            .store(current + 1, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    fn unlock_read(&self) {
+        let current = self.inner_lock.load(std::sync::atomic::Ordering::Relaxed);
+        self.inner_lock
+            .store(current - 1, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    pub fn is_loaded(&self) -> bool {
         self.loaded.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     pub fn try_inner(&self) -> Result<&AppData, UnlockError> {
+        self.read_lock();
+        // TODO: Return before unlocking
         if self.loaded.load(std::sync::atomic::Ordering::Relaxed) {
+            self.unlock_read();
             match unsafe { &*self.inner.get() } {
                 InnerAppState::Loaded(data) => Ok(data),
                 InnerAppState::Unloaded => Err(UnlockError::NotLoaded),
             }
         } else {
+            self.unlock_read();
             Err(UnlockError::NotLoaded)
         }
     }
 
     pub fn load(&self, data: AppData) {
+        self.inner_lock
+            .store(-1, std::sync::atomic::Ordering::Relaxed);
         unsafe {
             *self.inner.get() = InnerAppState::Loaded(data);
         }
-        self.loaded.store(true, std::sync::atomic::Ordering::Relaxed);
+        self.inner_lock
+            .store(0, std::sync::atomic::Ordering::Relaxed);
+        self.loaded
+            .store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }

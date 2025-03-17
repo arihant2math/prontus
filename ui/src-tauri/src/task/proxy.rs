@@ -79,10 +79,8 @@ impl Service<Request<Incoming>> for ServiceHandler {
 pub async fn run(
     context: AppState,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    loop {
-        if context.is_loaded().await {
-            break;
-        }
+    while !context.is_loaded() {
+        break;
     }
     let client = {
         let state = context.try_inner()?;

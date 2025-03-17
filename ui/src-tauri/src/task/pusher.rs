@@ -22,12 +22,10 @@ pub async fn run(
     handle: AppHandle,
     context: AppState,
 ) -> Result<(), PusherThreadError> {
-    loop {
-        if context.is_loaded().await {
-            // TODO: this is a busy loop, we should probably park or use a notifier
-            std::hint::spin_loop();
-            break;
-        }
+    while !context.is_loaded() {
+        // TODO: this is a busy loop, we should probably park or use a notifier
+        std::hint::spin_loop();
+        break;
     }
 
     let pusher_client = {

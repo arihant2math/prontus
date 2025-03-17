@@ -16,7 +16,7 @@ use updater::Version;
 
 #[command]
 pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
-    if state.is_loaded().await {
+    if state.is_loaded() {
         return Ok(());
     }
     let settings = Settings::load().await?;
