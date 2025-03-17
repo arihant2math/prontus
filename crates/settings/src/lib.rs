@@ -216,7 +216,7 @@ impl Settings {
 }
 
 pub fn prontus_dir() -> PathBuf {
-    home::home_dir()
+    std::env::home_dir()
         .expect("Could not locate home directory")
         .join(".prontus")
 }
