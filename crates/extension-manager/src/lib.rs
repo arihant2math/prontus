@@ -27,7 +27,7 @@ async fn install_extension(url: String) {
     let temp_dir = std::env::temp_dir().join(format!("prontus_extension_{rnd}"));
     let req = reqwest::get(url).await.unwrap();
     let mut file = File::create(&temp_file).unwrap();
-    file.write_all(&req.bytes().await.unwrap()).unwrap();
+    // file.write_all(&req.bytes().await.unwrap()).unwrap();
     // Extract
     todo!("Extract file");
 }

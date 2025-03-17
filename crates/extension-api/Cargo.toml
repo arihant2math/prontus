@@ -3,7 +3,8 @@ name = "extension-api"
 # this is the version of the extension api crate
 version = "0.1.0"
 authors = { workspace = true }
-edition = { workspace = true }
+# TODO: FIX
+edition = "2021"
 license = { workspace = true }
 
 [dependencies]

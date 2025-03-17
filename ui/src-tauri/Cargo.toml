@@ -3,7 +3,7 @@ name = "ui"
 version = "0.1.0"
 description = "Prontus"
 authors = ["Ashwin Naren <arihant2math@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [lib]
 name = "ui_core"
