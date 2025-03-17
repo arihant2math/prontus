@@ -53,7 +53,6 @@ pub async fn run(
                 channel.0.id, channel.0.channel_code
             )))
         }
-        drop(state);
         join_all(tasks).await;
         info!("Subscribed to pusher channels");
     }
