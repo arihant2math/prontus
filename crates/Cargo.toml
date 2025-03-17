@@ -1,6 +1,6 @@
 [workspace]
 members = ["client", "client-macros", "encrypt", "encrypt-internal", "extension", "extension-api", "extension-cli", "extension-manager", "probot", "pusher", "search", "settings", "ui-handlers", "ui-lib", "ui-macros", "updater", "version", "wit-gen"]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 authors = ["Ashwin Naren <arihant2math@gmail.com>"]
