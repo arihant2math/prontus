@@ -25,7 +25,7 @@ notify-rust = "4"
 pusher = { path = "../../crates/pusher" }
 reqwest = "0.12"
 search = { path = "../../crates/search" }
-tauri = { version = "2.2", features = ["tray-icon", "unstable"] }
+tauri = { version = "2.3", features = ["tray-icon", "unstable"] }
 tauri-plugin-shell = "2.0"
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["full"] }
