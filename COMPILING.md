@@ -3,6 +3,7 @@
 ## Requirements
 - Rust (latest stable)
 - Node.js (with npm)
+- Everything in https://v2.tauri.app/start/prerequisites/
 
 ## Setup
 1. Clone or download the repository.
