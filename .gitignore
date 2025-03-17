@@ -1,6 +1,5 @@
 **/target
 **/.idea/
-**/Cargo.lock
 **/node_modules/
 **/.svelte-kit/
 **/package-lock.json
