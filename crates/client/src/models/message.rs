@@ -1,5 +1,5 @@
-use crate::serde_datetime;
 use crate::UserInfo;
+use crate::serde_datetime;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 

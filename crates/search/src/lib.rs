@@ -7,8 +7,8 @@ pub use milli;
 use milli::score_details::ScoringStrategy;
 use milli::tokenizer::Language;
 use milli::{
-    execute_search, filtered_universe, AscDesc, DefaultSearchLogger, DocumentId, GeoSortStrategy,
-    Index, SearchContext, TermsMatchingStrategy, TimeBudget,
+    AscDesc, DefaultSearchLogger, DocumentId, GeoSortStrategy, Index, SearchContext,
+    TermsMatchingStrategy, TimeBudget, execute_search, filtered_universe,
 };
 use serde_json::{Map, Value};
 use std::path::PathBuf;

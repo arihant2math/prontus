@@ -5,7 +5,7 @@ use dashmap::DashMap;
 use settings::Settings;
 use std::cell::UnsafeCell;
 use std::sync::atomic::AtomicI64;
-use std::sync::{atomic::AtomicBool, Arc, RwLock};
+use std::sync::{Arc, RwLock, atomic::AtomicBool};
 use thiserror::Error;
 
 #[derive(Copy, Clone, Debug, Error)]

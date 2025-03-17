@@ -1,10 +1,10 @@
 use client::{Message, ProntoClient};
 use dashmap::DashMap;
-use milli::heed::EnvOpenOptions;
 use log::{debug, info};
-use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
-use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};
 use milli::Index;
+use milli::documents::{DocumentsBatchBuilder, DocumentsBatchReader};
+use milli::heed::EnvOpenOptions;
+use milli::update::{IndexDocuments, IndexDocumentsConfig, IndexerConfig, Settings};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::io::Cursor;

@@ -1,9 +1,9 @@
 use crate::info::ExtensionInfo;
 pub use crate::wasm_host::WasmExtension;
 use log::warn;
+use std::fs;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::fs;
 use thiserror::Error;
 
 pub mod info;
@@ -48,7 +48,10 @@ impl ExtensionManager {
                     self.extensions.push(extension);
                 }
             } else {
-                warn!("Ignoring non-directory entry in top-level extensions directory {extensions_parent_dir:?}: {:?}", path);
+                warn!(
+                    "Ignoring non-directory entry in top-level extensions directory {extensions_parent_dir:?}: {:?}",
+                    path
+                );
             }
         }
         Ok(())

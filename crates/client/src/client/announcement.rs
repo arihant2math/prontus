@@ -1,6 +1,6 @@
 use crate::announcement_list::GetAnnouncementListRequest;
 use crate::{
-    announcement_create, announcement_list, announcement_mark_read, ProntoClient, ResponseError,
+    ProntoClient, ResponseError, announcement_create, announcement_list, announcement_mark_read,
 };
 
 impl ProntoClient {

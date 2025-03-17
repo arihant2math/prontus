@@ -1,7 +1,7 @@
-use crate::wasm_host::{wasm_engine, WasmState};
+use crate::wasm_host::{WasmState, wasm_engine};
+use wasmtime::Store;
 use wasmtime::component::__internal::anyhow;
 use wasmtime::component::{Component, Linker};
-use wasmtime::Store;
 
 mod since_v0_1_0;
 

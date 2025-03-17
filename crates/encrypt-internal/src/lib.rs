@@ -17,7 +17,7 @@
 
 pub use aead::{Error, Result};
 use crypto_box::aead::{Aead, AeadCore, OsRng};
-use crypto_box::{aead, ChaChaBox, Nonce, PublicKey, SecretKey};
+use crypto_box::{ChaChaBox, Nonce, PublicKey, SecretKey, aead};
 use keyring::Entry;
 
 pub struct DMEncryption {
@@ -64,7 +64,10 @@ pub fn load_secret_key() -> keyring::Result<[u8; 32]> {
         .expect("Failed to load secret key, please report this issue to the keyring developers")
         .get_secret()?;
     if secret_vector.len() != 32 {
-        return Err(keyring::Error::Invalid("com_prontus_default".to_string(), "Invalid secret key length".to_string()));
+        return Err(keyring::Error::Invalid(
+            "com_prontus_default".to_string(),
+            "Invalid secret key length".to_string(),
+        ));
     }
     // Keep in array to allow for Copy
     let mut secret_key = [0u8; 32];
@@ -73,7 +76,8 @@ pub fn load_secret_key() -> keyring::Result<[u8; 32]> {
 }
 
 pub fn store_secret_key(secret_key: [u8; 32]) -> keyring::Result<()> {
-    let entry = Entry::new(SERVICE, DEFAULT_USER).expect("Failed to load secret key, please report this issue to the keyring developers");
+    let entry = Entry::new(SERVICE, DEFAULT_USER)
+        .expect("Failed to load secret key, please report this issue to the keyring developers");
     entry.set_secret(&secret_key)?;
     Ok(())
 }

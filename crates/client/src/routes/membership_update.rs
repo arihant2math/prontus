@@ -1,5 +1,5 @@
-use crate::custom_json::ToJson;
 use crate::Membership;
+use crate::custom_json::ToJson;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::json;
 

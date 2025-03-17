@@ -1,6 +1,6 @@
 use crate::pusher_auth::PusherAuthRequest;
 use crate::user_token_login::TokenLoginResponse;
-use crate::{pusher_auth, user_token_login, ProntoClient, ResponseError};
+use crate::{ProntoClient, ResponseError, pusher_auth, user_token_login};
 
 impl ProntoClient {
     pub async fn user_token_login(&self, token: &str) -> Result<TokenLoginResponse, ResponseError> {

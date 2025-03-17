@@ -8,9 +8,9 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tokio::net::TcpStream;
-use tokio::sync::{broadcast, mpsc, RwLock};
+use tokio::sync::{RwLock, broadcast, mpsc};
 use tokio_tungstenite::tungstenite::{Bytes, Message, Utf8Bytes};
-use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 
 #[derive(Clone, Debug)]
 pub enum PusherServerMessageWrapper {

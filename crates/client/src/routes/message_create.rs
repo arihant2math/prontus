@@ -3,7 +3,7 @@ use crate::models::Message;
 use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize, Serializer};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

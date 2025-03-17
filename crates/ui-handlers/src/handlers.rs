@@ -4,13 +4,13 @@ use client::{
     UserInfo,
 };
 use dashmap::DashMap;
+use search::SearchResults;
 use search::milli::score_details::ScoringStrategy;
 use search::milli::{GeoSortStrategy, TermsMatchingStrategy, TimeBudget};
-use search::SearchResults;
 use std::path::PathBuf;
-use std::sync::{Arc, RwLock};
 use std::sync::atomic::AtomicBool;
-use tauri::{command, Emitter, State};
+use std::sync::{Arc, RwLock};
+use tauri::{Emitter, State, command};
 use ui_lib::{AppData, AppState, BackendError};
 use updater::Version;
 
@@ -75,12 +75,14 @@ pub async fn load(state: State<'_, AppState>) -> Result<(), BackendError> {
         parent_messages: RwLock::new(vec![]),
         channel_users: DashMap::new(),
         announcements: RwLock::new(announcements_list?.announcements),
-        tasks: RwLock::new(tasks_list_incomplete?
-            .tasks
-            .iter()
-            .chain(tasks_list_complete?.tasks.iter())
-            .cloned()
-            .collect()),
+        tasks: RwLock::new(
+            tasks_list_incomplete?
+                .tasks
+                .iter()
+                .chain(tasks_list_complete?.tasks.iter())
+                .cloned()
+                .collect(),
+        ),
         is_typing: AtomicBool::new(false),
         typing_users: DashMap::new(),
         settings: RwLock::new(settings),
@@ -128,7 +130,10 @@ pub async fn set_reaction_state(
                 .client
                 .add_reaction(message_id, ReactionType::from(reaction_id as i32))
                 .await?;
-            let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+            let mut message_list = state
+                .message_list
+                .write()
+                .map_err(|_| BackendError::RwLockWriteError)?;
             let messages = message_list
                 .iter_mut()
                 .find(|message| message.id == message_id)
@@ -151,7 +156,10 @@ pub async fn set_reaction_state(
                 .client
                 .remove_reaction(message_id, ReactionType::from(reaction_id as i32))
                 .await?;
-            let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+            let mut message_list = state
+                .message_list
+                .write()
+                .map_err(|_| BackendError::RwLockWriteError)?;
             let messages = message_list
                 .iter_mut()
                 .find(|message| message.id == message_id)
@@ -167,7 +175,10 @@ pub async fn set_reaction_state(
     let message = message.await?;
 
     let state = state.try_inner()?;
-    let mut message_list = state.message_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut message_list = state
+        .message_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
 
     *message_list
         .iter_mut()
@@ -178,7 +189,11 @@ pub async fn set_reaction_state(
 }
 
 #[command]
-pub async fn create_dm(handle: tauri::AppHandle, state: State<'_, AppState>, user_id: u64) -> Result<(), BackendError> {
+pub async fn create_dm(
+    handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    user_id: u64,
+) -> Result<(), BackendError> {
     let channel_list = {
         let state = state.try_inner()?;
         state
@@ -204,7 +219,10 @@ pub async fn create_dm(handle: tauri::AppHandle, state: State<'_, AppState>, use
     };
 
     let state = state.try_inner()?;
-    let mut state_channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut state_channel_list = state
+        .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     *state_channel_list = channel_list;
     // TODO: Return new channel (id at the minimum)
     let _ = handle.emit("channelListUpdate", ());
@@ -213,7 +231,11 @@ pub async fn create_dm(handle: tauri::AppHandle, state: State<'_, AppState>, use
 }
 
 #[command]
-pub async fn create_bubble(handle: tauri::AppHandle, state: State<'_, AppState>, name: String) -> Result<(), BackendError> {
+pub async fn create_bubble(
+    handle: tauri::AppHandle,
+    state: State<'_, AppState>,
+    name: String,
+) -> Result<(), BackendError> {
     let channel_list = {
         let state = state.try_inner()?;
         state
@@ -239,7 +261,10 @@ pub async fn create_bubble(handle: tauri::AppHandle, state: State<'_, AppState>,
     };
 
     let state = state.try_inner()?;
-    let mut state_channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut state_channel_list = state
+        .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     *state_channel_list = channel_list;
     // TODO: Return new channel (id at the minimum)
     let _ = handle.emit("channelListUpdate", ());
@@ -271,7 +296,11 @@ pub async fn get_announcements(
 ) -> Result<Vec<Announcement>, BackendError> {
     let state = state.try_inner()?;
 
-    Ok(state.announcements.read().map_err(|_| BackendError::RwLockReadError)?.clone())
+    Ok(state
+        .announcements
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .clone())
 }
 
 #[command]
@@ -281,7 +310,10 @@ pub async fn mark_announcement_read(
 ) -> Result<(), BackendError> {
     let state = state.try_inner()?;
     let new_announcement = state.client.mark_read_announcement(id).await?;
-    let mut state_announcements = state.announcements.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut state_announcements = state
+        .announcements
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     state_announcements.iter_mut().for_each(|announcement| {
         if announcement.id == new_announcement.announcement.id {
             *announcement = new_announcement.announcement.clone();
@@ -294,7 +326,11 @@ pub async fn mark_announcement_read(
 pub async fn get_tasks(state: State<'_, AppState>) -> Result<Vec<Task>, BackendError> {
     let state = state.try_inner()?;
 
-    Ok(state.tasks.read().map_err(|_| BackendError::RwLockReadError)?.clone())
+    Ok(state
+        .tasks
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .clone())
 }
 
 #[command]
@@ -309,7 +345,10 @@ pub async fn complete_task(
     };
 
     let state = state.try_inner()?;
-    let mut state_tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut state_tasks = state
+        .tasks
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     if let Some(task) = state_tasks.iter_mut().find(|task| task.id == task_id) {
         *task = updated_task.task.clone();
     }
@@ -329,7 +368,10 @@ pub async fn uncomplete_task(
     };
 
     let state = state.try_inner()?;
-    let mut state_tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut state_tasks = state
+        .tasks
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     if let Some(task) = state_tasks.iter_mut().find(|task| task.id == task_id) {
         *task = updated_task.task.clone();
     }
@@ -347,7 +389,10 @@ pub async fn delete_task(
     let state = state.try_inner()?;
 
     // state.client.task_delete(task_id).await?;
-    let mut tasks = state.tasks.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut tasks = state
+        .tasks
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     *tasks = tasks
         .iter()
         .filter(|task| task.id != task_id)
@@ -360,7 +405,9 @@ pub async fn delete_task(
 #[command]
 pub async fn set_typing(state: State<'_, AppState>, typing: bool) -> Result<(), BackendError> {
     let state = state.try_inner()?;
-    state.is_typing.store(typing, std::sync::atomic::Ordering::Relaxed);
+    state
+        .is_typing
+        .store(typing, std::sync::atomic::Ordering::Relaxed);
     // TODO: send pusher message
     Ok(())
 }
@@ -379,7 +426,10 @@ pub async fn search_local(
     query: String,
 ) -> Result<Option<SearchResults>, BackendError> {
     let state = state.try_inner()?;
-    let settings = &state.settings.read().map_err(|_| BackendError::RwLockReadError)?;
+    let settings = &state
+        .settings
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?;
     if let Some(msg) = settings.search.messages.as_ref() {
         let loc = PathBuf::from(&msg.path);
         let mut search = search::Search::new(&loc);
@@ -415,11 +465,15 @@ pub async fn version() -> Result<String, BackendError> {
 #[command]
 pub async fn check_update(state: State<'_, AppState>) -> Result<Option<Version>, BackendError> {
     let state = state.try_inner()?;
-    let update_channel = state.settings.read().map_err(|_| BackendError::RwLockReadError)?.update.channel.clone();
-    let file = updater::UpdateFile::update_file(updater::UpdateChannel::from(
-        &*update_channel,
-    ))
-    .await?;
+    let update_channel = state
+        .settings
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .update
+        .channel
+        .clone();
+    let file =
+        updater::UpdateFile::update_file(updater::UpdateChannel::from(&*update_channel)).await?;
     if file.update_available() {
         Ok(file.latest_version_details()?)
     } else {

@@ -1,12 +1,11 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use std::env::current_dir;
 use std::path::PathBuf;
 use std::process::{Command as StdCommand, Stdio};
 use wasm_encoder::{ComponentSectionId, Encode as _, RawSection, Section as _};
 
 pub const RUST_TARGET: &str = "wasm32-wasip1";
-const WASI_ADAPTER_URL: &str =
-    "https://github.com/bytecodealliance/wasmtime/releases/download/v18.0.2/wasi_snapshot_preview1.reactor.wasm";
+const WASI_ADAPTER_URL: &str = "https://github.com/bytecodealliance/wasmtime/releases/download/v18.0.2/wasi_snapshot_preview1.reactor.wasm";
 
 pub fn install_rust_wasm_target_if_needed() -> anyhow::Result<()> {
     let rustc_output = StdCommand::new("rustc")

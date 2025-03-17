@@ -3,10 +3,10 @@ use crate::bubble_info::GetBubbleInfoResponse;
 use crate::bubble_list::GetBubbleListResponse;
 use crate::bubble_mark::PostBubbleMarkRequest;
 use crate::{
-    bubble_create, bubble_delete, bubble_history, bubble_info, bubble_list, bubble_mark,
-    bubble_membership_search, bubble_update, dm_create, membership_update,
     MembershipUpdateModification, NotificationsPreference, PostBubbleMembershipSearchRequest,
-    PostMembershipUpdateRequest, ProntoClient, ResponseError,
+    PostMembershipUpdateRequest, ProntoClient, ResponseError, bubble_create, bubble_delete,
+    bubble_history, bubble_info, bubble_list, bubble_mark, bubble_membership_search, bubble_update,
+    dm_create, membership_update,
 };
 
 impl ProntoClient {

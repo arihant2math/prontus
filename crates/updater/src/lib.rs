@@ -107,9 +107,7 @@ impl UpdateFile {
         Ok(json)
     }
 
-    pub async fn update_file(
-        channel: UpdateChannel,
-    ) -> Result<UpdateFile, UpdateError> {
+    pub async fn update_file(channel: UpdateChannel) -> Result<UpdateFile, UpdateError> {
         Self::get_update_file_with_url(channel.url()).await
     }
 

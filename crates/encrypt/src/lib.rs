@@ -19,7 +19,7 @@ mod retrieval;
 
 pub use crate::retrieval::PublicLookupService;
 use base64::prelude::*;
-use encrypt_internal::{load_secret_key, DMEncryption};
+use encrypt_internal::{DMEncryption, load_secret_key};
 use std::fmt::Display;
 use std::string::FromUtf8Error;
 use thiserror::Error;
@@ -98,8 +98,8 @@ impl Encrypt {
 
 #[cfg(test)]
 mod tests {
-    use crate::retrieval::PublicLookupService;
     use crate::Encrypt;
+    use crate::retrieval::PublicLookupService;
     use encrypt_internal::DMEncryption;
 
     #[test]

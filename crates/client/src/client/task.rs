@@ -1,4 +1,4 @@
-use crate::{task_complete, task_list, task_uncomplete, ProntoClient, ResponseError};
+use crate::{ProntoClient, ResponseError, task_complete, task_list, task_uncomplete};
 
 impl ProntoClient {
     pub async fn task_list(

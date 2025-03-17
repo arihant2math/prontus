@@ -1,7 +1,7 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use clap::{Parser, Subcommand};
 use extension::info::ExtensionInfo;
-use extension::{WasmExtension, EXTENSION_FILE_NAME, MANIFEST_FILE_NAME};
+use extension::{EXTENSION_FILE_NAME, MANIFEST_FILE_NAME, WasmExtension};
 use serde::{Deserialize, Serialize};
 use std::env::current_dir;
 use std::path::PathBuf;

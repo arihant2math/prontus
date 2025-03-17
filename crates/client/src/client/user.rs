@@ -1,5 +1,5 @@
 use crate::user_info::GetUserInfoRequest;
-use crate::{user_info, user_search, ProntoClient, ResponseError};
+use crate::{ProntoClient, ResponseError, user_info, user_search};
 
 impl ProntoClient {
     pub async fn current_user_info(&self) -> Result<user_info::GetUserInfoResponse, ResponseError> {

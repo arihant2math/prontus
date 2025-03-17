@@ -1,19 +1,26 @@
 use client::{Bubble, BubbleStats, Membership, UserInfo};
-use tauri::{command, State};
+use tauri::{State, command};
 use ui_lib::{AppState, BackendError, ChannelUsers};
 
 #[command]
 pub async fn load_channel(state: State<'_, AppState>, id: u64) -> Result<(), BackendError> {
     let state = state.try_inner()?;
     let bubble_info = state.client.bubble_info(id).await?;
-    *state.current_channel.write().map_err(|_| BackendError::RwLockWriteError)? = bubble_info.bubble;
+    *state
+        .current_channel
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)? = bubble_info.bubble;
     Ok(())
 }
 
 #[command]
 pub async fn get_current_channel(state: State<'_, AppState>) -> Result<Bubble, BackendError> {
     let state = state.try_inner()?;
-    Ok(state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.clone())
+    Ok(state
+        .current_channel
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .clone())
 }
 
 #[command]
@@ -21,7 +28,11 @@ pub async fn get_channel_list(
     state: State<'_, AppState>,
 ) -> Result<Vec<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
     let state = state.try_inner()?;
-    Ok(state.channel_list.read().map_err(|_| BackendError::RwLockReadError)?.clone())
+    Ok(state
+        .channel_list
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .clone())
 }
 
 #[command]
@@ -30,11 +41,16 @@ pub async fn get_channel_info(
 ) -> Result<Option<(Bubble, Option<BubbleStats>, Option<Membership>)>, BackendError> {
     let state = state.try_inner()?;
 
-    let id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
-    let channel_list = state.channel_list.read().map_err(|_| BackendError::RwLockReadError)?;
-    let bubble = channel_list
-        .iter()
-        .find(|(bubble, _, _)| bubble.id == id);
+    let id = state
+        .current_channel
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .id;
+    let channel_list = state
+        .channel_list
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?;
+    let bubble = channel_list.iter().find(|(bubble, _, _)| bubble.id == id);
     Ok(bubble.cloned())
 }
 
@@ -113,7 +129,10 @@ pub async fn set_channel_mute(
     };
 
     let state = state.try_inner()?;
-    let mut channel_list = state.channel_list.write().map_err(|_| BackendError::RwLockWriteError)?;
+    let mut channel_list = state
+        .channel_list
+        .write()
+        .map_err(|_| BackendError::RwLockWriteError)?;
     channel_list
         .iter_mut()
         .find(|(bubble, _, _)| bubble.id == state.current_channel.read().unwrap().id)
@@ -135,7 +154,11 @@ pub async fn set_channel_pin(
     };
 
     let state = state.try_inner()?;
-    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
+    let current_channel_id = state
+        .current_channel
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .id;
     state
         .channel_list
         .write()
@@ -160,7 +183,11 @@ pub async fn set_channel_alias(
     };
 
     let state = state.try_inner()?;
-    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
+    let current_channel_id = state
+        .current_channel
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .id;
     state
         .channel_list
         .write()
@@ -196,7 +223,11 @@ pub async fn set_channel_notifications(
     };
 
     let state = state.try_inner()?;
-    let current_channel_id = state.current_channel.read().map_err(|_| BackendError::RwLockReadError)?.id;
+    let current_channel_id = state
+        .current_channel
+        .read()
+        .map_err(|_| BackendError::RwLockReadError)?
+        .id;
     state
         .channel_list
         .write()

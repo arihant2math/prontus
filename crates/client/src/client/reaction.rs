@@ -1,6 +1,6 @@
 use crate::reaction_add::ReactionModifyRequest;
 use crate::{
-    reaction_add, reaction_remove, MessageModifyResponse, ProntoClient, ReactionType, ResponseError,
+    MessageModifyResponse, ProntoClient, ReactionType, ResponseError, reaction_add, reaction_remove,
 };
 
 impl ProntoClient {

@@ -1,5 +1,5 @@
-use client::user_login::{DeviceInfo, UserLoginRequest};
 use client::ProntoClient;
+use client::user_login::{DeviceInfo, UserLoginRequest};
 use log::info;
 use settings::Settings;
 use tauri::command;

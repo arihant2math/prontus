@@ -1,8 +1,8 @@
 use crate::Member;
 use serde::{Deserialize, Serialize};
 
-use serde_with::serde_as;
 use serde_with::DisplayFromStr;
+use serde_with::serde_as;
 
 fn _true() -> bool {
     true

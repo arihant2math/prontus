@@ -1,6 +1,6 @@
+use crate::serde_datetime;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use crate::serde_datetime;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Organization {

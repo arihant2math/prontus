@@ -1,6 +1,6 @@
 use client::UserInfo;
 use log::debug;
-use tauri::{command, State};
+use tauri::{State, command};
 use ui_lib::{AppState, BackendError};
 
 #[command]
