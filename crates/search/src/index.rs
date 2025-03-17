@@ -11,7 +11,7 @@ pub trait Index {
         let mut options = EnvOpenOptions::new();
         options.map_size(128 * 1024 * 1024 * 1024); // 100 GB
 
-        milli::Index::new(options, location.to_str().unwrap())
+        milli::Index::new(options, location.to_str().unwrap(), true)
     }
 
     async fn init(&self) -> Result<(), Self::Error>;

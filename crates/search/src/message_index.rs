@@ -31,7 +31,7 @@ pub fn get_index(dataset: &PathBuf) -> milli::Result<Index> {
         .unwrap_or(128 * 1024 * 1024 * 1024) // 128 GB
         as usize);
 
-    Index::new(options, dataset.to_str().unwrap())
+    Index::new(options, dataset.to_str().unwrap(), true)
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
