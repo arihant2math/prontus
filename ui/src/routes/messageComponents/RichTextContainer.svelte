@@ -43,5 +43,5 @@
 {#if richContent === undefined}
     <p>Loading...</p>
 {:else}
-    <RichText content="{richContent}"/>
+    <RichText content={richContent}/>
 {/if}

@@ -1,5 +1,5 @@
-use thiserror::Error;
 use extension::ExtensionManager;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ExtensionThreadError {
@@ -17,6 +17,9 @@ pub async fn run() -> Result<(), ExtensionThreadError> {
         extension_manager
     };
 
-    extension_manager.run_tasks().await.map_err(|e| ExtensionThreadError::ExtensionRuntimeError(e))?;
+    extension_manager
+        .run_tasks()
+        .await
+        .map_err(|e| ExtensionThreadError::ExtensionRuntimeError(e))?;
     Ok(())
 }

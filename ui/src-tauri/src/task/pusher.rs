@@ -1,4 +1,3 @@
-use ui_lib::{state::UnlockError, AppState};
 use client::Reactions;
 use futures::future::join_all;
 use log::{error, info, warn};
@@ -9,6 +8,7 @@ use pusher::{
 use settings::{Settings, SettingsError};
 use tauri::{AppHandle, Emitter};
 use thiserror::Error;
+use ui_lib::{AppState, state::UnlockError};
 
 #[derive(Debug, Error)]
 pub enum PusherThreadError {
@@ -18,10 +18,7 @@ pub enum PusherThreadError {
     UnlockError(#[from] UnlockError),
 }
 
-pub async fn run(
-    handle: AppHandle,
-    context: AppState,
-) -> Result<(), PusherThreadError> {
+pub async fn run(handle: AppHandle, context: AppState) -> Result<(), PusherThreadError> {
     while !context.is_loaded() {
         // TODO: this is a busy loop, we should probably park or use a notifier
         std::hint::spin_loop();
@@ -87,10 +84,17 @@ pub async fn run(
                                             if membership.notification_preference != "ALL" {
                                                 show_notification = false;
                                             }
-                                            if event.message.message.contains(&direct_mention) && (membership.notification_preference == "MENTIONS" || membership.notification_preference == "MENTIONS_EXCLUDE_ALL") {
+                                            if event.message.message.contains(&direct_mention)
+                                                && (membership.notification_preference
+                                                    == "MENTIONS"
+                                                    || membership.notification_preference
+                                                        == "MENTIONS_EXCLUDE_ALL")
+                                            {
                                                 show_notification = true;
                                             }
-                                            if event.message.message.contains("<@everyone>") && membership.notification_preference == "MENTIONS" {
+                                            if event.message.message.contains("<@everyone>")
+                                                && membership.notification_preference == "MENTIONS"
+                                            {
                                                 show_notification = true;
                                             }
 
@@ -115,8 +119,11 @@ pub async fn run(
                                 }
                                 let state = context.try_inner()?;
 
-                                if event.message.bubble_id == state.current_channel.read().unwrap().id {
-                                    let mut state_message_list = state.message_list.write().unwrap();
+                                if event.message.bubble_id
+                                    == state.current_channel.read().unwrap().id
+                                {
+                                    let mut state_message_list =
+                                        state.message_list.write().unwrap();
                                     if !state_message_list.iter().any(|m| m.id == event.message.id)
                                     {
                                         state_message_list.insert(0, event.message);
@@ -127,8 +134,11 @@ pub async fn run(
                             PusherServerEventType::PusherServerMessageUpdatedEvent(event) => {
                                 let state = context.try_inner()?;
 
-                                if event.message.bubble_id == state.current_channel.read().unwrap().id {
-                                    let mut state_message_list = state.message_list.write().unwrap();
+                                if event.message.bubble_id
+                                    == state.current_channel.read().unwrap().id
+                                {
+                                    let mut state_message_list =
+                                        state.message_list.write().unwrap();
                                     let message = state_message_list
                                         .iter_mut()
                                         .find(|m| m.id == event.message.id);
@@ -174,7 +184,7 @@ pub async fn run(
                                 let _ = handle.emit("channelListUpdate", ());
                             }
                             PusherServerEventType::PusherServerUserUpdatedEvent(event) => {
-                               let state = context.try_inner()?;
+                                let state = context.try_inner()?;
                                 let user = state.users.get_mut(&event.user.id);
                                 if let Some(mut user) = user {
                                     *user = event.user;
@@ -188,9 +198,8 @@ pub async fn run(
                             PusherServerEventType::PusherServerReactionAddedEvent(event) => {
                                 let state = context.try_inner()?;
                                 let mut message_list = state.message_list.write().unwrap();
-                                let message = message_list
-                                    .iter_mut()
-                                    .find(|m| m.id == event.message_id);
+                                let message =
+                                    message_list.iter_mut().find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
                                     if message
                                         .reactions
@@ -214,9 +223,8 @@ pub async fn run(
                             PusherServerEventType::PusherServerReactionRemovedEvent(event) => {
                                 let state = context.try_inner()?;
                                 let mut message_list = state.message_list.write().unwrap();
-                                let message = message_list
-                                    .iter_mut()
-                                    .find(|m| m.id == event.message_id);
+                                let message =
+                                    message_list.iter_mut().find(|m| m.id == event.message_id);
                                 if let Some(message) = message {
                                     if let Some(reaction) = message
                                         .reactions
@@ -257,8 +265,7 @@ pub async fn run(
                                 let state = context.try_inner()?;
 
                                 let mut announcements = state.announcements.write().unwrap();
-                                announcements
-                                    .retain(|a| a.id != event.announcement_id);
+                                announcements.retain(|a| a.id != event.announcement_id);
 
                                 let _ = handle.emit("announcementListUpdate", ());
                             }
@@ -278,7 +285,8 @@ pub async fn run(
                             PusherServerEventType::PusherServerUserTypingEvent(event) => {
                                 let state = context.try_inner()?;
 
-                                let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
+                                let channel_id =
+                                    ev.channel.split(".").nth(1).unwrap().parse().unwrap();
                                 let mut users = state.typing_users.entry(channel_id).or_default();
                                 if !users.contains(&event.user_id) {
                                     users.push(event.user_id);
@@ -289,7 +297,8 @@ pub async fn run(
                             PusherServerEventType::PusherServerUserStoppedTypingEvent(event) => {
                                 let state = context.try_inner()?;
 
-                                let channel_id = ev.channel.split(".").nth(1).unwrap().parse().unwrap();
+                                let channel_id =
+                                    ev.channel.split(".").nth(1).unwrap().parse().unwrap();
                                 let mut users = state.typing_users.entry(channel_id).or_default();
                                 users.retain(|u| u != &event.user_id);
 

@@ -1,6 +1,3 @@
-use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
-use ui_lib::AppState;
 use client::ProntoClient;
 use hyper::body::Incoming;
 use hyper::server::conn::http1;
@@ -8,16 +5,19 @@ use hyper::service::Service;
 use hyper::{Request, Response};
 use hyper_util::rt::TokioIo;
 use log::error;
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
 use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use ui_lib::AppState;
 
 const PORT: u16 = 10521;
 
 pub struct ServiceHandlerError {
     pub inner: reqwest::Error,
-    pub req: Request<Incoming>
+    pub req: Request<Incoming>,
 }
 
 impl Debug for ServiceHandlerError {
@@ -31,7 +31,13 @@ impl Debug for ServiceHandlerError {
 
 impl Display for ServiceHandlerError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", self.req.method().to_string(), self.req.uri().to_string(), self.inner)
+        write!(
+            f,
+            "{} {} {}",
+            self.req.method().to_string(),
+            self.req.uri().to_string(),
+            self.inner
+        )
     }
 }
 
@@ -70,15 +76,14 @@ impl Service<Request<Incoming>> for ServiceHandler {
                     ),
                 )
                 .send()
-                .await.map_err(|e| ServiceHandlerError { inner: e, req })?;
+                .await
+                .map_err(|e| ServiceHandlerError { inner: e, req })?;
             Ok(response.into())
         })
     }
 }
 
-pub async fn run(
-    context: AppState,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn run(context: AppState) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     while !context.is_loaded() {
         break;
     }

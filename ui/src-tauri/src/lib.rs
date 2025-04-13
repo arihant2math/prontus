@@ -1,4 +1,5 @@
 use std::thread;
+use log::info;
 use tauri::Manager;
 
 mod task;
@@ -12,6 +13,7 @@ use ui_handlers::*;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     color_eyre::install().expect("failed to install color_eyre");
+    info!("color_eyre initialized");
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -86,7 +88,7 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
-
+    info!("launching window");
     app.run(|_app_handle, event| match event {
         tauri::RunEvent::ExitRequested { api, .. } => {
             api.prevent_exit();

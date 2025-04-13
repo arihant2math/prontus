@@ -79,7 +79,7 @@
             </b>
         {:else if content.tagName === "a"}
             {#if content.properties.href.startsWith("MENTION")}
-                <Mention id="{parseInt(content.properties.href.split('_')[1])}"/>
+                <Mention id={parseInt(content.properties.href.split('_')[1])}/>
             {:else}
                 <a class="text-blue-600 dark:text-blue-400 hover:text-blue-500" href="{content.properties.href}" target="_blank">
                     {#each content.children as child}

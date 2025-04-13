@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use log::info;
 use log::LevelFilter;
 use log4rs::append::console::{ConsoleAppender, Target};
 use log4rs::append::file::FileAppender;
@@ -19,12 +20,16 @@ fn init_logging() -> Handle {
     // Build a stderr logger.
     let stdout = ConsoleAppender::builder()
         .target(Target::Stdout)
-        .encoder(Box::new(PatternEncoder::new("[{h({l})} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}")))
+        .encoder(Box::new(PatternEncoder::new(
+            "[{h({l})} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}",
+        )))
         .build();
     // Logging to log file.
     let logfile = FileAppender::builder()
         // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html
-        .encoder(Box::new(PatternEncoder::new("[{l} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}")))
+        .encoder(Box::new(PatternEncoder::new(
+            "[{l} {M} {d(%Y-%m-%d %H:%M:%S)}] {m}{n}",
+        )))
         .build(file_path.as_os_str().to_str().unwrap())
         .unwrap();
     let logfile_appender = Appender::builder().build("logfile", Box::new(logfile));
@@ -59,9 +64,14 @@ fn init_logging() -> Handle {
 
 fn main() {
     let _handle = init_logging();
-    let _guard = sentry::init(("https://11ea16af2a9b5fb2bc56d6283ea0f129@o4507958552297472.ingest.us.sentry.io/4508003269410816", sentry::ClientOptions {
-        release: sentry::release_name!(),
-        ..Default::default()
-    }));
+    info!("Logging initialized");
+    let _guard = sentry::init((
+        "https://11ea16af2a9b5fb2bc56d6283ea0f129@o4507958552297472.ingest.us.sentry.io/4508003269410816",
+        sentry::ClientOptions {
+            release: sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
+    info!("Sentry initialized");
     ui_core::run()
 }
