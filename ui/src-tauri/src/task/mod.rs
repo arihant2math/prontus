@@ -1,4 +1,16 @@
+#[cfg(feature = "extensions")]
 mod extension;
+#[cfg(not(feature = "extensions"))]
+mod extension {
+    use thiserror::Error;
+
+    #[derive(Debug, Error)]
+    pub enum ExtensionThreadError {}
+
+    pub async fn run() -> Result<(), ExtensionThreadError> {
+        Ok(())
+    }
+}
 mod proxy;
 mod pusher;
 mod search;
