@@ -10,6 +10,6 @@ license = { workspace = true }
 base64 = "0.22"
 blake3 = "1.5.5"
 encrypt_internal = { path = "../encrypt-internal" }
-reqwest = { workspace = true, features = ["json"] }
+reqwest = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
