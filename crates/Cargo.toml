@@ -11,26 +11,26 @@ version = "0.1.0-beta.1"
 [workspace.dependencies]
 async-compression = { version = "0.4", features = ["gzip"] }
 anyhow = "1.0"
-boa_engine = "0.20"
-boa_runtime = "0.20"
+boa_engine = "0.21"
+boa_runtime = "0.21"
 dashmap = { version = "6.1", features = ["serde"] }
 futures = "0.3"
 log = "0.4"
 rand = "0.8"
-reqwest = { version = "0.12", features = ["http2"] }
+reqwest = { version = "0.13", features = ["http2"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-simd-json = "0.14"
+simd-json = "0.17"
 syn = "2.0"
 tar = "0.4"
 tauri = { version = "2.3", features = ["tray-icon", "unstable"] }
 thiserror = "2"
 tokio = { version = "1.42", features = ["full"] }
-toml = "0.8"
+toml = "1.1"
 quote = "1.0"
-wit-bindgen = "0.36.0"
-wasmtime = "28"
-wasmtime-wasi = "28"
-wasmparser = "0.222"
-wasm-encoder = "0.222"
-wit-component = "0.222"
+wit-bindgen = "0.57.1"
+wasmtime = "45"
+wasmtime-wasi = "45"
+wasmparser = "0.250"
+wasm-encoder = "0.250"
+wit-component = "0.250"
