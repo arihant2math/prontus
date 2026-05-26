@@ -11,8 +11,6 @@ version = "0.1.0-beta.1"
 [workspace.dependencies]
 async-compression = { version = "0.4", features = ["gzip"] }
 anyhow = "1.0"
-boa_engine = "0.21"
-boa_runtime = "0.21"
 dashmap = { version = "6.1", features = ["serde"] }
 futures = "0.3"
 log = "0.4"
